@@ -1,0 +1,350 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:transparent;color:var(--color-text-primary)}
+.tabs{display:flex;gap:4px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:1.5rem;padding-bottom:0}
+.tab{padding:8px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--color-text-secondary);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s}
+.tab.active{color:var(--color-text-primary);border-bottom-color:var(--color-text-primary);font-weight:500}
+.tab:hover:not(.active){color:var(--color-text-primary)}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem}
+.badge{display:inline-block;padding:2px 8px;border-radius:var(--border-radius-md);font-size:11px;font-weight:500}
+.badge-ok{background:#EAF3DE;color:#3B6D11}
+.badge-warn{background:#FAEEDA;color:#854F0B}
+.badge-crit{background:#FCEBEB;color:#A32D2D}
+.grid3{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+input,select{width:100%;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans)}
+input:focus,select:focus{outline:none;border-color:var(--color-border-primary)}
+label{font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:4px}
+.btn{padding:7px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;cursor:pointer;font-family:var(--font-sans);transition:background .1s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.btn-primary:hover{opacity:.85}
+.btn-sm{padding:4px 10px;font-size:12px}
+.btn-danger{border-color:var(--color-border-danger);color:var(--color-text-danger)}
+.btn-danger:hover{background:var(--color-background-danger)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;font-size:11px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);text-transform:uppercase;letter-spacing:.04em}
+td{padding:8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-background-secondary)}
+.empty{text-align:center;padding:2rem;color:var(--color-text-tertiary);font-size:13px}
+.stat-card{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:.75rem 1rem}
+.stat-label{font-size:11px;color:var(--color-text-secondary);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.stat-val{font-size:22px;font-weight:500}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.section-title{font-size:13px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.75rem}
+</style>
+
+<div style="padding:0.5rem 0">
+
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+  <div>
+    <h2 style="font-size:18px;font-weight:500;margin-bottom:2px">Control de inventario</h2>
+    <p style="font-size:13px;color:var(--color-text-secondary)">Detecta mermas y fugas de alcohol</p>
+  </div>
+  <div id="week-badge" style="font-size:12px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);padding:5px 12px;border-radius:var(--border-radius-md);color:var(--color-text-secondary)"></div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('dashboard')"><i class="ti ti-chart-bar" aria-hidden="true"></i> Dashboard</button>
+  <button class="tab" onclick="switchTab('ventas')"><i class="ti ti-plus" aria-hidden="true"></i> Registrar ventas</button>
+  <button class="tab" onclick="switchTab('recetas')"><i class="ti ti-list" aria-hidden="true"></i> Recetas</button>
+  <button class="tab" onclick="switchTab('catalogo')"><i class="ti ti-bottle" aria-hidden="true"></i> Catálogo</button>
+</div>
+
+<div id="tab-dashboard"></div>
+<div id="tab-ventas" style="display:none"></div>
+<div id="tab-recetas" style="display:none"></div>
+<div id="tab-catalogo" style="display:none"></div>
+
+</div>
+
+<script>
+const spirits=[
+  {id:'LIC001',name:'Tequila Blanco',cat:'Tequila',ml:750,stock:5},
+  {id:'LIC002',name:'Tequila Reposado',cat:'Tequila',ml:750,stock:4},
+  {id:'LIC003',name:'Mezcal',cat:'Mezcal',ml:700,stock:3},
+  {id:'LIC004',name:'Gin',cat:'Gin',ml:750,stock:4},
+  {id:'LIC005',name:'Vodka',cat:'Vodka',ml:750,stock:5},
+  {id:'LIC006',name:'Ron Blanco',cat:'Ron',ml:750,stock:3},
+  {id:'LIC007',name:'Whisky/Bourbon',cat:'Whisky',ml:750,stock:3},
+  {id:'LIC008',name:'Cointreau/Triple Sec',cat:'Licor',ml:700,stock:3},
+  {id:'LIC009',name:'Campari',cat:'Aperitivo',ml:700,stock:2},
+  {id:'LIC010',name:'Aperol',cat:'Aperitivo',ml:700,stock:2},
+  {id:'LIC011',name:'Vermouth Rojo',cat:'Vermouth',ml:750,stock:2},
+  {id:'LIC012',name:'Kahlúa',cat:'Licor',ml:700,stock:2},
+];
+
+const recipes=[
+  {id:'COC001',name:'Margarita',ings:[{id:'LIC001',ml:60},{id:'LIC008',ml:30}]},
+  {id:'COC002',name:'Paloma',ings:[{id:'LIC002',ml:60}]},
+  {id:'COC003',name:'Negroni',ings:[{id:'LIC004',ml:30},{id:'LIC009',ml:30},{id:'LIC011',ml:30}]},
+  {id:'COC004',name:'Aperol Spritz',ings:[{id:'LIC010',ml:60}]},
+  {id:'COC005',name:'Mojito',ings:[{id:'LIC006',ml:60}]},
+  {id:'COC006',name:'Mezcal Sour',ings:[{id:'LIC003',ml:60},{id:'LIC008',ml:15}]},
+  {id:'COC007',name:'Moscow Mule',ings:[{id:'LIC005',ml:60}]},
+  {id:'COC008',name:'Old Fashioned',ings:[{id:'LIC007',ml:60}]},
+  {id:'COC009',name:'White Russian',ings:[{id:'LIC005',ml:50},{id:'LIC012',ml:20}]},
+  {id:'COC010',name:'Tequila Shot',ings:[{id:'LIC001',ml:35}]},
+  {id:'COC011',name:'Cuba Libre',ings:[{id:'LIC006',ml:50}]},
+  {id:'COC012',name:'Vodka Tonic',ings:[{id:'LIC005',ml:50}]},
+];
+
+let sales=[
+  {id:1,week:'Semana 1',cocktailId:'COC001',qty:12},
+  {id:2,week:'Semana 1',cocktailId:'COC003',qty:8},
+  {id:3,week:'Semana 1',cocktailId:'COC002',qty:15},
+  {id:4,week:'Semana 1',cocktailId:'COC005',qty:6},
+  {id:5,week:'Semana 1',cocktailId:'COC010',qty:20},
+  {id:6,week:'Semana 1',cocktailId:'COC007',qty:5},
+  {id:7,week:'Semana 2',cocktailId:'COC001',qty:18},
+  {id:8,week:'Semana 2',cocktailId:'COC003',qty:10},
+  {id:9,week:'Semana 2',cocktailId:'COC006',qty:7},
+  {id:10,week:'Semana 2',cocktailId:'COC010',qty:25},
+];
+let nextSaleId=11;
+let currentTab='dashboard';
+let filterWeek='all';
+
+function getConsumedML(spiritId){
+  const filtered=filterWeek==='all'?sales:sales.filter(s=>s.week===filterWeek);
+  return filtered.reduce((t,sale)=>{
+    const r=recipes.find(r=>r.id===sale.cocktailId);
+    if(!r)return t;
+    const ing=r.ings.find(i=>i.id===spiritId);
+    if(!ing)return t;
+    return t+sale.qty*ing.ml;
+  },0);
+}
+
+function getStatus(pct){
+  if(pct>=0.5)return{cls:'badge-ok',txt:'OK',color:'#3B6D11'};
+  if(pct>=0.25)return{cls:'badge-warn',txt:'Bajo',color:'#854F0B'};
+  return{cls:'badge-crit',txt:'Crítico',color:'#A32D2D'};
+}
+
+function bottleSVG(pct){
+  const h=80,w=36;
+  const fillH=Math.round((h-8)*Math.max(0,Math.min(1,pct)));
+  const fillY=h-4-fillH;
+  let fill='#97C459';
+  if(pct<0.25)fill='#E24B4A';
+  else if(pct<0.5)fill='#EF9F27';
+  const liqOpacity=pct>0?1:0;
+  return`<svg width="${w}" height="${h+16}" viewBox="0 0 ${w} ${h+16}" style="display:block;margin:0 auto">
+    <rect x="13" y="2" width="10" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".4"/>
+    <path d="M8,10 Q6,14 5,20 L5,${h} Q5,${h+4} 8,${h+4} L${w-8},${h+4} Q${w-5},${h+4} ${w-5},${h} L${w-5},20 Q${w-6},14 ${w-8},10 Z" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".3"/>
+    <clipPath id="bot-${Math.round(pct*100)}">
+      <path d="M8,10 Q6,14 5,20 L5,${h} Q5,${h+4} 8,${h+4} L${w-8},${h+4} Q${w-5},${h+4} ${w-5},${h} L${w-5},20 Q${w-6},14 ${w-8},10 Z"/>
+    </clipPath>
+    <rect x="5" y="${fillY}" width="${w-10}" height="${fillH+4}" fill="${fill}" opacity="${liqOpacity}" clip-path="url(#bot-${Math.round(pct*100)})"/>
+    <text x="${w/2}" y="${h+15}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".7">${Math.round(pct*100)}%</text>
+  </svg>`;
+}
+
+function getWeeks(){return[...new Set(sales.map(s=>s.week))].sort();}
+
+function switchTab(t){
+  currentTab=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>{
+    el.classList.toggle('active',['dashboard','ventas','recetas','catalogo'][i]===t);
+  });
+  ['dashboard','ventas','recetas','catalogo'].forEach(id=>{
+    document.getElementById('tab-'+id).style.display=id===t?'block':'none';
+  });
+  render();
+}
+
+function render(){
+  renderWeekBadge();
+  if(currentTab==='dashboard')renderDashboard();
+  if(currentTab==='ventas')renderVentas();
+  if(currentTab==='recetas')renderRecetas();
+  if(currentTab==='catalogo')renderCatalogo();
+}
+
+function renderWeekBadge(){
+  const weeks=getWeeks();
+  document.getElementById('week-badge').textContent=weeks.length>0?`${weeks.length} semana(s) registrada(s)`:'Sin datos aún';
+}
+
+function renderDashboard(){
+  const el=document.getElementById('tab-dashboard');
+  const weeks=getWeeks();
+  let totalConsumed=0,critical=0,warning=0,ok=0;
+  spirits.forEach(sp=>{
+    const c=getConsumedML(sp.id);
+    totalConsumed+=c;
+    const totalML=sp.ml*sp.stock;
+    const pct=(totalML-c)/totalML;
+    if(pct<0.25)critical++;else if(pct<0.5)warning++;else ok++;
+  });
+
+  const weekOptions=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}" ${filterWeek===w?'selected':''}>${w}</option>`).join('');
+
+  const bottleCards=spirits.map(sp=>{
+    const totalML=sp.ml*sp.stock;
+    const consumed=getConsumedML(sp.id);
+    const remaining=Math.max(0,totalML-consumed);
+    const pct=totalML>0?remaining/totalML:0;
+    const bottlesLeft=remaining/sp.ml;
+    const st=getStatus(pct);
+    return`<div class="card" style="text-align:center;padding:.75rem .75rem 1rem">
+      ${bottleSVG(pct)}
+      <div style="font-size:12px;font-weight:500;margin-top:6px;line-height:1.3">${sp.name}</div>
+      <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${sp.cat}</div>
+      <span class="badge ${st.cls}" style="margin-top:6px">${st.txt}</span>
+      <div style="margin-top:6px;font-size:11px;color:var(--color-text-secondary)">
+        ${Math.round(remaining).toLocaleString()} ml restantes
+      </div>
+      <div style="font-size:11px;color:var(--color-text-tertiary)">${bottlesLeft.toFixed(1)} bot. restantes</div>
+      ${consumed>0?`<div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">Consumido: ${Math.round(consumed).toLocaleString()} ml</div>`:''}
+    </div>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div style="display:flex;gap:8px;margin-bottom:1.25rem;align-items:center;flex-wrap:wrap">
+      <div style="flex:1;min-width:140px">
+        <select onchange="filterWeek=this.value;render()">${weekOptions}</select>
+      </div>
+      <div class="stat-card" style="min-width:90px;text-align:center"><div class="stat-label">OK</div><div class="stat-val" style="color:#3B6D11">${ok}</div></div>
+      <div class="stat-card" style="min-width:90px;text-align:center"><div class="stat-label">Bajos</div><div class="stat-val" style="color:#854F0B">${warning}</div></div>
+      <div class="stat-card" style="min-width:90px;text-align:center"><div class="stat-label">Críticos</div><div class="stat-val" style="color:#A32D2D">${critical}</div></div>
+    </div>
+    <div class="grid3">${bottleCards}</div>
+  `;
+}
+
+function renderVentas(){
+  const el=document.getElementById('tab-ventas');
+  const weeks=getWeeks();
+  const weekSuggestion=weeks.length>0?`Semana ${weeks.length+1}`:`Semana 1`;
+  const recipeOptions=recipes.map(r=>`<option value="${r.id}">${r.name}</option>`).join('');
+  const weekOptions=['Semana 1','Semana 2','Semana 3','Semana 4','Semana 5','Semana 6','Semana 7','Semana 8'].map(w=>`<option value="${w}" ${w===weekSuggestion?'selected':''}>${w}</option>`).join('');
+
+  const salesRows=sales.length>0?sales.slice().reverse().map(s=>{
+    const r=recipes.find(r=>r.id===s.cocktailId);
+    return`<tr>
+      <td style="color:var(--color-text-secondary)">${s.week}</td>
+      <td>${r?r.name:'?'}</td>
+      <td style="font-weight:500">${s.qty}</td>
+      <td style="color:var(--color-text-secondary);font-size:12px">${r?r.ings.map(i=>{const sp=spirits.find(x=>x.id===i.id);return sp?`${sp.name.split(' ')[0]} ${i.ml}ml`:''}).join(' + '):''}</td>
+      <td><button class="btn btn-sm btn-danger" onclick="deleteSale(${s.id})"><i class="ti ti-trash" aria-hidden="true"></i></button></td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="5" class="empty">Sin ventas registradas aún</td></tr>`;
+
+  el.innerHTML=`
+    <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:1.5rem;align-items:start">
+      <div>
+        <p class="section-title">Nueva venta</p>
+        <div class="card">
+          <div style="margin-bottom:10px">
+            <label>Semana</label>
+            <select id="s-week">${weekOptions}</select>
+          </div>
+          <div style="margin-bottom:10px">
+            <label>Cóctel</label>
+            <select id="s-cocktail">${recipeOptions}</select>
+          </div>
+          <div style="margin-bottom:14px">
+            <label>Cantidad vendida</label>
+            <input type="number" id="s-qty" min="1" value="1" style="width:100%">
+          </div>
+          <button class="btn btn-primary" style="width:100%" onclick="addSale()"><i class="ti ti-plus" aria-hidden="true"></i> Agregar</button>
+        </div>
+      </div>
+      <div>
+        <p class="section-title">Ventas registradas</p>
+        <div class="card" style="padding:0;overflow:hidden">
+          <table>
+            <thead><tr><th>Semana</th><th>Cóctel</th><th>Cant.</th><th>Licores</th><th></th></tr></thead>
+            <tbody>${salesRows}</tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function addSale(){
+  const week=document.getElementById('s-week').value;
+  const cocktailId=document.getElementById('s-cocktail').value;
+  const qty=parseInt(document.getElementById('s-qty').value)||0;
+  if(!cocktailId||qty<=0)return;
+  sales.push({id:nextSaleId++,week,cocktailId,qty});
+  render();
+}
+
+function deleteSale(id){
+  sales=sales.filter(s=>s.id!==id);
+  render();
+}
+
+function renderRecetas(){
+  const el=document.getElementById('tab-recetas');
+  const rows=recipes.map(r=>{
+    const ings=r.ings.map(i=>{
+      const sp=spirits.find(x=>x.id===i.id);
+      return`<span style="display:inline-block;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:2px 7px;font-size:11px;margin:2px">${sp?sp.name:'?'} <strong>${i.ml}ml</strong></span>`;
+    }).join('');
+    const totalML=r.ings.reduce((t,i)=>t+i.ml,0);
+    const totalSold=sales.filter(s=>s.cocktailId===r.id).reduce((t,s)=>t+s.qty,0);
+    return`<tr>
+      <td style="font-weight:500">${r.name}</td>
+      <td>${ings}</td>
+      <td style="text-align:center;font-size:13px">${totalML}ml</td>
+      <td style="text-align:center;font-weight:500">${totalSold}</td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML=`
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>Cóctel</th><th>Ingredientes (licores)</th><th style="text-align:center">ML alcohol</th><th style="text-align:center">Vendidos</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p style="margin-top:.75rem;font-size:12px;color:var(--color-text-tertiary)">Los licores no incluyen jugos, refrescos ni garnishes — solo las bebidas alcohólicas que afectan tu inventario.</p>
+  `;
+}
+
+function renderCatalogo(){
+  const el=document.getElementById('tab-catalogo');
+  const rows=spirits.map((sp,idx)=>{
+    const consumed=getConsumedML(sp.id);
+    const totalML=sp.ml*sp.stock;
+    const remaining=Math.max(0,totalML-consumed);
+    const pct=totalML>0?remaining/totalML:0;
+    const st=getStatus(pct);
+    return`<tr>
+      <td style="font-family:var(--font-mono);font-size:12px;color:var(--color-text-secondary)">${sp.id}</td>
+      <td style="font-weight:500">${sp.name}</td>
+      <td>${sp.cat}</td>
+      <td style="text-align:center">${sp.ml}ml</td>
+      <td style="text-align:center">
+        <input type="number" min="0" value="${sp.stock}" style="width:64px;text-align:center;padding:4px 6px" onchange="updateStock('${sp.id}',this.value)">
+      </td>
+      <td style="text-align:center"><span class="badge ${st.cls}">${st.txt}</span></td>
+    </tr>`;
+  }).join('');
+
+  el.innerHTML=`
+    <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem">Actualiza el stock al inicio de cada semana cuando recibas tu pedido.</p>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table>
+        <thead><tr><th>ID</th><th>Licor</th><th>Categoría</th><th style="text-align:center">ML/bot.</th><th style="text-align:center">Stock actual</th><th style="text-align:center">Estado</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function updateStock(id,val){
+  const sp=spirits.find(s=>s.id===id);
+  if(sp)sp.stock=Math.max(0,parseInt(val)||0);
+  render();
+}
+
+render();
+</script>
