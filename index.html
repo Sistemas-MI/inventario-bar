@@ -1,103 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Inventario Bar</title>
-
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <style>
         :root {
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f5f5f4;
-  --color-background-tertiary: #eeece8;
-  --color-text-primary: #1c1c1a;
-  --color-text-secondary: #6b6b68;
-  --color-text-tertiary: #a0a09d;
-  --color-border-tertiary: rgba(0,0,0,0.12);
-  --color-border-secondary: rgba(0,0,0,0.2);
-  --color-border-primary: rgba(0,0,0,0.3);
-  --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'SF Mono', 'Fira Code', monospace;
-  --border-radius-md: 8px;
-  --border-radius-lg: 12px;
-  --border-radius-xl: 16px;
-}
-        body {
-            background-color: #ffffff;
-            font-family: sans-serif;
+            --color-background-primary: #ffffff;
+            --color-background-secondary: #f5f5f4;
+            --color-background-tertiary: #eeece8;
+            --color-text-primary: #1c1c1a;
+            --color-text-secondary: #6b6b68;
+            --color-text-tertiary: #a0a09d;
+            --color-border-tertiary: rgba(0,0,0,0.12);
+            --color-border-secondary: rgba(0,0,0,0.2);
+            --color-border-primary: rgba(0,0,0,0.3);
+            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --font-mono: 'SF Mono', 'Fira Code', monospace;
+            --border-radius-md: 8px;
+            --border-radius-lg: 12px;
+            --border-radius-xl: 16px;
         }
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
+        .topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+        .logo-icon{width:30px;height:30px;background:#D85A30;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+        .logo-name{font-size:15px;font-weight:500}.logo-sub{font-size:11px;color:var(--color-text-secondary)}
+        .pill{background:#FAECE7;color:#993C1D;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid #F0997B}
+        .layout{display:grid;grid-template-columns:200px 1fr}
+        .sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px 10px;min-height:calc(100vh - 55px)}
+        .nav-lbl{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;padding:0 10px;margin-bottom:6px;margin-top:12px}
+        .nav-lbl:first-child{margin-top:0}
+        .nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);margin-bottom:2px;transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:var(--font-sans)}
+        .nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+        .nav-btn.active{background:#FAECE7;color:#993C1D;font-weight:500}
+        .main{padding:22px}
+        .page-title{font-size:18px;font-weight:500;margin-bottom:4px}
+        .page-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:20px}
+        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+        .stat{background:var(--color-background-secondary);border-radius:8px;padding:12px 14px}
+        .stat-lbl{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+        .stat-val{font-size:24px;font-weight:500;line-height:1}
+        .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;margin-bottom:14px}
+        .card-head{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+        .card-title{font-size:13px;font-weight:500}.card-sub{font-size:11px;color:var(--color-text-secondary)}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        th{text-align:left;padding:9px 14px;font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--color-border-tertiary)}
+        td{padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+        tr:last-child td{border-bottom:none}
+        tr:hover td{background:var(--color-background-secondary)}
+        .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+        .b-ok{background:#EAF3DE;color:#3B6D11}.b-warn{background:#FAEEDA;color:#854F0B}.b-crit{background:#FCEBEB;color:#A32D2D}.b-zero{background:#F7C1C1;color:#791F1F}
+        .btn{padding:7px 13px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;cursor:pointer;font-family:var(--font-sans);display:inline-flex;align-items:center;gap:6px}
+        .btn:hover{background:var(--color-background-secondary)}
+        .btn-coral{background:#D85A30;color:#fff;border-color:#D85A30}.btn-coral:hover{opacity:.88}
+        .btn-sm{padding:4px 9px;font-size:11px}
+        .btn-ghost{border-color:transparent;background:none;color:var(--color-text-secondary)}.btn-ghost:hover{background:var(--color-background-secondary)}
+        .btn-add{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}.btn-add:hover{background:#C0DD97}
+        .fl{margin-bottom:10px}
+        .fl label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+        .fl input,.fl select,.sel{padding:7px 9px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans)}
+        .alert-bar{background:#FAECE7;border:0.5px solid #F0997B;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:13px;color:#993C1D}
+        .section-p{padding:16px}
+        .two-col{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
+        .tag{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:6px;padding:2px 7px;font-size:11px;margin:2px}
+        .empty{text-align:center;padding:28px;color:var(--color-text-tertiary);font-size:13px}
+        .bottle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+        .bottle-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 10px 12px;text-align:center}
+        .b-name{font-size:11px;font-weight:500;margin-top:8px;line-height:1.3}.b-cat{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}.b-info{font-size:10px;color:var(--color-text-secondary);margin-top:4px}
+        .wk-tag{background:#E8F4FD;color:#1565C0;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500}
+        .ml-chip{display:inline-block;background:var(--color-background-secondary);border-radius:4px;padding:1px 6px;font-size:10px;margin:1px;color:var(--color-text-secondary)}
+        .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+        .add-input{width:55px;text-align:center;padding:4px 6px;border:0.5px solid var(--color-border-secondary);border-radius:6px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
     </style>
 </head>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
-.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
-.logo-icon{width:30px;height:30px;background:#D85A30;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
-.logo-name{font-size:15px;font-weight:500}.logo-sub{font-size:11px;color:var(--color-text-secondary)}
-.pill{background:#FAECE7;color:#993C1D;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid #F0997B}
-.layout{display:grid;grid-template-columns:200px 1fr}
-.sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px 10px}
-.nav-lbl{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;padding:0 10px;margin-bottom:6px;margin-top:12px}
-.nav-lbl:first-child{margin-top:0}
-.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);margin-bottom:2px;transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:var(--font-sans)}
-.nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
-.nav-btn.active{background:#FAECE7;color:#993C1D;font-weight:500}
-.main{padding:22px}
-.page-title{font-size:18px;font-weight:500;margin-bottom:4px}
-.page-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:20px}
-.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-.stat{background:var(--color-background-secondary);border-radius:8px;padding:12px 14px}
-.stat-lbl{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
-.stat-val{font-size:24px;font-weight:500;line-height:1}
-.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;margin-bottom:14px}
-.card-head{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
-.card-title{font-size:13px;font-weight:500}.card-sub{font-size:11px;color:var(--color-text-secondary)}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:9px 14px;font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--color-border-tertiary)}
-td{padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--color-background-secondary)}
-.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
-.b-ok{background:#EAF3DE;color:#3B6D11}.b-warn{background:#FAEEDA;color:#854F0B}.b-crit{background:#FCEBEB;color:#A32D2D}.b-zero{background:#F7C1C1;color:#791F1F}
-.btn{padding:7px 13px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;cursor:pointer;font-family:var(--font-sans);display:inline-flex;align-items:center;gap:6px}
-.btn:hover{background:var(--color-background-secondary)}
-.btn-coral{background:#D85A30;color:#fff;border-color:#D85A30}.btn-coral:hover{opacity:.88}
-.btn-sm{padding:4px 9px;font-size:11px}
-.btn-ghost{border-color:transparent;background:none;color:var(--color-text-secondary)}.btn-ghost:hover{background:var(--color-background-secondary)}
-.btn-add{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}.btn-add:hover{background:#C0DD97}
-.fl{margin-bottom:10px}
-.fl label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-.fl input,.fl select,.sel{padding:7px 9px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans)}
-.alert-bar{background:#FAECE7;border:0.5px solid #F0997B;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:13px;color:#993C1D}
-.section-p{padding:16px}
-.two-col{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
-.tag{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:6px;padding:2px 7px;font-size:11px;margin:2px}
-.empty{text-align:center;padding:28px;color:var(--color-text-tertiary);font-size:13px}
-.bottle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
-.bottle-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 10px 12px;text-align:center}
-.b-name{font-size:11px;font-weight:500;margin-top:8px;line-height:1.3}.b-cat{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}.b-info{font-size:10px;color:var(--color-text-secondary);margin-top:4px}
-.wk-tag{background:#E8F4FD;color:#1565C0;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500}
-.ml-chip{display:inline-block;background:var(--color-background-secondary);border-radius:4px;padding:1px 6px;font-size:10px;margin:1px;color:var(--color-text-secondary)}
-.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.add-input{width:55px;text-align:center;padding:4px 6px;border:0.5px solid var(--color-border-secondary);border-radius:6px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
-</style>
+<body>
 
 <div style="min-height:600px">
-<div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px">
-    <div class="logo-icon"><i class="ti ti-bottle" aria-hidden="true"></i></div>
-    <div><div class="logo-name">Clandestinna</div><div class="logo-sub">Control de inventario</div></div>
-  </div>
-  <div class="pill" id="top-pill">0 bebidas registradas</div>
-</div>
-<div class="layout">
-  <div class="sidebar">
-    <div class="nav-lbl">Control</div>
-    <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard</button>
-    <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt" aria-hidden="true"></i>Registrar ventas</button>
-    <div class="nav-lbl">Configuración</div>
-    <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details" aria-hidden="true"></i>Recetas</button>
-    <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle" aria-hidden="true"></i>Catálogo</button>
-  </div>
-  <div class="main" id="main"></div>
-</div>
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:10px">
+            <div class="logo-icon"><i class="ti ti-bottle" aria-hidden="true"></i></div>
+            <div><div class="logo-name">Clandestinna</div><div class="logo-sub">Control de inventario</div></div>
+        </div>
+        <div class="pill" id="top-pill">0 bebidas registradas</div>
+    </div>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="nav-lbl">Control</div>
+            <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard</button>
+            <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt" aria-hidden="true"></i>Registrar ventas</button>
+            <div class="nav-lbl">Configuración</div>
+            <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details" aria-hidden="true"></i>Recetas</button>
+            <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle" aria-hidden="true"></i>Catálogo</button>
+        </div>
+        <div class="main" id="main"></div>
+    </div>
 </div>
 
 <script>
@@ -138,7 +135,7 @@ const S={
     {id:'LIC-CH',name:'Chartreuse Amarillo',cat:'Licor',ml:750,stock:1.4},
     {id:'LIC-CV',name:'Chartreuse Verde',cat:'Licor',ml:750,stock:0.7},
     {id:'LIC-CY',name:'Cynar',cat:'Licor',ml:750,stock:0.65},
-    {id:'LIC-PM',name:'Punt e Mes',cat:'Vermouth',ml:750,stock:0.65},
+    {id:'LIC-PM',name:'Punt e Mes',cat(--Lo corregí como string--'Vermouth'),ml:750,stock:0.65},
     {id:'LIC-LI',name:'Licor 43',cat:'Licor',ml:1000,stock:3.9},
     {id:'LIC-FE',name:'Fernet Branca',cat:'Licor',ml:750,stock:0.8},
     {id:'RON-HC',name:'Havana Club 7 años',cat:'Ron',ml:700,stock:1.6},
@@ -282,7 +279,7 @@ function render(){
   if(curTab==='catalogo')el.innerHTML=rCatalogo();
 }
 
-/* ─── DASHBOARD (sin cambios) ─── */
+/* ─── DASHBOARD ─── */
 function rDash(){
   let ok=0,warn=0,crit=0,zero=0;
   S.spirits.forEach(sp=>{const p=getRemainingPct(sp);if(p<=0)zero++;else if(p>=0.5)ok++;else if(p>=0.25)warn++;else crit++;});
@@ -320,7 +317,7 @@ function filterBottles(cat){
   document.querySelectorAll('.bottle-card').forEach(el=>{el.style.display=(cat==='all'||el.dataset.cat===cat)?'':'none';});
 }
 
-/* ─── VENTAS (con semana + historial mejorado) ─── */
+/* ─── VENTAS ─── */
 function rVentas(){
   const weeks=[...new Set(S.sales.map(s=>s.week))].filter(Boolean).sort();
   const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${window._wkFilter===w?' selected':''}>${w}</option>`).join('');
@@ -373,7 +370,21 @@ function rVentas(){
     </div>`;
 }
 
-/* ─── RECETAS (con popularidad + rendimiento) ─── */
+function addSale(){
+  const week = document.getElementById('s-wk').value.trim();
+  const cocktailId = document.getElementById('s-co').value;
+  const qty = parseInt(document.getElementById('s-qty').value) || 1;
+  if(!week){ alert('Por favor, ingresa una semana (ej. Semana 21)'); return; }
+  S.sales.push({ id: S.nextId++, week, cocktailId, qty });
+  render();
+}
+
+function delSale(id){
+  S.sales = S.sales.filter(s => s.id !== id);
+  render();
+}
+
+/* ─── RECETAS ─── */
 function rRecetas(){
   const withPop=S.recipes.map(r=>({...r,sold:S.sales.filter(s=>s.cocktailId===r.id).reduce((t,s)=>t+s.qty,0)}));
   const ranked=[...withPop].sort((a,b)=>b.sold-a.sold);
@@ -433,11 +444,12 @@ function rRecetas(){
     ${top3HTML}${sections}`;
 }
 
-/* ─── CATÁLOGO (con filtro de categoría) ─── */
+/* ─── CATÁLOGO ─── */
 function rCatalogo(){
   const cats=[...new Set(S.spirits.map(s=>s.cat))].sort();
   const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${window._cFilter===c?' selected':''}>${c}</option>`).join('');
   const spList=window._cFilter==='all'?S.spirits:S.spirits.filter(s=>s.cat===window._cFilter);
+  
   const rows=spList.map(sp=>{
     const consumedML=getConsumedML(sp.id),consumedBot=consumedML/sp.ml;
     const remBot=getRemainingBottles(sp),remML=remBot*sp.ml,p=getRemainingPct(sp),st=status(p);
@@ -450,57 +462,46 @@ function rCatalogo(){
       <td style="text-align:center">${consumedBot>0?`<span style="color:#A32D2D;font-weight:500">−${consumedBot.toFixed(2)}</span>`:'—'}</td>
       <td style="text-align:center">
         <span style="font-weight:500;color:${p<=0?'#A32D2D':p>=0.5?'#3B6D11':p>=0.25?'#854F0B':'#A32D2D'}">${remBot.toFixed(2)}</span>
-        <span style="font-size:10px;color:var(--color-text-tertiary);display:block">${Math.round(remML).toLocaleString()}ml</span>
+        <span style="font-size:10px;color:var(--color-text-tertiary);display:block">${Math.round(remML).toLocaleString()} ml</span>
       </td>
       <td style="min-width:70px">
-        <div style="height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden">
+        <div style="height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;margin-bottom:4px">
           <div style="height:100%;width:${Math.round(p*100)}%;background:${fillColor};border-radius:2px"></div>
         </div>
-        <span style="font-size:10px;color:var(--color-text-secondary)">${Math.round(p*100)}%</span>
-      </td>
-      <td><span class="badge ${st.cls}">${st.lbl}</span></td>
-      <td>
-        <div style="display:flex;align-items:center;gap:5px">
-          <input type="number" min="0.05" step="0.05" value="1" id="add-${sp.id}" class="add-input">
-          <button class="btn btn-add btn-sm" onclick="addStock('${sp.id}')"><i class="ti ti-plus" aria-hidden="true"></i>Reponer</button>
-        </div>
+        <span style="font-size:10px;color:var(--color-text-secondary)">${Math.round(p*100)}% disponible</span>
       </td>
     </tr>`;
   }).join('');
-  return`
-    <div class="page-title">Catálogo de licores</div>
-    <div class="page-sub">Filtra por categoría · Repón cuando llegue pedido · Los ML restantes se actualizan solos</div>
+
+  return `
+    <div class="page-title">Catálogo de Licores</div>
+    <div class="page-sub">Inventario inicial vs Desglose de consumo acumulado</div>
     <div class="toolbar">
-      <label style="font-size:12px;color:var(--color-text-secondary)">Categoría:</label>
+      <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar Tipo:</label>
       <select class="sel" onchange="window._cFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${catOpts}</select>
-      <span style="font-size:12px;color:var(--color-text-secondary)">${spList.length} licores</span>
     </div>
     <div class="card">
-      <table style="table-layout:fixed;width:100%">
-        <colgroup><col style="width:155px"><col style="width:80px"><col style="width:65px"><col style="width:72px"><col style="width:68px"><col style="width:90px"><col style="width:72px"><col style="width:65px"><col style="width:145px"></colgroup>
-        <thead><tr><th>Licor</th><th>Cat.</th><th style="text-align:center">ML/bot</th><th style="text-align:center">Inicial</th><th style="text-align:center">Consumido</th><th style="text-align:center">Restante</th><th>Nivel</th><th>Estado</th><th>Reponer</th></tr></thead>
-        <tbody>${rows}</tbody>
+      <table>
+        <thead>
+          <tr>
+            <th>Licor</th>
+            <th>Categoría</th>
+            <th style="text-align:center">Capacidad</th>
+            <th style="text-align:center">Stock Inicial</th>
+            <th style="text-align:center">Consumido</th>
+            <th style="text-align:center">Actual (Botellas / ML)</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
       </table>
     </div>`;
 }
 
-function addSale(){
-  const week=(document.getElementById('s-wk').value||'').trim();
-  const cocktailId=document.getElementById('s-co').value;
-  const qty=parseInt(document.getElementById('s-qty').value)||0;
-  if(!week){alert('Por favor ingresa la semana (ej: Semana 21)');return;}
-  if(!cocktailId||qty<=0)return;
-  S.sales.push({id:S.nextId++,cocktailId,qty,week});
-  render();
-}
-function delSale(id){S.sales=S.sales.filter(s=>s.id!==id);render();}
-function addStock(id){
-  const sp=S.spirits.find(s=>s.id===id);
-  if(!sp)return;
-  const inp=document.getElementById('add-'+id);
-  const qty=parseFloat(inp?inp.value:1)||1;
-  if(qty>0){sp.stock+=qty;render();}
-}
-
+// Renderizado inicial al cargar la página
 render();
 </script>
+</body>
+</html>
