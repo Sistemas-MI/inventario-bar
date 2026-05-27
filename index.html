@@ -1,75 +1,109 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Inventario Bar - Clandestinna</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <style>
-        :root {
-            --color-background-primary: #ffffff;
-            --color-background-secondary: #f5f5f4;
-            --color-background-tertiary: #eeece8;
-            --color-text-primary: #1c1c1a;
-            --color-text-secondary: #6b6b68;
-            --color-text-tertiary: #a0a09d;
-            --color-border-tertiary: rgba(0,0,0,0.12);
-            --color-border-secondary: rgba(0,0,0,0.2);
-            --color-border-primary: rgba(0,0,0,0.3);
-            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            --border-radius-md: 8px;
-            --border-radius-lg: 12px;
-        }
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
-        .topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
-        .logo-icon{width:30px;height:30px;background:#D85A30;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
-        .logo-name{font-size:15px;font-weight:500}.logo-sub{font-size:11px;color:var(--color-text-secondary)}
-        .pill{background:#FAECE7;color:#993C1D;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid #F0997B}
-        .layout{display:grid;grid-template-columns:200px 1fr}
-        .sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px 10px;min-height:calc(100vh - 55px)}
-        .nav-lbl{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;padding:0 10px;margin-bottom:6px;margin-top:12px}
-        .nav-lbl:first-child{margin-top:0}
-        .nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);margin-bottom:2px;transition:all .12s;border:none;background:none;width:100%;text-align:left}
-        .nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
-        .nav-btn.active{background:#FAECE7;color:#993C1D;font-weight:500}
-        .main{padding:22px}
-        .page-title{font-size:18px;font-weight:500;margin-bottom:4px}
-        .page-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:20px}
-        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-        .stat{background:var(--color-background-secondary);border-radius:8px;padding:12px 14px}
-        .stat-lbl{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
-        .stat-val{font-size:24px;font-weight:500;line-height:1}
-        .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;margin-bottom:14px}
-        .card-head{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
-        .card-title{font-size:13px;font-weight:500}.card-sub{font-size:11px;color:var(--color-text-secondary)}
-        table{width:100%;border-collapse:collapse;font-size:13px}
-        th{text-align:left;padding:9px 14px;font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--color-border-tertiary)}
-        td{padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
-        tr:last-child td{border-bottom:none}
-        tr:hover td{background:var(--color-background-secondary)}
-        .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
-        .b-ok{background:#EAF3DE;color:#3B6D11}.b-warn{background:#FAEEDA;color:#854F0B}.b-crit{background:#FCEBEB;color:#A32D2D}.b-zero{background:#F7C1C1;color:#791F1F}
-        .btn{padding:7px 13px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
-        .btn:hover{background:var(--color-background-secondary)}
-        .btn-coral{background:#D85A30;color:#fff;border-color:#D85A30}.btn-coral:hover{opacity:.88}
-        .btn-sm{padding:4px 9px;font-size:11px}
-        .btn-ghost{border-color:transparent;background:none;color:var(--color-text-secondary)}.btn-ghost:hover{background:var(--color-background-secondary)}
-        .fl{margin-bottom:10px}
-        .fl label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-        .fl input,.fl select,.sel{padding:7px 9px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px}
-        .alert-bar{background:#FAECE7;border:0.5px solid #F0997B;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:13px;color:#993C1D}
-        .section-p{padding:16px}
-        .two-col{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
-        .tag{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:6px;padding:2px 7px;font-size:11px;margin:2px}
-        .empty{text-align:center;padding:28px;color:var(--color-text-tertiary);font-size:13px}
-        .bottle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
-        .bottle-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 10px 12px;text-align:center}
-        .b-name{font-size:11px;font-weight:500;margin-top:8px;line-height:1.3}.b-cat{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}.b-info{font-size:10px;color:var(--color-text-secondary);margin-top:4px}
-        .wk-tag{background:#E8F4FD;color:#1565C0;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500}
-        .ml-chip{display:inline-block;background:var(--color-background-secondary);border-radius:4px;padding:1px 6px;font-size:10px;margin:1px;color:var(--color-text-secondary)}
-        .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Clandestinna — Inventario</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --bg:#ffffff;--bg2:#f5f5f4;--bg3:#eeece8;
+  --txt:#1c1c1a;--txt2:#6b6b68;--txt3:#a0a09d;
+  --bdr:rgba(0,0,0,0.10);--bdr2:rgba(0,0,0,0.18);
+  --accent:#D85A30;--accent-light:#FAECE7;--accent-mid:#F0997B;
+  --font:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --r:8px;--r2:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg3);color:var(--txt);min-height:100vh}
+/* TOPBAR */
+.topbar{background:var(--bg);border-bottom:0.5px solid var(--bdr);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.logo-icon{width:30px;height:30px;background:var(--accent);border-radius:var(--r);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;flex-shrink:0}
+.logo-name{font-size:15px;font-weight:500}.logo-sub{font-size:11px;color:var(--txt2)}
+.pill{background:var(--accent-light);color:#993C1D;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid var(--accent-mid);white-space:nowrap}
+/* LAYOUT */
+.layout{display:grid;grid-template-columns:210px 1fr;min-height:calc(100vh - 57px)}
+.sidebar{background:var(--bg);border-right:0.5px solid var(--bdr);padding:14px 10px;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
+.nav-lbl{font-size:10px;font-weight:500;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;padding:0 10px;margin:12px 0 5px}
+.nav-lbl:first-child{margin-top:0}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:var(--r);cursor:pointer;font-size:13px;color:var(--txt2);margin-bottom:1px;border:none;background:none;width:100%;text-align:left;font-family:var(--font);transition:all .1s}
+.nav-btn:hover{background:var(--bg2);color:var(--txt)}
+.nav-btn.active{background:var(--accent-light);color:#993C1D;font-weight:500}
+/* MAIN */
+.main{padding:22px;overflow-y:auto}
+.ph{font-size:18px;font-weight:500;margin-bottom:3px}
+.ps{font-size:13px;color:var(--txt2);margin-bottom:20px}
+/* STATS */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--bg2);border-radius:var(--r);padding:12px 14px}
+.stat-lbl{font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.stat-val{font-size:24px;font-weight:500;line-height:1}
+/* CARDS */
+.card{background:var(--bg);border:0.5px solid var(--bdr);border-radius:var(--r2);overflow:hidden;margin-bottom:14px}
+.card-head{padding:12px 16px;border-bottom:0.5px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-title{font-size:13px;font-weight:500}.card-sub{font-size:11px;color:var(--txt2)}
+/* TABLES */
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 12px;font-size:10px;color:var(--txt2);font-weight:500;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--bdr)}
+td{padding:8px 12px;border-bottom:0.5px solid var(--bdr);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--bg2)}
+/* BADGES */
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500;white-space:nowrap}
+.ok{background:#EAF3DE;color:#3B6D11}.warn{background:#FAEEDA;color:#854F0B}.crit{background:#FCEBEB;color:#A32D2D}.zero{background:#F7C1C1;color:#791F1F}
+.tag{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:5px;padding:2px 7px;font-size:11px;margin:1px}
+/* BUTTONS */
+.btn{padding:7px 12px;border:0.5px solid var(--bdr2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-size:12px;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:5px;transition:background .1s;white-space:nowrap}
+.btn:hover{background:var(--bg2)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-coral{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-coral:hover{opacity:.88}
+.btn-sm{padding:4px 8px;font-size:11px}
+.btn-ghost{border-color:transparent;background:none;color:var(--txt2)}.btn-ghost:hover{background:var(--bg2)}
+.btn-green{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}.btn-green:hover{background:#C0DD97}
+.btn-red{background:#FCEBEB;color:#A32D2D;border-color:#FFBCBC}.btn-red:hover{background:#FFBCBC}
+.btn-icon{padding:4px 6px;font-size:14px;line-height:1}
+/* FORMS */
+.fl{margin-bottom:10px}
+.fl label{font-size:11px;color:var(--txt2);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.fl input,.fl select,input.inp,select.sel{padding:7px 9px;border:0.5px solid var(--bdr2);border-radius:var(--r);background:var(--bg);color:var(--txt);font-size:13px;font-family:var(--font);width:100%}
+.fl input:focus,.fl select:focus,input.inp:focus,select.sel:focus{outline:none;border-color:var(--accent)}
+/* MISC */
+.alert-bar{background:var(--accent-light);border:0.5px solid var(--accent-mid);border-radius:var(--r);padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:16px;font-size:13px;color:#993C1D}
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.two-col{display:grid;grid-template-columns:260px 1fr;gap:14px;align-items:start}
+.empty{text-align:center;padding:28px;color:var(--txt3);font-size:13px}
+.loading{text-align:center;padding:40px;color:var(--txt2)}
+.spin{display:inline-block;width:18px;height:18px;border:2px solid var(--bdr2);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* BOTTLE GRID */
+.bottle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+.bottle-card{background:var(--bg);border:0.5px solid var(--bdr);border-radius:10px;padding:12px 8px 10px;text-align:center;transition:border-color .15s}
+.bottle-card:hover{border-color:var(--bdr2)}
+.b-name{font-size:11px;font-weight:500;margin-top:7px;line-height:1.3}
+.b-cat{font-size:10px;color:var(--txt3);margin-top:1px}
+.b-ml{font-size:10px;color:var(--txt2);margin-top:4px}
+.b-stock{font-size:11px;font-weight:500;margin-top:2px}
+.prog{height:4px;background:var(--bg2);border-radius:2px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;border-radius:2px;transition:width .3s}
+/* STOCK CONTROLS */
+.stock-ctrl{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:6px}
+.stock-ctrl button{width:22px;height:22px;border-radius:6px;border:0.5px solid var(--bdr2);background:var(--bg2);cursor:pointer;font-size:14px;line-height:1;display:flex;align-items:center;justify-content:center;font-family:var(--font)}
+.stock-ctrl button:hover{background:var(--bdr2)}
+.stock-val{font-size:12px;font-weight:500;min-width:28px;text-align:center}
+/* ML chip */
+.ml-chip{display:inline-block;background:var(--bg2);border-radius:4px;padding:1px 5px;font-size:10px;margin:1px;color:var(--txt2)}
+.wk-tag{background:#E8F4FD;color:#1565C0;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500}
+/* WEEKLY TABLE TOGGLE */
+.collapse-btn{cursor:pointer;background:none;border:none;font-size:13px;color:var(--txt2);padding:4px 8px;border-radius:var(--r)}
+.collapse-btn:hover{background:var(--bg2)}
+/* ADMIN */
+.admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.admin-card{background:var(--bg);border:0.5px solid var(--bdr);border-radius:var(--r2);padding:16px}
+.admin-card h3{font-size:13px;font-weight:500;margin-bottom:12px;color:var(--txt2);text-transform:uppercase;letter-spacing:.04em}
+/* RESPONSIVE */
+@media(max-width:700px){.layout{grid-template-columns:1fr}.sidebar{display:none}.stats-row{grid-template-columns:repeat(2,1fr)}.two-col{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 
@@ -84,30 +118,235 @@
 <div class="layout">
   <div class="sidebar">
     <div class="nav-lbl">Control</div>
-    <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
-    <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt"></i>Registrar ventas</button>
-    <div class="nav-lbl">Configuración</div>
-    <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details"></i>Recetas</button>
-    <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle"></i>Catálogo</button>
+    <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+    <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt"></i> Registrar ventas</button>
+    <div class="nav-lbl">Catálogo</div>
+    <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle"></i> Botellas</button>
+    <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details"></i> Recetas</button>
+    <div class="nav-lbl">Admin</div>
+    <button class="nav-btn" onclick="go('admin')"><i class="ti ti-settings"></i> Inventario Central</button>
   </div>
-  <div class="main" id="main"><div class="loading"><div class="spinner"></div><br>Cargando datos...</div></div>
+  <div class="main" id="main"><div class="loading"><div class="spin"></div><br><br>Cargando datos...</div></div>
 </div>
 
 <script>
-// ============================================================
-// 🔧 CONFIGURACIÓN — Reemplaza con tus credenciales de Supabase
-// ============================================================
+// ═══════════════════════════════════════════
+// 🔧 SUPABASE CONFIG
+// ═══════════════════════════════════════════
 const SUPABASE_URL = 'https://yhfeyycvhdcngwqbxvqy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InloZmV5eWN2aGRjbmd3cWJ4dnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4Mjc4MTYsImV4cCI6MjA5NTQwMzgxNn0.f0x3rE-brskkG_prKpjszOg1HhtTq195AQoqhjsztDY';
-
-// ============================================================
-
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let spirits=[], recipes=[], sales=[], curTab='dash';
-let _wkFilter='all', _cFilter='all';
+// ═══════════════════════════════════════════
+// DATA — Products (stock starts at 0)
+// ═══════════════════════════════════════════
+const INITIAL_PRODUCTS = [
+  // --- APERITIVO ---
+  {id:'AP001',name:'Amaro Averna',cat:'Aperitivo',type:'licor',ml:700,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'AP002',name:'Aperol',cat:'Aperitivo',type:'licor',ml:750,stock:0,price_shot:220,price_bottle:0,active:true},
+  {id:'AP003',name:'Campari',cat:'Aperitivo',type:'licor',ml:750,stock:0,price_shot:220,price_bottle:0,active:true},
+  {id:'AP004',name:'Lillet Blanc',cat:'Aperitivo',type:'licor',ml:750,stock:0,price_shot:230,price_bottle:0,active:true},
+  {id:'AP005',name:'Zuze',cat:'Aperitivo',type:'licor',ml:750,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'AP006',name:'Amaro Montenegro',cat:'Aperitivo',type:'licor',ml:750,stock:0,price_shot:0,price_bottle:0,active:true},
+  // --- GINEBRA ---
+  {id:'GIN001',name:'Bombay Saphire',cat:'Ginebra',type:'licor',ml:700,stock:0,price_shot:250,price_bottle:3100,active:true},
+  {id:'GIN002',name:'Monkey 47',cat:'Ginebra',type:'licor',ml:500,stock:0,price_shot:470,price_bottle:5900,active:true},
+  {id:'GIN003',name:'The Botanist',cat:'Ginebra',type:'licor',ml:700,stock:0,price_shot:350,price_bottle:5000,active:true},
+  {id:'GIN004',name:'Hendricks',cat:'Ginebra',type:'licor',ml:750,stock:0,price_shot:400,price_bottle:5000,active:true},
+  {id:'GIN005',name:'Condesa Gin Saumerio',cat:'Ginebra',type:'licor',ml:750,stock:0,price_shot:280,price_bottle:3300,active:true},
+  {id:'GIN006',name:'Condesa Gin Xoconostle',cat:'Ginebra',type:'licor',ml:750,stock:0,price_shot:280,price_bottle:3300,active:true},
+  {id:'GIN007',name:'Condesa Gin Clásica',cat:'Ginebra',type:'licor',ml:750,stock:0,price_shot:280,price_bottle:3300,active:true},
+  {id:'GIN008',name:'Tanqueray Ten',cat:'Ginebra',type:'licor',ml:700,stock:0,price_shot:300,price_bottle:4200,active:true},
+  // --- MEZCAL ---
+  {id:'MEZ001',name:'Creyente',cat:'Mezcal',type:'licor',ml:750,stock:0,price_shot:300,price_bottle:0,active:true},
+  {id:'MEZ002',name:'Monte Lobos Tobalá',cat:'Mezcal',type:'licor',ml:750,stock:0,price_shot:490,price_bottle:6500,active:true},
+  {id:'MEZ003',name:'Monte Lobos Espadin',cat:'Mezcal',type:'licor',ml:750,stock:0,price_shot:220,price_bottle:3200,active:true},
+  {id:'MEZ004',name:'Rey Campero Tepextate',cat:'Mezcal',type:'licor',ml:750,stock:0,price_shot:260,price_bottle:0,active:true},
+  {id:'MEZ005',name:'Siete Misterios Barril',cat:'Mezcal',type:'licor',ml:750,stock:0,price_shot:280,price_bottle:4000,active:true},
+  {id:'MEZ006',name:'Verde Amarás Espadin',cat:'Mezcal',type:'licor',ml:700,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'MEZ007',name:'Sotol Cardenxe',cat:'Sotol',type:'licor',ml:750,stock:0,price_shot:0,price_bottle:0,active:true},
+  // --- TEQUILA ---
+  {id:'TEQ001',name:'Clase Azul Reposado',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:1100,price_bottle:16500,active:true},
+  {id:'TEQ002',name:'Don Julio 1942',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:900,price_bottle:14800,active:true},
+  {id:'TEQ003',name:'Maestro Tequilero Blanco',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:260,price_bottle:3100,active:true},
+  {id:'TEQ004',name:'Maestro Dobel Diamante',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:320,price_bottle:4600,active:true},
+  {id:'TEQ005',name:'Don Julio Reposado',cat:'Tequila',type:'licor',ml:700,stock:0,price_shot:280,price_bottle:3800,active:true},
+  {id:'TEQ006',name:'Don Julio Añejo',cat:'Tequila',type:'licor',ml:700,stock:0,price_shot:320,price_bottle:4800,active:true},
+  {id:'TEQ007',name:'Don Julio 70',cat:'Tequila',type:'licor',ml:700,stock:0,price_shot:380,price_bottle:5100,active:true},
+  {id:'TEQ008',name:'Reserva de la Familia Reposado',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:450,price_bottle:6000,active:true},
+  {id:'TEQ009',name:'Reserva de la Familia Extra Añejo',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:1050,price_bottle:15200,active:true},
+  {id:'TEQ010',name:'Cascahuin Tahona',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:300,price_bottle:4600,active:true},
+  {id:'TEQ011',name:'Don Fulano Blanco',cat:'Tequila',type:'licor',ml:700,stock:0,price_shot:320,price_bottle:4500,active:true},
+  {id:'TEQ012',name:'Don Fulano Reposado',cat:'Tequila',type:'licor',ml:700,stock:0,price_shot:380,price_bottle:5000,active:true},
+  {id:'TEQ013',name:'Don Fulano Imperial',cat:'Tequila',type:'licor',ml:700,stock:0,price_shot:850,price_bottle:13000,active:true},
+  {id:'TEQ014',name:'Tequila 8 Reposado',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:350,price_bottle:3800,active:true},
+  {id:'TEQ015',name:'Tequila 8 Extra Añejo',cat:'Tequila',type:'licor',ml:750,stock:0,price_shot:920,price_bottle:14500,active:true},
+  {id:'TEQ016',name:'Don Julio Blanco',cat:'Tequila',type:'licor',ml:700,stock:0,price_shot:260,price_bottle:3100,active:true},
+  // --- RON ---
+  {id:'RON001',name:'Havana Club 3 Años',cat:'Ron',type:'licor',ml:750,stock:0,price_shot:250,price_bottle:3100,active:true},
+  {id:'RON002',name:'Havana Club 7 Años',cat:'Ron',type:'licor',ml:700,stock:0,price_shot:280,price_bottle:4100,active:true},
+  {id:'RON003',name:'Matusalem Gran Reserva',cat:'Ron',type:'licor',ml:750,stock:0,price_shot:350,price_bottle:4500,active:true},
+  {id:'RON004',name:'Matusalem Platino',cat:'Ron',type:'licor',ml:750,stock:0,price_shot:220,price_bottle:3000,active:true},
+  {id:'RON005',name:'Zacapa 23',cat:'Ron',type:'licor',ml:750,stock:0,price_shot:500,price_bottle:7400,active:true},
+  {id:'RON006',name:'Bacardi Blanco',cat:'Ron',type:'licor',ml:700,stock:0,price_shot:220,price_bottle:0,active:true},
+  {id:'RON007',name:'Paranubes',cat:'Ron',type:'licor',ml:1000,stock:0,price_shot:350,price_bottle:0,active:true},
+  // --- VODKA ---
+  {id:'VOD001',name:'Stolichnaya',cat:'Vodka',type:'licor',ml:750,stock:0,price_shot:280,price_bottle:3600,active:true},
+  {id:'VOD002',name:'Titos Handmade',cat:'Vodka',type:'licor',ml:700,stock:0,price_shot:250,price_bottle:3400,active:true},
+  {id:'VOD003',name:'Beluga',cat:'Vodka',type:'licor',ml:750,stock:0,price_shot:450,price_bottle:6500,active:true},
+  {id:'VOD004',name:'Grey Goose',cat:'Vodka',type:'licor',ml:750,stock:0,price_shot:300,price_bottle:4200,active:true},
+  {id:'VOD005',name:'Belvedere',cat:'Vodka',type:'licor',ml:700,stock:0,price_shot:350,price_bottle:4900,active:true},
+  {id:'VOD006',name:'Ketel One',cat:'Vodka',type:'licor',ml:700,stock:0,price_shot:250,price_bottle:3100,active:true},
+  // --- WHISKY ---
+  {id:'WHI001',name:'Glenfiddich 12',cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:450,price_bottle:8500,active:true},
+  {id:'WHI002',name:'JW Etiqueta Negra',cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:300,price_bottle:4600,active:true},
+  {id:'WHI003',name:'JW Etiqueta Roja',cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:250,price_bottle:3400,active:true},
+  {id:'WHI004',name:'Jack Daniels',cat:'Whisky',type:'licor',ml:700,stock:0,price_shot:220,price_bottle:3100,active:true},
+  {id:'WHI005',name:'Macallan 12',cat:'Whisky',type:'licor',ml:700,stock:0,price_shot:600,price_bottle:12000,active:true},
+  {id:'WHI006',name:'Macallan 15',cat:'Whisky',type:'licor',ml:700,stock:0,price_shot:1200,price_bottle:19500,active:true},
+  {id:'WHI007',name:'Makers Mark',cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:290,price_bottle:4200,active:true},
+  {id:'WHI008',name:'Woodford Reserve',cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:300,price_bottle:6800,active:true},
+  {id:'WHI009',name:'Jim Beam',cat:'Whisky',type:'licor',ml:700,stock:0,price_shot:240,price_bottle:3100,active:true},
+  {id:'WHI010',name:'Wild Turkey Rye',cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:280,price_bottle:3800,active:true},
+  {id:'WHI011',name:'Bulleit',cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:290,price_bottle:4200,active:true},
+  {id:'WHI012',name:"Michter's Sour Mash",cat:'Whisky',type:'licor',ml:750,stock:0,price_shot:550,price_bottle:9500,active:true},
+  // --- COGNAC / BRANDY ---
+  {id:'COG001',name:'Hennessy VSOP',cat:'Cognac',type:'licor',ml:700,stock:0,price_shot:400,price_bottle:0,active:true},
+  {id:'COG002',name:'Grand Marnier',cat:'Cognac',type:'licor',ml:700,stock:0,price_shot:280,price_bottle:0,active:true},
+  {id:'COG003',name:'Torres 10',cat:'Brandy',type:'licor',ml:700,stock:0,price_shot:0,price_bottle:0,active:true},
+  // --- LICORES / VERMOUTHS ---
+  {id:'LIC001',name:'Chartreuse Amarillo',cat:'Licor',type:'licor',ml:750,stock:0,price_shot:460,price_bottle:0,active:true},
+  {id:'LIC002',name:'Chartreuse Verde',cat:'Licor',type:'licor',ml:750,stock:0,price_shot:500,price_bottle:0,active:true},
+  {id:'LIC003',name:'Fernet Branca',cat:'Licor',type:'licor',ml:750,stock:0,price_shot:240,price_bottle:0,active:true},
+  {id:'LIC004',name:'St. Germain',cat:'Licor',type:'licor',ml:750,stock:0,price_shot:300,price_bottle:0,active:true},
+  {id:'LIC005',name:'Kahlúa',cat:'Licor',type:'licor',ml:1000,stock:0,price_shot:220,price_bottle:0,active:true},
+  {id:'LIC006',name:'Licor 43',cat:'Licor',type:'licor',ml:1000,stock:0,price_shot:240,price_bottle:0,active:true},
+  {id:'LIC007',name:'Amaretto Disaronno',cat:'Licor',type:'licor',ml:700,stock:0,price_shot:240,price_bottle:0,active:true},
+  {id:'LIC008',name:'Cointreau',cat:'Licor',type:'licor',ml:700,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'LIC009',name:'Frangelico',cat:'Licor',type:'licor',ml:700,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'LIC010',name:'Cynar',cat:'Licor',type:'licor',ml:750,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'LIC011',name:'Baileys',cat:'Licor',type:'licor',ml:750,stock:0,price_shot:220,price_bottle:0,active:true},
+  {id:'LIC012',name:'Grand Marnier',cat:'Licor',type:'licor',ml:700,stock:0,price_shot:280,price_bottle:0,active:true},
+  {id:'LIC013',name:'Absinth',cat:'Licor',type:'licor',ml:700,stock:0,price_shot:250,price_bottle:0,active:true},
+  {id:'LIC014',name:'Narano (Licor Naranja)',cat:'Licor',type:'licor',ml:1000,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'VER001',name:'Carpano Dry',cat:'Vermouth',type:'licor',ml:1000,stock:0,price_shot:230,price_bottle:0,active:true},
+  {id:'VER002',name:'Carpano Bianco',cat:'Vermouth',type:'licor',ml:1000,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'VER003',name:'Carpano Rosso',cat:'Vermouth',type:'licor',ml:1000,stock:0,price_shot:230,price_bottle:0,active:true},
+  {id:'VER004',name:'Antica Formula',cat:'Vermouth',type:'licor',ml:1000,stock:0,price_shot:250,price_bottle:0,active:true},
+  {id:'VER005',name:'Punt e Mes',cat:'Vermouth',type:'licor',ml:750,stock:0,price_shot:0,price_bottle:0,active:true},
+  {id:'JER001',name:'Tío Pepe',cat:'Jerez',type:'licor',ml:750,stock:0,price_shot:240,price_bottle:0,active:true},
+  // --- CERVEZA ---
+  {id:'CER001',name:'Cerveza de Jengibre Mula',cat:'Cerveza',type:'cerveza',ml:330,stock:0,price_shot:170,price_bottle:0,active:true},
+  {id:'CER002',name:'Fat Tuna Lager',cat:'Cerveza',type:'cerveza',ml:330,stock:0,price_shot:170,price_bottle:0,active:true},
+  {id:'CER003',name:'Fat Tuna IPA',cat:'Cerveza',type:'cerveza',ml:330,stock:0,price_shot:170,price_bottle:0,active:true},
+  {id:'CER004',name:'Piedra Lisa',cat:'Cerveza',type:'cerveza',ml:330,stock:0,price_shot:170,price_bottle:0,active:true},
+  {id:'CER005',name:'Colimita',cat:'Cerveza',type:'cerveza',ml:330,stock:0,price_shot:170,price_bottle:0,active:true},
+  {id:'CER006',name:'Colimita Cero',cat:'Cerveza',type:'cerveza',ml:330,stock:0,price_shot:150,price_bottle:0,active:true},
+  // --- VINO BLANCO ---
+  {id:'VB001',name:'Brand Bros Müller Thurgau',cat:'Vino Blanco',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:1750,active:true},
+  {id:'VB002',name:'Paul Mas Chardonnay',cat:'Vino Blanco',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:1300,active:true},
+  {id:'VB003',name:'Daou Chardonnay',cat:'Vino Blanco',type:'vino',ml:750,stock:0,price_shot:320,price_bottle:3000,active:true},
+  {id:'VB004',name:'Domaine Collet Chablis',cat:'Vino Blanco',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:1740,active:true},
+  {id:'VB005',name:'Le Grande Metaire Sauvignon Blanc',cat:'Vino Blanco',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:970,active:true},
+  {id:'VB006',name:'Tres Raíces Sauvignon Blanc',cat:'Vino Blanco',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:930,active:true},
+  // --- VINO TINTO ---
+  {id:'VT001',name:'Decoy Merlot',cat:'Vino Tinto',type:'vino',ml:750,stock:0,price_shot:380,price_bottle:1900,active:true},
+  {id:'VT002',name:'Decoy Pinot Noir',cat:'Vino Tinto',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:1750,active:true},
+  {id:'VT003',name:'Tres Raíces Ensamble',cat:'Vino Tinto',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:1600,active:true},
+  {id:'VT004',name:'Unshackled Cabernet Sauvignon',cat:'Vino Tinto',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:3300,active:true},
+  {id:'VT005',name:'Folie à Deux Merlot',cat:'Vino Tinto',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:1450,active:true},
+  {id:'VT006',name:'Frank Family Cabernet Sauvignon',cat:'Vino Tinto',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:5000,active:true},
+  {id:'VT007',name:'Bounchard Pinot Noir',cat:'Vino Tinto',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:1500,active:true},
+  // --- VINO ROSADO ---
+  {id:'VR001',name:'Tres Raíces Grenache',cat:'Vino Rosado',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:1600,active:true},
+  {id:'VR002',name:'Minuty Rosé Prestige',cat:'Vino Rosado',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:1650,active:true},
+  {id:'VR003',name:'Mirabeau X',cat:'Vino Rosado',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:2500,active:true},
+  {id:'VR004',name:'Domaine Eolé Rosé',cat:'Vino Rosado',type:'vino',ml:750,stock:0,price_shot:300,price_bottle:950,active:true},
+  // --- ESPUMOSOS / CHAMPAGNE ---
+  {id:'ESP001',name:'Bortolomiol Prosecco Brut',cat:'Espumoso',type:'vino',ml:750,stock:0,price_shot:350,price_bottle:1500,active:true},
+  {id:'ESP002',name:'Moet Brut Imperial 750ml',cat:'Champagne',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:5100,active:true},
+  {id:'ESP003',name:'Moet Brut Imperial 375ml',cat:'Champagne',type:'vino',ml:375,stock:0,price_shot:0,price_bottle:2500,active:true},
+  {id:'ESP004',name:'Moet Brut Rosé 750ml',cat:'Champagne',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:6200,active:true},
+  {id:'ESP005',name:'Veuve Clicquot Brut',cat:'Champagne',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:5100,active:true},
+  {id:'ESP006',name:'Dom Pérignon 750ml',cat:'Champagne',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:27000,active:true},
+  {id:'ESP007',name:'Laurent Perrier Brut',cat:'Champagne',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:6400,active:true},
+  {id:'ESP008',name:'Bollinger Special Cuvée',cat:'Champagne',type:'vino',ml:750,stock:0,price_shot:0,price_bottle:6000,active:true},
+];
 
-// ── LOAD DATA ──────────────────────────────────────────────
+// RECIPES
+const INITIAL_RECIPES = [
+  // SIGNATURE
+  {id:'SIG001',name:'Negroni Prohibido',cat:'Signature',price:320,ings:[{id:'GIN007',ml:43},{id:'VER003',ml:16},{id:'AP003',ml:25}]},
+  {id:'SIG002',name:'Dirty Devil',cat:'Signature',price:350,ings:[{id:'GIN007',ml:60},{id:'VER001',ml:15}]},
+  {id:'SIG003',name:'Amore Mio',cat:'Signature',price:300,ings:[{id:'GIN007',ml:45}]},
+  {id:'SIG004',name:'Hot & High',cat:'Signature',price:350,ings:[{id:'MEZ007',ml:60}]},
+  {id:'SIG005',name:'Blood Moon',cat:'Signature',price:350,ings:[{id:'WHI002',ml:50}]},
+  {id:'SIG006',name:'Bandits',cat:'Signature',price:350,ings:[{id:'MEZ007',ml:45}]},
+  {id:'SIG007',name:'Spicy Roots',cat:'Signature',price:320,ings:[{id:'TEQ003',ml:30},{id:'MEZ007',ml:30}]},
+  {id:'SIG008',name:'Una Horchata',cat:'Signature',price:320,ings:[{id:'RON004',ml:45}]},
+  {id:'SIG009',name:'Five Point Gang',cat:'Signature',price:350,ings:[{id:'RON003',ml:45},{id:'RON007',ml:15}]},
+  {id:'SIG010',name:'Seven Sins',cat:'Signature',price:300,ings:[{id:'GIN006',ml:50}]},
+  {id:'SIG011',name:'Phenex',cat:'Signature',price:300,ings:[{id:'VOD005',ml:50}]},
+  {id:'SIG012',name:'Rize Spirits',cat:'Signature',price:350,ings:[{id:'JER001',ml:45},{id:'VER003',ml:20},{id:'VER001',ml:15}]},
+  // CLÁSICOS
+  {id:'COC001',name:'Daiquiri Paranubes',cat:'Clásico',price:350,ings:[{id:'RON007',ml:45}]},
+  {id:'COC002',name:'Martini de Mezcal',cat:'Clásico',price:350,ings:[{id:'MEZ006',ml:45},{id:'VER002',ml:45}]},
+  {id:'COC003',name:'Negroni',cat:'Clásico',price:280,ings:[{id:'GIN007',ml:30},{id:'VER003',ml:30},{id:'AP003',ml:30}]},
+  {id:'COC004',name:'Gibson',cat:'Clásico',price:350,ings:[{id:'GIN007',ml:60},{id:'VER001',ml:15}]},
+  {id:'COC005',name:'Martini',cat:'Clásico',price:300,ings:[{id:'GIN007',ml:75},{id:'VER001',ml:20}]},
+  {id:'COC006',name:'Martini Perfecto',cat:'Clásico',price:320,ings:[{id:'GIN007',ml:45},{id:'VER001',ml:30},{id:'VER003',ml:30}]},
+  {id:'COC007',name:'Martinez',cat:'Clásico',price:350,ings:[{id:'GIN007',ml:45},{id:'VER003',ml:30}]},
+  {id:'COC008',name:'Vesper',cat:'Clásico',price:350,ings:[{id:'GIN007',ml:45},{id:'VOD002',ml:30},{id:'AP004',ml:20}]},
+  {id:'COC009',name:'Espresso Martini',cat:'Clásico',price:280,ings:[{id:'VOD002',ml:60},{id:'LIC005',ml:30}]},
+  {id:'COC010',name:'Aperol Spritz',cat:'Clásico',price:300,ings:[{id:'AP002',ml:45},{id:'ESP001',ml:120}]},
+  {id:'COC011',name:'Americano',cat:'Clásico',price:350,ings:[{id:'AP003',ml:45},{id:'VER003',ml:45}]},
+  {id:'COC012',name:'Bloody Mary',cat:'Clásico',price:350,ings:[{id:'VOD004',ml:60}]},
+  {id:'COC013',name:'Aviation',cat:'Clásico',price:350,ings:[{id:'GIN001',ml:45}]},
+  {id:'COC014',name:'Daiquiri',cat:'Clásico',price:350,ings:[{id:'RON006',ml:60}]},
+  {id:'COC015',name:'Hemingway Daiquiri',cat:'Clásico',price:350,ings:[{id:'RON004',ml:45}]},
+  {id:'COC016',name:'Last Word',cat:'Clásico',price:350,ings:[{id:'GIN007',ml:30},{id:'LIC001',ml:30},{id:'LIC002',ml:30}]},
+  {id:'COC017',name:'Mezcalita',cat:'Clásico',price:350,ings:[{id:'MEZ006',ml:45}]},
+  {id:'COC018',name:'Moscow Mule',cat:'Clásico',price:300,ings:[{id:'VOD002',ml:45}]},
+  {id:'COC019',name:'Naked and Famous',cat:'Clásico',price:400,ings:[{id:'MEZ007',ml:30},{id:'AP002',ml:30},{id:'LIC001',ml:30}]},
+  {id:'COC020',name:'Old Fashioned',cat:'Clásico',price:280,ings:[{id:'WHI009',ml:60}]},
+  {id:'COC021',name:'Manhattan',cat:'Clásico',price:350,ings:[{id:'WHI009',ml:50},{id:'VER003',ml:30}]},
+  {id:'COC022',name:'Paper Plane',cat:'Clásico',price:350,ings:[{id:'WHI009',ml:30},{id:'AP002',ml:30}]},
+  {id:'COC023',name:'Rob Roy',cat:'Clásico',price:350,ings:[{id:'WHI002',ml:50},{id:'VER003',ml:30}]},
+  {id:'COC024',name:'Whisky Sour',cat:'Clásico',price:350,ings:[{id:'WHI009',ml:60}]},
+  {id:'COC025',name:'Mojito',cat:'Clásico',price:350,ings:[{id:'RON004',ml:45}]},
+  {id:'COC026',name:'Dark & Stormy',cat:'Clásico',price:350,ings:[{id:'RON002',ml:60}]},
+  {id:'COC027',name:'Pisco Sour',cat:'Clásico',price:350,ings:[]},
+  {id:'COC028',name:'Paloma',cat:'Clásico',price:350,ings:[{id:'TEQ004',ml:40}]},
+  {id:'COC029',name:'Margarita',cat:'Clásico',price:280,ings:[{id:'TEQ004',ml:60}]},
+  {id:'COC030',name:'Carajillo',cat:'Clásico',price:280,ings:[{id:'LIC006',ml:50}]},
+  {id:'COC031',name:'Side Car',cat:'Clásico',price:350,ings:[{id:'COG001',ml:50}]},
+  {id:'COC032',name:'Bijou',cat:'Clásico',price:380,ings:[{id:'GIN007',ml:30},{id:'LIC002',ml:30},{id:'VER003',ml:30}]},
+  {id:'COC033',name:'Corpse Reviver #2',cat:'Clásico',price:350,ings:[{id:'GIN007',ml:30},{id:'AP004',ml:30}]},
+  {id:'COC034',name:'French 75',cat:'Clásico',price:350,ings:[{id:'GIN007',ml:60},{id:'ESP001',ml:40}]},
+  {id:'COC035',name:'Tom Collins',cat:'Clásico',price:350,ings:[{id:'GIN007',ml:60}]},
+  {id:'COC036',name:'Hanky Panky',cat:'Clásico',price:300,ings:[{id:'GIN007',ml:45},{id:'VER003',ml:45},{id:'LIC003',ml:10}]},
+  {id:'COC037',name:'Cosmopolitan',cat:'Clásico',price:350,ings:[{id:'VOD002',ml:45}]},
+  {id:'COC038',name:'Lemon Drop',cat:'Clásico',price:350,ings:[{id:'VOD002',ml:60}]},
+  {id:'COC039',name:'Old Cuban',cat:'Clásico',price:280,ings:[{id:'RON003',ml:50},{id:'ESP001',ml:30}]},
+  {id:'COC040',name:'Mint Julep',cat:'Clásico',price:350,ings:[{id:'WHI009',ml:60}]},
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let products=[...INITIAL_PRODUCTS];
+let recipes=[...INITIAL_RECIPES];
+let sales=[];
+let curTab='dash';
+let _wkFilter='all';
+let _catFilter='all';
+let _dashCollapsed=false;
+let _nextLocalId=1;
+let _useLocalMode=false; // set true if Supabase fails
+
+// ═══════════════════════════════════════════
+// DATA LOADING
+// ═══════════════════════════════════════════
 async function loadAll(){
   try{
     const [sp,rc,ri,sl]=await Promise.all([
@@ -116,43 +355,68 @@ async function loadAll(){
       sb.from('recipe_ingredients').select('*'),
       sb.from('sales').select('*').order('created_at',{ascending:false})
     ]);
-    if(sp.error||rc.error||ri.error||sl.error) throw new Error('Error cargando datos');
-    spirits=sp.data||[];
+    if(sp.error||rc.error||ri.error||sl.error) throw new Error('DB error');
+    if(sp.data&&sp.data.length>0) products=sp.data.map(p=>({...p,active:p.active!==false}));
     sales=sl.data||[];
-    // Attach ingredients to recipes
-    recipes=(rc.data||[]).map(r=>({
-      ...r,
-      ings:(ri.data||[]).filter(i=>i.recipe_id===r.id).map(i=>({id:i.spirit_id,ml:i.ml}))
-    }));
-    updatePill();
-    render();
+    if(rc.data&&rc.data.length>0){
+      recipes=rc.data.map(r=>({
+        ...r,
+        price: r.price||0,
+        ings:(ri.data||[]).filter(i=>i.recipe_id===r.id).map(i=>({id:i.spirit_id,ml:i.ml}))
+      }));
+    }
   }catch(e){
-    document.getElementById('main').innerHTML=`<div class="alert-bar"><i class="ti ti-alert-circle"></i> Error de conexión. Verifica tus credenciales de Supabase.</div>`;
-    console.error(e);
+    console.warn('Supabase not available, running in local mode',e);
+    _useLocalMode=true;
   }
+  updatePill();
+  render();
 }
 
-// ── HELPERS ───────────────────────────────────────────────
-function getConsumedML(sid){
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function getConsumedML(pid){
   return sales.reduce((t,s)=>{
-    const r=recipes.find(r=>r.id===s.cocktail_id);
-    if(!r)return t;
-    const ing=r.ings.find(i=>i.id===sid);
-    return t+(ing?s.qty*ing.ml:0);
+    if(s.sell_type==='bottle'&&s.product_id===pid){return t+((s.qty||1)*(s.ml_per_unit||1));}
+    if(s.sell_type==='shot'&&s.product_id===pid){return t+((s.qty||1)*(s.ml_per_unit||45));}
+    if(s.sell_type==='copa'&&s.product_id===pid){return t+((s.qty||1)*(s.ml_per_unit||150));}
+    if(s.sell_type==='unit'&&s.product_id===pid){return t+((s.qty||1)*(s.ml_per_unit||330));}
+    if(s.sell_type==='cocktail'&&s.cocktail_id){
+      const r=recipes.find(r=>r.id===s.cocktail_id);
+      if(!r)return t;
+      const ing=r.ings.find(i=>i.id===pid);
+      return t+(ing?(s.qty||1)*ing.ml:0);
+    }
+    return t;
   },0);
 }
-function getRemainingBottles(sp){return Math.max(0,sp.stock-getConsumedML(sp.id)/sp.ml);}
-function getRemainingPct(sp){return sp.stock===0?0:Math.min(1,getRemainingBottles(sp)/sp.stock);}
-function status(p){
-  if(p<=0)return{cls:'b-zero',lbl:'Agotado'};
-  if(p>=0.5)return{cls:'b-ok',lbl:'OK'};
-  if(p>=0.25)return{cls:'b-warn',lbl:'Bajo'};
-  return{cls:'b-crit',lbl:'Crítico'};
+function getWeekConsumed(pid,week){
+  return sales.filter(s=>s.week===week).reduce((t,s)=>{
+    if((s.sell_type==='bottle'||s.sell_type==='shot'||s.sell_type==='copa'||s.sell_type==='unit')&&s.product_id===pid)
+      return t+(s.qty||1)*(s.ml_per_unit||0);
+    if(s.sell_type==='cocktail'&&s.cocktail_id){
+      const r=recipes.find(r=>r.id===s.cocktail_id);
+      if(!r)return t;
+      const ing=r.ings.find(i=>i.id===pid);
+      return t+(ing?(s.qty||1)*ing.ml:0);
+    }
+    return t;
+  },0);
+}
+function getRemML(p){return Math.max(0,p.stock*p.ml-getConsumedML(p.id));}
+function getRemPct(p){return p.stock===0?0:Math.min(1,getRemML(p)/(p.stock*p.ml));}
+function status(pct){
+  if(pct<=0)return{cls:'zero',lbl:'Agotado'};
+  if(pct>=0.5)return{cls:'ok',lbl:'OK'};
+  if(pct>=0.25)return{cls:'warn',lbl:'Bajo'};
+  return{cls:'crit',lbl:'Crítico'};
 }
 function bottleSVG(p){
-  const W=32,H=72,c=p<=0?'#F09595':p>=0.5?'#639922':p>=0.25?'#BA7517':'#E24B4A';
+  const W=32,H=68;
+  const c=p<=0?'#F09595':p>=0.5?'#639922':p>=0.25?'#BA7517':'#E24B4A';
   const fH=Math.round((H-14)*Math.max(0,Math.min(1,p))),fY=H-4-fH;
-  const uid='b'+Math.round(p*1000)+'_'+Math.round(Math.random()*9999);
+  const uid='bv'+Math.round(p*100)+'x'+Math.round(Math.random()*9999);
   return`<svg width="${W}" height="${H+12}" viewBox="0 0 ${W} ${H+12}" style="display:block;margin:0 auto">
     <defs><clipPath id="${uid}"><rect x="5" y="12" width="${W-10}" height="${H-12}" rx="3"/></clipPath></defs>
     <rect x="11" y="2" width="${W-22}" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity=".2"/>
@@ -161,232 +425,533 @@ function bottleSVG(p){
     <text x="${W/2}" y="${H+11}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".6" font-family="system-ui">${Math.round(p*100)}%</text>
   </svg>`;
 }
+function fmx(n){return(n||0).toLocaleString('es-MX');}
+function getWeeks(){return[...new Set(sales.map(s=>s.week))].filter(Boolean).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));}
 function updatePill(){
-  const t=sales.reduce((s,x)=>s+x.qty,0);
-  document.getElementById('top-pill').textContent=`${t} bebida${t!==1?'s':''} registrada${t!==1?'s':''}`;
+  const t=sales.reduce((s,x)=>s+(x.qty||1),0);
+  document.getElementById('top-pill').textContent=`${t} venta${t!==1?'s':''} registrada${t!==1?'s':''}${_useLocalMode?' · Modo local':''}`;
 }
 
-// ── NAVIGATION ────────────────────────────────────────────
+// ═══════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════
 function go(tab){
   curTab=tab;
   document.querySelectorAll('.nav-btn').forEach((el,i)=>{
-    el.classList.toggle('active',['dash','ventas','recetas','catalogo'][i]===tab);
+    el.classList.toggle('active',['dash','ventas','catalogo','recetas','admin'][i]===tab);
   });
   render();
 }
 function render(){
   const el=document.getElementById('main');
   if(curTab==='dash')el.innerHTML=rDash();
-  if(curTab==='ventas')el.innerHTML=rVentas();
-  if(curTab==='recetas')el.innerHTML=rRecetas();
-  if(curTab==='catalogo')el.innerHTML=rCatalogo();
+  else if(curTab==='ventas')el.innerHTML=rVentas();
+  else if(curTab==='catalogo')el.innerHTML=rCatalogo();
+  else if(curTab==='recetas')el.innerHTML=rRecetas();
+  else if(curTab==='admin')el.innerHTML=rAdmin();
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────
+// ═══════════════════════════════════════════
+// DASHBOARD
+// ═══════════════════════════════════════════
 function rDash(){
+  const activeP=products.filter(p=>p.active!==false);
   let ok=0,warn=0,crit=0,zero=0;
-  spirits.forEach(sp=>{const p=getRemainingPct(sp);if(p<=0)zero++;else if(p>=0.5)ok++;else if(p>=0.25)warn++;else crit++;});
-  const critList=spirits.filter(sp=>getRemainingPct(sp)<0.25);
-  const alertHTML=critList.length?`<div class="alert-bar"><i class="ti ti-alert-triangle" style="font-size:16px"></i><span>${critList.length} licor${critList.length>1?'es':''} en nivel crítico: ${critList.slice(0,4).map(s=>s.name).join(', ')}${critList.length>4?'...':''}</span></div>`:'';
-  const cats=[...new Set(spirits.map(s=>s.cat))];
-  const selOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const cards=spirits.map(sp=>{
-    const p=getRemainingPct(sp),remBot=getRemainingBottles(sp),remML=remBot*sp.ml,st=status(p);
-    return`<div class="bottle-card" data-cat="${sp.cat}">
-      ${bottleSVG(p)}<div class="b-name">${sp.name}</div><div class="b-cat">${sp.cat}</div>
-      <span class="badge ${st.cls}" style="margin-top:6px">${st.lbl}</span>
-      <div class="b-info">${Math.round(remML).toLocaleString('es-MX')} ml</div>
-      <div class="b-info" style="font-weight:500">${remBot.toFixed(2)} botellas</div>
+  activeP.forEach(p=>{const pct=getRemPct(p);if(pct<=0)zero++;else if(pct>=0.5)ok++;else if(pct>=0.25)warn++;else crit++;});
+  const critList=activeP.filter(p=>getRemPct(p)<0.25&&p.stock>0);
+  const alertHTML=critList.length?`<div class="alert-bar"><i class="ti ti-alert-triangle" style="font-size:16px"></i><span>${critList.length} producto${critList.length>1?'s':''} en nivel crítico: ${critList.slice(0,4).map(s=>s.name).join(', ')}${critList.length>4?`... y ${critList.length-4} más`:''}</span></div>`:'';
+  const weeks=getWeeks();
+  const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
+  const cats=[...new Set(activeP.map(p=>p.cat))].sort();
+  const catOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}"${_catFilter===c?' selected':''}>${c}</option>`).join('');
+
+  // Weekly metrics table
+  const visibleP=_catFilter==='all'?activeP:activeP.filter(p=>p.cat===_catFilter);
+  const weekTableRows=visibleP.filter(p=>p.stock>0).map(p=>{
+    const totalML=p.stock*p.ml;
+    const consumed=_wkFilter==='all'?getConsumedML(p.id):getWeekConsumed(p.id,_wkFilter);
+    const rem=Math.max(0,totalML-consumed);
+    const pct=totalML>0?rem/totalML:0;
+    const st=status(pct);
+    const fc=pct<=0?'#F09595':pct>=0.5?'#97C459':pct>=0.25?'#EF9F27':'#E24B4A';
+    return`<tr>
+      <td style="font-weight:500">${p.name}</td>
+      <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:10px">${p.cat}</span></td>
+      <td style="text-align:center">${p.ml}ml</td>
+      <td style="text-align:center;font-weight:500">${parseFloat(p.stock).toFixed(2)}</td>
+      <td style="text-align:center;color:#A32D2D;font-weight:500">${consumed>0?`−${(consumed/p.ml).toFixed(2)}`:'—'}</td>
+      <td style="text-align:center;font-weight:500;color:${pct<=0?'#A32D2D':pct>=0.5?'#3B6D11':pct>=0.25?'#854F0B':'#A32D2D'}">${(rem/p.ml).toFixed(2)} <span style="font-weight:400;font-size:10px;color:var(--txt3)">(${fmx(Math.round(rem))}ml)</span></td>
+      <td style="min-width:80px">
+        <div class="prog"><div class="prog-fill" style="width:${Math.round(pct*100)}%;background:${fc}"></div></div>
+        <span style="font-size:10px;color:var(--txt2)">${Math.round(pct*100)}%</span>
+      </td>
+      <td><span class="badge ${st.cls}">${st.lbl}</span></td>
+    </tr>`;
+  }).join('');
+
+  const bottleCards=visibleP.map(p=>{
+    const pct=getRemPct(p),remML=getRemML(p),st=status(pct);
+    return`<div class="bottle-card" data-cat="${p.cat}">
+      ${bottleSVG(pct)}
+      <div class="b-name">${p.name}</div>
+      <div class="b-cat">${p.cat}</div>
+      <span class="badge ${st.cls}" style="margin-top:6px;font-size:10px">${st.lbl}</span>
+      <div class="b-ml">${p.ml}ml/bot</div>
+      <div class="b-stock">${(remML/p.ml).toFixed(2)} bot — ${fmx(Math.round(remML))}ml</div>
     </div>`;
   }).join('');
-  return`<div class="page-title">Dashboard</div><div class="page-sub">Stock en tiempo real</div>
+
+  return`
+    <div class="ph">Dashboard</div>
+    <div class="ps">Inventario en tiempo real · se actualiza con cada venta</div>
     ${alertHTML}
     <div class="stats-row">
-      <div class="stat"><div class="stat-lbl">Total licores</div><div class="stat-val">${spirits.length}</div></div>
+      <div class="stat"><div class="stat-lbl">Productos activos</div><div class="stat-val">${activeP.length}</div></div>
       <div class="stat"><div class="stat-lbl" style="color:#3B6D11">OK</div><div class="stat-val" style="color:#3B6D11">${ok}</div></div>
       <div class="stat"><div class="stat-lbl" style="color:#854F0B">Bajos</div><div class="stat-val" style="color:#854F0B">${warn+crit}</div></div>
       <div class="stat"><div class="stat-lbl" style="color:#A32D2D">Agotados</div><div class="stat-val" style="color:#A32D2D">${zero}</div></div>
     </div>
-    <div class="toolbar">
-      <label style="font-size:12px;color:var(--color-text-secondary)">Categoría:</label>
-      <select class="sel" onchange="filterBottles(this.value)" style="font-size:12px;padding:5px 9px">${selOpts}</select>
+
+    <div class="toolbar" style="flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:12px;color:var(--txt2)">Semana:</span>
+        <select class="sel" style="width:auto;padding:5px 8px;font-size:12px" onchange="_wkFilter=this.value;render()">${wkOpts}</select>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span style="font-size:12px;color:var(--txt2)">Categoría:</span>
+        <select class="sel" style="width:auto;padding:5px 8px;font-size:12px" onchange="_catFilter=this.value;render()">${catOpts}</select>
+      </div>
     </div>
-    <div class="bottle-grid" id="btl-grid">${cards}</div>`;
-}
-function filterBottles(cat){
-  document.querySelectorAll('.bottle-card').forEach(el=>{el.style.display=(cat==='all'||el.dataset.cat===cat)?'':'none';});
+
+    <!-- WEEKLY METRICS TABLE -->
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-head">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="card-title">📊 Métricas de control</span>
+          <span class="card-sub">${_wkFilter==='all'?'Acumulado total':_wkFilter}</span>
+        </div>
+        <button class="collapse-btn" onclick="_dashCollapsed=!_dashCollapsed;render()">
+          <i class="ti ti-${_dashCollapsed?'chevron-down':'chevron-up'}"></i> ${_dashCollapsed?'Ver tabla':'Minimizar'}
+        </button>
+      </div>
+      ${_dashCollapsed?'':
+      `<div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Producto</th><th>Cat.</th><th style="text-align:center">ML/bot</th><th style="text-align:center">Stock inicial</th><th style="text-align:center">Consumido</th><th style="text-align:center">Restante</th><th>Nivel</th><th>Estado</th></tr></thead>
+          <tbody>${weekTableRows||'<tr><td colspan="8" class="empty">Sin productos con stock registrado aún</td></tr>'}</tbody>
+        </table>
+      </div>`}
+    </div>
+
+    <!-- BOTTLE GRID -->
+    <div class="bottle-grid">${bottleCards||'<div class="empty" style="grid-column:1/-1">Sin productos en esta categoría</div>'}</div>
+  `;
 }
 
-// ── VENTAS ────────────────────────────────────────────────
+// ═══════════════════════════════════════════
+// VENTAS
+// ═══════════════════════════════════════════
 function rVentas(){
-  const weeks=[...new Set(sales.map(s=>s.week))].filter(Boolean).sort();
-  const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
+  const weeks=getWeeks();
+  const sugg=weeks.length?`Semana ${weeks.length+1}`:'Semana 1';
+  const wkFilter2=['all',...weeks];
+  const wkFilterOpts=wkFilter2.map(w=>`<option value="${w}"${w===_wkFilter?' selected':''}>${w==='all'?'Todas':w}</option>`).join('');
+  const activeP=products.filter(p=>p.active!==false);
+  const pOpts=activeP.sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name))
+    .map(p=>`<option value="${p.id}" data-type="${p.type||'licor'}" data-ml="${p.ml}">${p.cat} — ${p.name}</option>`).join('');
   const rOpts=[...recipes].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${r.id}">${r.name} · ${r.cat}</option>`).join('');
   const filtered=_wkFilter==='all'?sales:sales.filter(s=>s.week===_wkFilter);
   const rows=filtered.length?filtered.map(s=>{
+    const p=products.find(x=>x.id===s.product_id);
     const r=recipes.find(x=>x.id===s.cocktail_id);
-    const mlDetail=r?r.ings.map(i=>{
-      const sp=spirits.find(x=>x.id===i.id);
-      return sp?`<span class="ml-chip"><b>${sp.name.split(' ')[0]}</b> −${i.ml*s.qty}ml</span>`:'';
-    }).join(''):'—';
+    const desc=r?r.name:p?`${p.name} (${s.sell_type||'unidad'})` :'?';
+    const cat=r?r.cat:p?p.cat:'?';
+    const totalML=(s.qty||1)*(s.ml_per_unit||0);
+    const revenue=(s.price||0)*(s.qty||1);
     return`<tr>
-      <td style="font-weight:500">${r?r.name:'?'}</td>
-      <td><span class="badge" style="background:#EEEDFE;color:#3C3489">${r?r.cat:'?'}</span></td>
-      <td style="text-align:center;font-weight:500">${s.qty}</td>
+      <td style="font-weight:500">${desc}</td>
+      <td><span class="badge" style="background:#EEEDFE;color:#3C3489">${cat}</span></td>
+      <td style="text-align:center">${s.qty||1}</td>
       <td><span class="wk-tag">${s.week||'—'}</span></td>
-      <td style="max-width:220px">${mlDetail}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="delSale(${s.id})"><i class="ti ti-trash" style="color:#A32D2D;font-size:14px"></i></button></td>
+      <td style="font-size:11px;color:var(--txt2)">${totalML>0?`−${fmx(Math.round(totalML))}ml`:'receta'}</td>
+      <td style="text-align:right;font-weight:500;color:#3B6D11">${revenue>0?`$${fmx(revenue)}`:''}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="delSale(${JSON.stringify(s.id)})"><i class="ti ti-trash" style="color:#A32D2D"></i></button></td>
     </tr>`;
-  }).join(''):`<tr><td colspan="6" class="empty">Sin ventas en este período</td></tr>`;
-  return`<div class="page-title">Registrar ventas</div><div class="page-sub">Cada venta descuenta los ML exactos según la receta y se guarda en la base de datos</div>
+  }).join(''):`<tr><td colspan="7" class="empty">Sin ventas en este período</td></tr>`;
+
+  return`
+    <div class="ph">Registrar ventas</div>
+    <div class="ps">Registra cualquier bebida o cóctel vendido — los ML se descuentan automáticamente</div>
     <div class="two-col">
-      <div class="card"><div class="card-head"><span class="card-title">Nueva venta</span></div>
-        <div class="section-p">
-          <div class="fl"><label>Semana *</label><input type="text" id="s-wk" placeholder="Ej: Semana 21" style="width:100%"></div>
-          <div class="fl"><label>Cóctel</label><select id="s-co" style="width:100%">${rOpts}</select></div>
-          <div class="fl"><label>Cantidad</label><input type="number" id="s-qty" min="1" value="1" style="width:100%"></div>
-          <button class="btn btn-coral" id="btn-save" style="width:100%;justify-content:center" onclick="addSale()"><i class="ti ti-plus"></i> Registrar venta</button>
+      <div>
+        <!-- FORM CÓCTEL -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="card-head"><span class="card-title">🍹 Cóctel / Receta</span></div>
+          <div style="padding:14px">
+            <div class="fl"><label>Semana *</label><input class="inp" type="text" id="v-wk" placeholder="Ej: Semana 21" value="${sugg}"></div>
+            <div class="fl"><label>Cóctel</label><select class="sel" id="v-co">${rOpts}</select></div>
+            <div class="fl"><label>Cantidad</label><input class="inp" type="number" id="v-cqty" min="1" value="1"></div>
+            <button class="btn btn-coral" style="width:100%;justify-content:center" id="btn-save-c" onclick="addSaleCocktail()"><i class="ti ti-plus"></i> Registrar cóctel</button>
+          </div>
+        </div>
+        <!-- FORM BOTELLA / SHOT / COPA -->
+        <div class="card">
+          <div class="card-head"><span class="card-title">🍾 Botella / Shot / Copa / Cerveza</span></div>
+          <div style="padding:14px">
+            <div class="fl"><label>Semana *</label><input class="inp" type="text" id="v-wk2" placeholder="Ej: Semana 21" value="${sugg}"></div>
+            <div class="fl"><label>Producto</label><select class="sel" id="v-prod" onchange="updateSellTypes()">${pOpts}</select></div>
+            <div class="fl"><label>Tipo de venta</label><select class="sel" id="v-stype">
+              <option value="shot">Shot (≈45ml)</option>
+              <option value="copa">Copa de vino (≈150ml)</option>
+              <option value="bottle">Botella completa</option>
+              <option value="unit">Unidad (cerveza/agua)</option>
+            </select></div>
+            <div class="fl"><label>Cantidad</label><input class="inp" type="number" id="v-pqty" min="1" value="1"></div>
+            <button class="btn btn-coral" style="width:100%;justify-content:center" id="btn-save-p" onclick="addSaleProduct()"><i class="ti ti-plus"></i> Registrar venta</button>
+          </div>
         </div>
       </div>
       <div>
         <div class="toolbar">
-          <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar semana:</label>
-          <select class="sel" onchange="_wkFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${wkOpts}</select>
-          <span style="font-size:12px;color:var(--color-text-secondary)">${filtered.length} registros</span>
+          <span style="font-size:12px;color:var(--txt2)">Filtrar:</span>
+          <select class="sel" style="width:auto;padding:5px 8px;font-size:12px" onchange="_wkFilter=this.value;render()">${wkFilterOpts}</select>
+          <span style="font-size:12px;color:var(--txt2)">${filtered.length} registros</span>
         </div>
-        <div class="card"><table>
-          <thead><tr><th>Cóctel</th><th>Tipo</th><th style="text-align:center">Cant.</th><th>Semana</th><th>ML descontados</th><th></th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table></div>
+        <div class="card">
+          <table>
+            <thead><tr><th>Producto/Cóctel</th><th>Cat.</th><th style="text-align:center">Cant.</th><th>Semana</th><th>ML desc.</th><th style="text-align:right">Ingreso</th><th></th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
       </div>
-    </div>`;
+    </div>
+  `;
+}
+function updateSellTypes(){
+  const sel=document.getElementById('v-prod');
+  if(!sel)return;
+  const opt=sel.options[sel.selectedIndex];
+  const type=opt?opt.getAttribute('data-type'):'licor';
+  const st=document.getElementById('v-stype');
+  if(!st)return;
+  const opts=type==='cerveza'||type==='agua'?
+    `<option value="unit">Unidad</option>`:
+    type==='vino'?
+    `<option value="copa">Copa (≈150ml)</option><option value="bottle">Botella completa</option>`:
+    `<option value="shot">Shot (≈45ml)</option><option value="bottle">Botella completa</option>`;
+  st.innerHTML=opts;
 }
 
-// ── RECETAS ───────────────────────────────────────────────
+// ═══════════════════════════════════════════
+// CATÁLOGO
+// ═══════════════════════════════════════════
+function rCatalogo(){
+  const activeP=products.filter(p=>p.active!==false);
+  const cats=[...new Set(activeP.map(p=>p.cat))].sort();
+  const sections=cats.map(cat=>{
+    const list=activeP.filter(p=>p.cat===cat);
+    const totalBots=list.reduce((t,p)=>t+p.stock,0);
+    const rows=list.map(p=>{
+      const pct=getRemPct(p),remML=getRemML(p),st=status(pct);
+      const fc=pct<=0?'#F09595':pct>=0.5?'#97C459':pct>=0.25?'#EF9F27':'#E24B4A';
+      return`<tr>
+        <td style="font-weight:500">${p.name}</td>
+        <td style="text-align:center">${p.ml}ml</td>
+        <td style="text-align:center;font-weight:500">${parseFloat(p.stock).toFixed(2)}</td>
+        <td style="text-align:center;color:#A32D2D">${getConsumedML(p.id)>0?`−${(getConsumedML(p.id)/p.ml).toFixed(2)}`:'—'}</td>
+        <td style="text-align:center;font-weight:500">${(remML/p.ml).toFixed(2)}<br><span style="font-size:10px;color:var(--txt3)">${fmx(Math.round(remML))}ml</span></td>
+        <td style="min-width:70px"><div class="prog"><div class="prog-fill" style="width:${Math.round(pct*100)}%;background:${fc}"></div></div><span style="font-size:10px">${Math.round(pct*100)}%</span></td>
+        <td><span class="badge ${st.cls}">${st.lbl}</span></td>
+        <td style="text-align:center">${p.price_shot>0?`$${p.price_shot}`:''}</td>
+        <td style="text-align:center">${p.price_bottle>0?`$${fmx(p.price_bottle)}`:''}</td>
+        <td>
+          <div style="display:flex;align-items:center;gap:4px">
+            <button class="btn btn-red btn-icon btn-sm" onclick="adjustStock('${p.id}',-0.5)">−</button>
+            <span style="font-size:12px;font-weight:500;min-width:32px;text-align:center">${parseFloat(p.stock).toFixed(1)}</span>
+            <button class="btn btn-green btn-icon btn-sm" onclick="adjustStock('${p.id}',0.5)">+</button>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
+    return`<div class="card" style="margin-bottom:12px">
+      <div class="card-head">
+        <span class="card-title">${cat}</span>
+        <span class="card-sub">${list.length} productos · ${totalBots.toFixed(1)} botellas totales</span>
+      </div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Nombre</th><th style="text-align:center">ML/bot</th><th style="text-align:center">Stock</th><th style="text-align:center">Consumido</th><th style="text-align:center">Restante</th><th>Nivel</th><th>Estado</th><th style="text-align:center">Shot/$</th><th style="text-align:center">Bot/$</th><th>Ajuste</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+  return`
+    <div class="ph">Catálogo de botellas</div>
+    <div class="ps">Usa + / − para ajustar stock al inicio de cada semana · Los niveles se calculan automáticamente</div>
+    ${sections}
+  `;
+}
+
+// ═══════════════════════════════════════════
+// RECETAS
+// ═══════════════════════════════════════════
 function rRecetas(){
-  const withPop=recipes.map(r=>({...r,sold:sales.filter(s=>s.cocktail_id===r.id).reduce((t,s)=>t+s.qty,0)}));
-  const ranked=[...withPop].sort((a,b)=>b.sold-a.sold);
-  const maxSold=ranked[0]?.sold||1;
-  const top3=ranked.filter(r=>r.sold>0).slice(0,3);
+  const withPop=recipes.map(r=>({
+    ...r,
+    sold:sales.filter(s=>s.cocktail_id===r.id).reduce((t,s)=>t+(s.qty||1),0),
+    revenue:sales.filter(s=>s.cocktail_id===r.id).reduce((t,s)=>t+(s.price||r.price||0)*(s.qty||1),0)
+  }));
+  const sorted=[...withPop].sort((a,b)=>b.sold-a.sold);
+  const maxSold=sorted[0]?.sold||1;
+  const top3=sorted.filter(r=>r.sold>0).slice(0,3);
+  const bottom3=[...sorted].filter(r=>r.sold===0||r.sold>0).slice(-3).reverse();
   const medals=['🥇','🥈','🥉'],podColors=['#FFF3CD','#F0F0F0','#FFF0E8'];
-  const top3HTML=top3.length?`<div class="card" style="margin-bottom:14px">
-    <div class="card-head"><span class="card-title">⭐ Cócteles más populares</span><span class="card-sub">Basado en ventas registradas</span></div>
-    <div style="display:grid;grid-template-columns:repeat(${top3.length},1fr);gap:10px;padding:14px">
-      ${top3.map((r,i)=>`<div style="text-align:center;background:${podColors[i]};border-radius:8px;padding:12px">
-        <div style="font-size:22px">${medals[i]}</div>
-        <div style="font-size:12px;font-weight:500;margin-top:4px;line-height:1.3">${r.name}</div>
-        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${r.sold} vendidos</div>
+
+  const top3HTML=top3.length?`<div class="card" style="margin-bottom:12px">
+    <div class="card-head"><span class="card-title">⭐ Más populares</span></div>
+    <div style="display:grid;grid-template-columns:repeat(${top3.length},1fr);gap:10px;padding:12px">
+      ${top3.map((r,i)=>`<div style="text-align:center;background:${podColors[i]};border-radius:8px;padding:10px">
+        <div style="font-size:20px">${medals[i]}</div>
+        <div style="font-size:12px;font-weight:500;margin-top:4px">${r.name}</div>
+        <div style="font-size:11px;color:var(--txt2)">${r.sold} vendidos</div>
+        ${r.revenue>0?`<div style="font-size:11px;color:#3B6D11;font-weight:500">$${fmx(r.revenue)}</div>`:''}
       </div>`).join('')}
-    </div></div>`:'';
+    </div>
+  </div>`:'';
+
+  const least=sorted.filter(r=>r.sold===0);
+  const leastHTML=least.length?`<div class="card" style="margin-bottom:12px">
+    <div class="card-head"><span class="card-title">⚠️ Menos vendidos / Sin movimiento</span><span class="card-sub">${least.length} cócteles</span></div>
+    <div style="padding:10px 14px;display:flex;flex-wrap:wrap;gap:6px">
+      ${least.map(r=>`<span class="badge" style="background:#FFF8E1;color:#856404">${r.name}</span>`).join('')}
+    </div>
+  </div>`:'';
+
   const cats=[...new Set(recipes.map(r=>r.cat))];
   const sections=cats.map(cat=>{
-    const list=ranked.filter(r=>r.cat===cat);
+    const list=sorted.filter(r=>r.cat===cat);
     const rows=list.map(r=>{
       const totalML=r.ings.reduce((t,i)=>t+i.ml,0);
       const mainIng=r.ings.length?r.ings.reduce((a,b)=>a.ml>=b.ml?a:b,r.ings[0]):null;
-      const mainSp=mainIng?spirits.find(x=>x.id===mainIng.id):null;
-      const rend=mainSp&&mainIng?`${Math.floor(mainSp.ml/mainIng.ml)} tragos/bot.`:'—';
-      const globalRank=ranked.findIndex(x=>x.id===r.id);
-      let rankEl='';
-      if(globalRank===0&&r.sold>0)rankEl=`<span style="background:#FFF3CD;color:#856404;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥇 #1</span>`;
-      else if(globalRank===1&&r.sold>0)rankEl=`<span style="background:#F0F0F0;color:#6C757D;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥈 #2</span>`;
-      else if(globalRank===2&&r.sold>0)rankEl=`<span style="background:#FFF0E8;color:#A0522D;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥉 #3</span>`;
-      const ings=r.ings.map(i=>{const sp=spirits.find(x=>x.id===i.id);return`<span class="tag">${sp?sp.name:'?'} ${i.ml}ml</span>`;}).join('');
+      const mainSp=mainIng?products.find(p=>p.id===mainIng.id):null;
+      const rend=mainSp&&mainIng?`${Math.floor(mainSp.ml/mainIng.ml)} tragos/bot`:'—';
+      const grank=sorted.findIndex(x=>x.id===r.id);
+      let rankEl=grank===0&&r.sold>0?`<span style="background:#FFF3CD;color:#856404;border-radius:5px;padding:2px 5px;font-size:10px;font-weight:600">🥇#1</span>`:
+                 grank===1&&r.sold>0?`<span style="background:#F0F0F0;color:#6C757D;border-radius:5px;padding:2px 5px;font-size:10px;font-weight:600">🥈#2</span>`:
+                 grank===2&&r.sold>0?`<span style="background:#FFF0E8;color:#A0522D;border-radius:5px;padding:2px 5px;font-size:10px;font-weight:600">🥉#3</span>`:'';
+      const ings=r.ings.map(i=>{const p=products.find(x=>x.id===i.id);return`<span class="tag">${p?p.name:'?'} ${i.ml}ml</span>`;}).join('');
       const popPct=maxSold>0?Math.round((r.sold/maxSold)*100):0;
       return`<tr>
-        <td style="width:65px">${rankEl}</td>
+        <td style="width:50px">${rankEl}</td>
         <td style="font-weight:500">${r.name}</td>
-        <td>${ings}</td>
-        <td style="text-align:center;color:#D85A30;font-weight:500">${totalML}ml</td>
-        <td style="text-align:center;font-size:11px;color:var(--color-text-secondary)">${rend}</td>
-        <td style="text-align:center"><span style="font-weight:500">${r.sold}</span>
-          ${r.sold>0?`<div style="height:3px;background:var(--color-background-secondary);border-radius:2px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${popPct}%;background:#D85A30;border-radius:2px"></div></div>`:''}
-        </td></tr>`;
+        <td>${ings||'—'}</td>
+        <td style="text-align:center;color:var(--accent);font-weight:500">${totalML}ml</td>
+        <td style="text-align:center;font-size:11px;color:var(--txt2)">${rend}</td>
+        <td style="text-align:center;font-weight:500">${r.price>0?`$${r.price}`:''}</td>
+        <td style="text-align:center">
+          <span style="font-weight:500">${r.sold}</span>
+          ${r.sold>0?`<div class="prog" style="margin-top:3px"><div class="prog-fill" style="width:${popPct}%;background:var(--accent)"></div></div>`:''}
+        </td>
+        <td style="text-align:right;color:#3B6D11;font-weight:500">${r.revenue>0?`$${fmx(r.revenue)}`:''}</td>
+      </tr>`;
     }).join('');
     return`<div class="card" style="margin-bottom:12px">
       <div class="card-head"><span class="card-title">${cat}</span><span class="card-sub">${list.length} cócteles</span></div>
-      <table><thead><tr><th style="width:65px">Rank</th><th>Cóctel</th><th>Ingredientes</th><th style="text-align:center">ML</th><th style="text-align:center">Rendimiento</th><th style="text-align:center">Vendidos</th></tr></thead><tbody>${rows}</tbody></table>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th style="width:50px">Rank</th><th>Cóctel</th><th>Ingredientes</th><th style="text-align:center">ML</th><th style="text-align:center">Rend.</th><th style="text-align:center">Precio</th><th style="text-align:center">Vendidos</th><th style="text-align:right">Ingresos</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
     </div>`;
   }).join('');
-  return`<div class="page-title">Recetas</div><div class="page-sub">Ordenadas por popularidad · Rendimiento = tragos por botella del licor principal</div>${top3HTML}${sections}`;
+
+  return`
+    <div class="ph">Recetas y Mixología</div>
+    <div class="ps">Popularidad, rendimiento por botella e ingresos estimados</div>
+    ${top3HTML}${leastHTML}${sections}
+  `;
 }
 
-// ── CATÁLOGO ──────────────────────────────────────────────
-function rCatalogo(){
-  const cats=[...new Set(spirits.map(s=>s.cat))].sort();
-  const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${_cFilter===c?' selected':''}>${c}</option>`).join('');
-  const spList=_cFilter==='all'?spirits:spirits.filter(s=>s.cat===_cFilter);
-  const rows=spList.map(sp=>{
-    const consumedML=getConsumedML(sp.id),consumedBot=consumedML/sp.ml;
-    const remBot=getRemainingBottles(sp),remML=remBot*sp.ml,p=getRemainingPct(sp),st=status(p);
-    const fillColor=p<=0?'#F09595':p>=0.5?'#97C459':p>=0.25?'#EF9F27':'#E24B4A';
-    return`<tr>
-      <td style="font-weight:500">${sp.name}</td>
-      <td><span style="background:var(--color-background-secondary);border-radius:6px;padding:2px 7px;font-size:11px">${sp.cat}</span></td>
-      <td style="text-align:center">${sp.ml}ml</td>
-      <td style="text-align:center"><span style="font-weight:500">${parseFloat(sp.stock).toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">inicial</span></td>
-      <td style="text-align:center">${consumedBot>0?`<span style="color:#A32D2D;font-weight:500">−${consumedBot.toFixed(2)}</span>`:'—'}</td>
-      <td style="text-align:center"><span style="font-weight:500;color:${p<=0?'#A32D2D':p>=0.5?'#3B6D11':p>=0.25?'#854F0B':'#A32D2D'}">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">${Math.round(remML).toLocaleString()}ml</span></td>
-      <td style="min-width:70px"><div style="height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round(p*100)}%;background:${fillColor};border-radius:2px"></div></div><span style="font-size:10px;color:var(--color-text-secondary)">${Math.round(p*100)}%</span></td>
-      <td><span class="badge ${st.cls}">${st.lbl}</span></td>
-      <td><div style="display:flex;align-items:center;gap:5px">
-        <input type="number" min="0.05" step="0.05" value="1" id="add-${sp.id}" class="add-input">
-        <button class="btn btn-add btn-sm" onclick="addStock('${sp.id}')"><i class="ti ti-plus"></i>Reponer</button>
-      </div></td>
-    </tr>`;
-  }).join('');
-  return`<div class="page-title">Catálogo de licores</div><div class="page-sub">Los ML restantes se actualizan con cada venta. Repón cuando llegue pedido.</div>
-    <div class="toolbar">
-      <label style="font-size:12px;color:var(--color-text-secondary)">Categoría:</label>
-      <select class="sel" onchange="_cFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${catOpts}</select>
-      <span style="font-size:12px;color:var(--color-text-secondary)">${spList.length} licores</span>
+// ═══════════════════════════════════════════
+// ADMIN — Inventario Central
+// ═══════════════════════════════════════════
+function rAdmin(){
+  const activeP=products.filter(p=>p.active!==false);
+  const cats=[...new Set([...activeP.map(p=>p.cat),'Ginebra','Tequila','Mezcal','Ron','Vodka','Whisky','Aperitivo','Licor','Vermouth','Cerveza','Vino Blanco','Vino Tinto','Vino Rosado','Espumoso','Champagne'])].sort();
+  const catOpts=cats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const types=['licor','vino','cerveza','agua'];
+
+  const rows=activeP.sort((a,b)=>a.cat.localeCompare(b.cat)||a.name.localeCompare(b.name)).map(p=>`<tr>
+    <td style="font-weight:500">${p.name}</td>
+    <td><span style="background:var(--bg2);border-radius:5px;padding:1px 6px;font-size:10px">${p.cat}</span></td>
+    <td style="text-align:center">${p.ml}ml</td>
+    <td style="text-align:center"><input type="number" value="${p.price_shot||0}" min="0" style="width:70px;padding:3px 5px;border:0.5px solid var(--bdr2);border-radius:5px;font-size:12px;text-align:center" onchange="updatePrice('${p.id}','shot',this.value)"></td>
+    <td style="text-align:center"><input type="number" value="${p.price_bottle||0}" min="0" style="width:80px;padding:3px 5px;border:0.5px solid var(--bdr2);border-radius:5px;font-size:12px;text-align:center" onchange="updatePrice('${p.id}','bottle',this.value)"></td>
+    <td style="text-align:center"><button class="btn btn-red btn-sm" onclick="deactivateProduct('${p.id}')"><i class="ti ti-trash"></i> Dar de baja</button></td>
+  </tr>`).join('');
+
+  return`
+    <div class="ph">Inventario Central</div>
+    <div class="ps">Administra productos, precios y altas/bajas del catálogo completo</div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;align-items:start">
+      <!-- ALTA DE PRODUCTO -->
+      <div class="card">
+        <div class="card-head"><span class="card-title">➕ Alta de producto</span></div>
+        <div style="padding:16px">
+          <div class="fl"><label>Nombre</label><input class="inp" type="text" id="a-name" placeholder="Nombre del producto"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="fl"><label>Categoría</label><select class="sel" id="a-cat">${catOpts}</select></div>
+            <div class="fl"><label>Tipo</label><select class="sel" id="a-type">${types.map(t=>`<option value="${t}">${t}</option>`).join('')}</select></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="fl"><label>ML por botella</label><input class="inp" type="number" id="a-ml" value="750" min="1"></div>
+            <div class="fl"><label>Precio shot/copa ($)</label><input class="inp" type="number" id="a-pshot" value="0" min="0"></div>
+          </div>
+          <div class="fl"><label>Precio botella ($)</label><input class="inp" type="number" id="a-pbot" value="0" min="0"></div>
+          <button class="btn btn-coral" style="width:100%;justify-content:center" onclick="addProduct()"><i class="ti ti-plus"></i> Agregar al catálogo</button>
+        </div>
+      </div>
+      <!-- ALTA DE CÓCTEL -->
+      <div class="card">
+        <div class="card-head"><span class="card-title">🍹 Alta de cóctel</span></div>
+        <div style="padding:16px">
+          <div class="fl"><label>Nombre del cóctel</label><input class="inp" type="text" id="rc-name" placeholder="Nombre"></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div class="fl"><label>Categoría</label>
+              <select class="sel" id="rc-cat">
+                <option>Signature</option><option>Clásico</option><option>Spritz</option><option>Aperitivo</option>
+              </select>
+            </div>
+            <div class="fl"><label>Precio de venta ($)</label><input class="inp" type="number" id="rc-price" value="0" min="0"></div>
+          </div>
+          <div class="fl"><label>Ingredientes (producto · ML, separados por coma)</label>
+            <input class="inp" type="text" id="rc-ings" placeholder="Ej: GIN007·45, VER003·30, AP003·25">
+          </div>
+          <button class="btn btn-coral" style="width:100%;justify-content:center" onclick="addRecipe()"><i class="ti ti-plus"></i> Agregar receta</button>
+        </div>
+      </div>
     </div>
-    <div class="card"><table style="table-layout:fixed;width:100%">
-      <colgroup><col style="width:155px"><col style="width:80px"><col style="width:65px"><col style="width:72px"><col style="width:68px"><col style="width:90px"><col style="width:72px"><col style="width:65px"><col style="width:145px"></colgroup>
-      <thead><tr><th>Licor</th><th>Cat.</th><th style="text-align:center">ML/bot</th><th style="text-align:center">Inicial</th><th style="text-align:center">Consumido</th><th style="text-align:center">Restante</th><th>Nivel</th><th>Estado</th><th>Reponer</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
+
+    <!-- TABLA DE GESTIÓN -->
+    <div class="card">
+      <div class="card-head"><span class="card-title">📋 Productos activos — Gestión de precios</span><span class="card-sub">${activeP.length} productos</span></div>
+      <div style="overflow-x:auto"><table>
+        <thead><tr><th>Nombre</th><th>Categoría</th><th style="text-align:center">ML/bot</th><th style="text-align:center">Precio shot/copa</th><th style="text-align:center">Precio botella</th><th>Acción</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>
+  `;
 }
 
-// ── ACCIONES (con Supabase) ───────────────────────────────
-async function addSale(){
-  const week=(document.getElementById('s-wk').value||'').trim();
-  const cocktail_id=document.getElementById('s-co').value;
-  const qty=parseInt(document.getElementById('s-qty').value)||0;
-  if(!week){alert('Por favor ingresa la semana (ej: Semana 21)');return;}
+// ═══════════════════════════════════════════
+// ACTIONS
+// ═══════════════════════════════════════════
+async function addSaleCocktail(){
+  const week=(document.getElementById('v-wk')?.value||'').trim();
+  const cocktail_id=document.getElementById('v-co')?.value;
+  const qty=parseInt(document.getElementById('v-cqty')?.value)||0;
+  if(!week){alert('Ingresa la semana');return;}
   if(!cocktail_id||qty<=0)return;
-  const btn=document.getElementById('btn-save');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Guardando...';}
-  const {data,error}=await sb.from('sales').insert({cocktail_id,qty,week}).select();
-  if(error){alert('Error al guardar: '+error.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Registrar venta';} return;}
-  sales.unshift(data[0]);
-  updatePill();
-  render();
+  const r=recipes.find(x=>x.id===cocktail_id);
+  const rec={id:String(Date.now()),cocktail_id,product_id:null,qty,week,sell_type:'cocktail',ml_per_unit:0,price:r?.price||0,created_at:new Date().toISOString()};
+  if(!_useLocalMode){
+    const {data,error}=await sb.from('sales').insert({cocktail_id,product_id:null,qty,week,sell_type:'cocktail',ml_per_unit:0,price:r?.price||0}).select();
+    if(error){alert('Error: '+error.message);return;}
+    sales.unshift(data[0]);
+  }else{sales.unshift({...rec,id:_nextLocalId++});}
+  updatePill();render();
+}
+
+async function addSaleProduct(){
+  const week=(document.getElementById('v-wk2')?.value||'').trim();
+  const product_id=document.getElementById('v-prod')?.value;
+  const sell_type=document.getElementById('v-stype')?.value||'shot';
+  const qty=parseInt(document.getElementById('v-pqty')?.value)||0;
+  if(!week){alert('Ingresa la semana');return;}
+  if(!product_id||qty<=0)return;
+  const p=products.find(x=>x.id===product_id);
+  const ml_per_unit=sell_type==='bottle'?(p?.ml||750):sell_type==='copa'?150:sell_type==='unit'?(p?.ml||330):45;
+  const price=sell_type==='bottle'?(p?.price_bottle||0):(p?.price_shot||0);
+  const rec={id:String(Date.now()),cocktail_id:null,product_id,qty,week,sell_type,ml_per_unit,price};
+  if(!_useLocalMode){
+    const {data,error}=await sb.from('sales').insert({cocktail_id:null,product_id,qty,week,sell_type,ml_per_unit,price}).select();
+    if(error){alert('Error: '+error.message);return;}
+    sales.unshift(data[0]);
+  }else{sales.unshift({...rec,id:_nextLocalId++});}
+  updatePill();render();
 }
 
 async function delSale(id){
   if(!confirm('¿Eliminar esta venta?'))return;
-  const {error}=await sb.from('sales').delete().eq('id',id);
-  if(error){alert('Error al eliminar: '+error.message);return;}
+  if(!_useLocalMode){
+    const {error}=await sb.from('sales').delete().eq('id',id);
+    if(error){alert('Error: '+error.message);return;}
+  }
   sales=sales.filter(s=>s.id!==id);
-  updatePill();
+  updatePill();render();
+}
+
+async function adjustStock(id,delta){
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+  const newStock=Math.max(0,parseFloat((p.stock+(delta)).toFixed(2)));
+  if(!_useLocalMode){
+    const {error}=await sb.from('spirits').update({stock:newStock}).eq('id',id);
+    if(error){alert('Error: '+error.message);return;}
+  }
+  p.stock=newStock;render();
+}
+
+function addProduct(){
+  const name=(document.getElementById('a-name')?.value||'').trim();
+  const cat=document.getElementById('a-cat')?.value||'';
+  const type=document.getElementById('a-type')?.value||'licor';
+  const ml=parseInt(document.getElementById('a-ml')?.value)||750;
+  const price_shot=parseInt(document.getElementById('a-pshot')?.value)||0;
+  const price_bottle=parseInt(document.getElementById('a-pbot')?.value)||0;
+  if(!name){alert('Ingresa el nombre del producto');return;}
+  const id='P'+Date.now();
+  const prod={id,name,cat,type,ml,stock:0,price_shot,price_bottle,active:true};
+  products.push(prod);
+  if(!_useLocalMode){sb.from('spirits').insert({id,name,cat,ml,stock:0,price_shot,price_bottle,active:true});}
   render();
 }
 
-async function addStock(id){
-  const sp=spirits.find(s=>s.id===id);
-  if(!sp)return;
-  const inp=document.getElementById('add-'+id);
-  const qty=parseFloat(inp?inp.value:1)||1;
-  if(qty<=0)return;
-  const newStock=parseFloat((sp.stock+qty).toFixed(2));
-  const {error}=await sb.from('spirits').update({stock:newStock}).eq('id',id);
-  if(error){alert('Error al actualizar stock: '+error.message);return;}
-  sp.stock=newStock;
+function addRecipe(){
+  const name=(document.getElementById('rc-name')?.value||'').trim();
+  const cat=document.getElementById('rc-cat')?.value||'Clásico';
+  const price=parseInt(document.getElementById('rc-price')?.value)||0;
+  const ingsRaw=(document.getElementById('rc-ings')?.value||'').trim();
+  if(!name){alert('Ingresa el nombre del cóctel');return;}
+  const ings=ingsRaw?ingsRaw.split(',').map(s=>{const[id,ml]=s.trim().split('·');return{id:(id||'').trim(),ml:parseInt(ml)||0};}).filter(i=>i.id):{};
+  const id='R'+Date.now();
+  recipes.push({id,name,cat,price,ings:Array.isArray(ings)?ings:[],sold:0,revenue:0});
   render();
 }
 
-// ── INIT ──────────────────────────────────────────────────
+function updatePrice(id,field,val){
+  const p=products.find(x=>x.id===id);
+  if(!p)return;
+  const v=parseInt(val)||0;
+  if(field==='shot')p.price_shot=v;
+  else p.price_bottle=v;
+  if(!_useLocalMode){
+    const upd={};
+    upd[field==='shot'?'price_shot':'price_bottle']=v;
+    sb.from('spirits').update(upd).eq('id',id);
+  }
+}
+
+function deactivateProduct(id){
+  if(!confirm('¿Dar de baja este producto? Podrás reactivarlo desde la base de datos.'))return;
+  const p=products.find(x=>x.id===id);
+  if(p){p.active=false;}
+  if(!_useLocalMode){sb.from('spirits').update({active:false}).eq('id',id);}
+  render();
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
 loadAll();
 </script>
 </body>
