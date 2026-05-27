@@ -1,247 +1,153 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Inventario Bar</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-    <style>
-        :root {
-            --color-background-primary: #ffffff;
-            --color-background-secondary: #f5f5f4;
-            --color-background-tertiary: #eeece8;
-            --color-text-primary: #1c1c1a;
-            --color-text-secondary: #6b6b68;
-            --color-text-tertiary: #a0a09d;
-            --color-border-tertiary: rgba(0,0,0,0.12);
-            --color-border-secondary: rgba(0,0,0,0.2);
-            --color-border-primary: rgba(0,0,0,0.3);
-            --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            --font-mono: 'SF Mono', 'Fira Code', monospace;
-            --border-radius-md: 8px;
-            --border-radius-lg: 12px;
-            --border-radius-xl: 16px;
-        }
-        *{box-sizing:border-box;margin:0;padding:0}
-        body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
-        .topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
-        .logo-icon{width:30px;height:30px;background:#D85A30;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
-        .logo-name{font-size:15px;font-weight:500}.logo-sub{font-size:11px;color:var(--color-text-secondary)}
-        .pill{background:#FAECE7;color:#993C1D;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid #F0997B}
-        .layout{display:grid;grid-template-columns:200px 1fr}
-        .sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px 10px;min-height:calc(100vh - 55px)}
-        .nav-lbl{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;padding:0 10px;margin-bottom:6px;margin-top:12px}
-        .nav-lbl:first-child{margin-top:0}
-        .nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);margin-bottom:2px;transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:var(--font-sans)}
-        .nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
-        .nav-btn.active{background:#FAECE7;color:#993C1D;font-weight:500}
-        .main{padding:22px}
-        .page-title{font-size:18px;font-weight:500;margin-bottom:4px}
-        .page-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:20px}
-        .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
-        .stat{background:var(--color-background-secondary);border-radius:8px;padding:12px 14px}
-        .stat-lbl{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
-        .stat-val{font-size:24px;font-weight:500;line-height:1}
-        .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;margin-bottom:14px}
-        .card-head{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
-        .card-title{font-size:13px;font-weight:500}.card-sub{font-size:11px;color:var(--color-text-secondary)}
-        table{width:100%;border-collapse:collapse;font-size:13px}
-        th{text-align:left;padding:9px 14px;font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--color-border-tertiary)}
-        td{padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
-        tr:last-child td{border-bottom:none}
-        tr:hover td{background:var(--color-background-secondary)}
-        .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
-        .b-ok{background:#EAF3DE;color:#3B6D11}.b-warn{background:#FAEEDA;color:#854F0B}.b-crit{background:#FCEBEB;color:#A32D2D}.b-zero{background:#F7C1C1;color:#791F1F}
-        .btn{padding:7px 13px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;cursor:pointer;font-family:var(--font-sans);display:inline-flex;align-items:center;gap:6px}
-        .btn:hover{background:var(--color-background-secondary)}
-        .btn-coral{background:#D85A30;color:#fff;border-color:#D85A30}.btn-coral:hover{opacity:.88}
-        .btn-sm{padding:4px 9px;font-size:11px}
-        .btn-ghost{border-color:transparent;background:none;color:var(--color-text-secondary)}.btn-ghost:hover{background:var(--color-background-secondary)}
-        .btn-add{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}.btn-add:hover{background:#C0DD97}
-        .fl{margin-bottom:10px}
-        .fl label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
-        .fl input,.fl select,.sel{padding:7px 9px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans)}
-        .alert-bar{background:#FAECE7;border:0.5px solid #F0997B;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:13px;color:#993C1D}
-        .section-p{padding:16px}
-        .two-col{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
-        .tag{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:6px;padding:2px 7px;font-size:11px;margin:2px}
-        .empty{text-align:center;padding:28px;color:var(--color-text-tertiary);font-size:13px}
-        .bottle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
-        .bottle-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 10px 12px;text-align:center}
-        .b-name{font-size:11px;font-weight:500;margin-top:8px;line-height:1.3}.b-cat{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}.b-info{font-size:10px;color:var(--color-text-secondary);margin-top:4px}
-        .wk-tag{background:#E8F4FD;color:#1565C0;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500}
-        .ml-chip{display:inline-block;background:var(--color-background-secondary);border-radius:4px;padding:1px 6px;font-size:10px;margin:1px;color:var(--color-text-secondary)}
-        .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-        .add-input{width:55px;text-align:center;padding:4px 6px;border:0.5px solid var(--color-border-secondary);border-radius:6px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario Bar</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<!-- Supabase JS -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f5f4;
+  --color-background-tertiary:#eeece8;
+  --color-text-primary:#1c1c1a;
+  --color-text-secondary:#6b6b68;
+  --color-text-tertiary:#a0a09d;
+  --color-border-tertiary:rgba(0,0,0,0.10);
+  --color-border-secondary:rgba(0,0,0,0.18);
+  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary);min-height:100vh}
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10}
+.logo-icon{width:30px;height:30px;background:#D85A30;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
+.logo-name{font-size:15px;font-weight:500}.logo-sub{font-size:11px;color:var(--color-text-secondary)}
+.pill{background:#FAECE7;color:#993C1D;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid #F0997B}
+.layout{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 57px)}
+.sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px 10px;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
+.nav-lbl{font-size:10px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.06em;padding:0 10px;margin-bottom:6px;margin-top:12px}
+.nav-lbl:first-child{margin-top:0}
+.nav-btn{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--color-text-secondary);margin-bottom:2px;transition:all .12s;border:none;background:none;width:100%;text-align:left;font-family:var(--font-sans)}
+.nav-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.nav-btn.active{background:#FAECE7;color:#993C1D;font-weight:500}
+.main{padding:22px;overflow-y:auto}
+.page-title{font-size:18px;font-weight:500;margin-bottom:4px}
+.page-sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:20px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:20px}
+.stat{background:var(--color-background-secondary);border-radius:8px;padding:12px 14px}
+.stat-lbl{font-size:11px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+.stat-val{font-size:24px;font-weight:500;line-height:1}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;margin-bottom:14px}
+.card-head{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:13px;font-weight:500}.card-sub{font-size:11px;color:var(--color-text-secondary)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 14px;font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--color-border-tertiary)}
+td{padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.b-ok{background:#EAF3DE;color:#3B6D11}.b-warn{background:#FAEEDA;color:#854F0B}.b-crit{background:#FCEBEB;color:#A32D2D}.b-zero{background:#F7C1C1;color:#791F1F}
+.btn{padding:7px 13px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;cursor:pointer;font-family:var(--font-sans);display:inline-flex;align-items:center;gap:6px;transition:background .1s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-coral{background:#D85A30;color:#fff;border-color:#D85A30}.btn-coral:hover{opacity:.88}
+.btn-coral:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{padding:4px 9px;font-size:11px}
+.btn-ghost{border-color:transparent;background:none;color:var(--color-text-secondary)}.btn-ghost:hover{background:var(--color-background-secondary)}
+.btn-add{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}.btn-add:hover{background:#C0DD97}
+.fl{margin-bottom:10px}
+.fl label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
+.fl input,.fl select,.sel{padding:7px 9px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-sans)}
+.alert-bar{background:#FAECE7;border:0.5px solid #F0997B;border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:13px;color:#993C1D}
+.section-p{padding:16px}
+.two-col{display:grid;grid-template-columns:240px 1fr;gap:14px;align-items:start}
+.tag{display:inline-block;background:#EEEDFE;color:#3C3489;border-radius:6px;padding:2px 7px;font-size:11px;margin:2px}
+.empty{text-align:center;padding:28px;color:var(--color-text-tertiary);font-size:13px}
+.bottle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
+.bottle-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 10px 12px;text-align:center}
+.b-name{font-size:11px;font-weight:500;margin-top:8px;line-height:1.3}.b-cat{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}.b-info{font-size:10px;color:var(--color-text-secondary);margin-top:4px}
+.wk-tag{background:#E8F4FD;color:#1565C0;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500}
+.ml-chip{display:inline-block;background:var(--color-background-secondary);border-radius:4px;padding:1px 6px;font-size:10px;margin:1px;color:var(--color-text-secondary)}
+.toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.add-input{width:55px;text-align:center;padding:4px 6px;border:0.5px solid var(--color-border-secondary);border-radius:6px;font-size:12px;background:var(--color-background-primary);color:var(--color-text-primary);font-family:var(--font-sans)}
+.loading{text-align:center;padding:40px;color:var(--color-text-secondary);font-size:13px}
+.spinner{display:inline-block;width:20px;height:20px;border:2px solid var(--color-border-secondary);border-top-color:#D85A30;border-radius:50%;animation:spin .8s linear infinite;margin-bottom:8px}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
 </head>
 <body>
 
-<div style="min-height:600px">
-    <div class="topbar">
-        <div style="display:flex;align-items:center;gap:10px">
-            <div class="logo-icon"><i class="ti ti-bottle" aria-hidden="true"></i></div>
-            <div><div class="logo-name">Clandestinna</div><div class="logo-sub">Control de inventario</div></div>
-        </div>
-        <div class="pill" id="top-pill">0 bebidas registradas</div>
-    </div>
-    <div class="layout">
-        <div class="sidebar">
-            <div class="nav-lbl">Control</div>
-            <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard</button>
-            <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt" aria-hidden="true"></i>Registrar ventas</button>
-            <div class="nav-lbl">Configuración</div>
-            <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details" aria-hidden="true"></i>Recetas</button>
-            <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle" aria-hidden="true"></i>Catálogo</button>
-        </div>
-        <div class="main" id="main"></div>
-    </div>
+<div class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="logo-icon"><i class="ti ti-bottle"></i></div>
+    <div><div class="logo-name">Clandestinna</div><div class="logo-sub">Control de inventario</div></div>
+  </div>
+  <div id="top-pill" class="pill">Conectando...</div>
+</div>
+
+<div class="layout">
+  <div class="sidebar">
+    <div class="nav-lbl">Control</div>
+    <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
+    <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt"></i>Registrar ventas</button>
+    <div class="nav-lbl">Configuración</div>
+    <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details"></i>Recetas</button>
+    <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle"></i>Catálogo</button>
+  </div>
+  <div class="main" id="main"><div class="loading"><div class="spinner"></div><br>Cargando datos...</div></div>
 </div>
 
 <script>
-const S={
-  spirits:[
-    {id:'GIN-BC',name:'Condesa Clásica',cat:'Ginebra',ml:750,stock:2.7},
-    {id:'GIN-BX',name:'Condesa Xoconostle',cat:'Ginebra',ml:750,stock:1.2},
-    {id:'GIN-BS',name:'Condesa Saumerio',cat:'Ginebra',ml:750,stock:3.65},
-    {id:'GIN-TQ',name:'Tanqueray Ten',cat:'Ginebra',ml:700,stock:1.3},
-    {id:'GIN-BF',name:'Bombay Saphire',cat:'Ginebra',ml:700,stock:0.65},
-    {id:'GIN-HE',name:'Hendricks',cat:'Ginebra',ml:750,stock:0.35},
-    {id:'MEZ-VA',name:'Verde Amarás Espadin',cat:'Mezcal',ml:700,stock:3.8},
-    {id:'MEZ-VM',name:'Verde Momento',cat:'Mezcal',ml:700,stock:1.0},
-    {id:'MEZ-ML',name:'Monte Lobos Espadin',cat:'Mezcal',ml:750,stock:1.3},
-    {id:'MEZ-SOT',name:'Sotol Coyote',cat:'Sotol',ml:750,stock:5.1},
-    {id:'TEQ-DO',name:'Dobel Diamante',cat:'Tequila',ml:750,stock:2.0},
-    {id:'TEQ-MT',name:'Maestro Tequilero Blanco',cat:'Tequila',ml:750,stock:1.0},
-    {id:'TEQ-OCH',name:'Tequila 8 Reposado',cat:'Tequila',ml:750,stock:0.35},
-    {id:'RON-PA',name:'Paranubes',cat:'Ron',ml:1000,stock:0.0},
-    {id:'RON-MA',name:'Matusalem Platino',cat:'Ron',ml:750,stock:2.15},
-    {id:'RON-MG',name:'Matusalem Gran Reserva',cat:'Ron',ml:750,stock:0.4},
-    {id:'RON-BA',name:'Bacardi Blanco',cat:'Ron',ml:700,stock:0.7},
-    {id:'VOD-TI',name:'Titos Handmade',cat:'Vodka',ml:700,stock:1.0},
-    {id:'VOD-GG',name:'Grey Goose',cat:'Vodka',ml:750,stock:1.9},
-    {id:'VOD-BV',name:'Belvedere',cat:'Vodka',ml:700,stock:1.1},
-    {id:'WHI-JB',name:'Jim Beam',cat:'Whisky',ml:700,stock:3.3},
-    {id:'WHI-WT',name:'Wild Turkey Rye',cat:'Whisky',ml:750,stock:1.6},
-    {id:'WHI-EN',name:'Etiqueta Negra',cat:'Whisky',ml:750,stock:1.3},
-    {id:'LIC-CP',name:'Campari',cat:'Aperitivo',ml:750,stock:2.4},
-    {id:'LIC-AP',name:'Aperol',cat:'Aperitivo',ml:750,stock:3.8},
-    {id:'LIC-LL',name:'Lillet Blanc',cat:'Licor',ml:750,stock:0.4},
-    {id:'VER-CR',name:'Carpano Rosso',cat:'Vermouth',ml:1000,stock:2.5},
-    {id:'VER-CB',name:'Carpano Bianco',cat:'Vermouth',ml:1000,stock:0.3},
-    {id:'VER-CD',name:'Carpano Dry',cat:'Vermouth',ml:1000,stock:0.5},
-    {id:'LIC-NA',name:'Narano',cat:'Licor',ml:1000,stock:2.25},
-    {id:'LIC-KH',name:'Kahlúa',cat:'Licor',ml:1000,stock:0.75},
-    {id:'LIC-LU',name:'Luxardo',cat:'Licor',ml:750,stock:0.8},
-    {id:'LIC-CH',name:'Chartreuse Amarillo',cat:'Licor',ml:750,stock:1.4},
-    {id:'LIC-CV',name:'Chartreuse Verde',cat:'Licor',ml:750,stock:0.7},
-    {id:'LIC-CY',name:'Cynar',cat:'Licor',ml:750,stock:0.65},
-    {id:'LIC-PM',name:'Punt e Mes',cat(--Lo corregí como string--'Vermouth'),ml:750,stock:0.65},
-    {id:'LIC-LI',name:'Licor 43',cat:'Licor',ml:1000,stock:3.9},
-    {id:'LIC-FE',name:'Fernet Branca',cat:'Licor',ml:750,stock:0.8},
-    {id:'RON-HC',name:'Havana Club 7 años',cat:'Ron',ml:700,stock:1.6},
-    {id:'WHI-JM',name:'Jameson',cat:'Whisky',ml:750,stock:3.3},
-    {id:'COG-HE',name:'Hennessy VSOP',cat:'Cognac',ml:700,stock:0.85},
-    {id:'LIC-PIS',name:'Pisco Rompemar',cat:'Pisco',ml:750,stock:0.8},
-    {id:'JER-TP',name:'Jerez Tío Pepe',cat:'Jerez',ml:750,stock:0.3},
-    {id:'LIC-ST',name:'St. Germain',cat:'Licor',ml:750,stock:1.9},
-    {id:'LIC-AM',name:'Amaro Montenegro',cat:'Licor',ml:750,stock:1.5},
-    {id:'ESP-FR',name:'Espumoso / Prosecco',cat:'Espumoso',ml:750,stock:3.0},
-  ],
-  recipes:[
-    {id:'COC001',name:'Daiquiri Paranubes',cat:'Clásico',ings:[{id:'RON-PA',ml:45}]},
-    {id:'COC002',name:'Martini de Mezcal',cat:'Clásico',ings:[{id:'MEZ-VA',ml:45},{id:'VER-CB',ml:45}]},
-    {id:'COC003',name:'Negroni de Mezcal',cat:'Clásico',ings:[{id:'MEZ-VA',ml:30},{id:'VER-CR',ml:30},{id:'LIC-CP',ml:30}]},
-    {id:'COC004',name:'Gibson',cat:'Clásico',ings:[{id:'GIN-BC',ml:60},{id:'VER-CD',ml:15}]},
-    {id:'COC005',name:'Martini Dry',cat:'Clásico',ings:[{id:'GIN-BC',ml:75},{id:'VER-CD',ml:20}]},
-    {id:'COC006',name:'Martini Perfecto',cat:'Clásico',ings:[{id:'GIN-BC',ml:45},{id:'VER-CD',ml:30},{id:'VER-CR',ml:30}]},
-    {id:'COC007',name:'Martinez',cat:'Clásico',ings:[{id:'GIN-BC',ml:45},{id:'LIC-LU',ml:15},{id:'VER-CR',ml:30}]},
-    {id:'COC008',name:'Vesper',cat:'Clásico',ings:[{id:'GIN-BC',ml:45},{id:'VOD-TI',ml:30},{id:'LIC-LL',ml:20}]},
-    {id:'COC009',name:'Espresso Martini',cat:'Clásico',ings:[{id:'VOD-TI',ml:60},{id:'LIC-KH',ml:30}]},
-    {id:'COC010',name:'Aperol Spritz',cat:'Spritz',ings:[{id:'LIC-AP',ml:45},{id:'ESP-FR',ml:120}]},
-    {id:'COC011',name:'Carpano Spritz',cat:'Spritz',ings:[{id:'VER-CR',ml:45},{id:'ESP-FR',ml:120}]},
-    {id:'COC012',name:'Lillet Spritz',cat:'Spritz',ings:[{id:'LIC-LL',ml:45},{id:'ESP-FR',ml:45}]},
-    {id:'COC013',name:'Sbagliato',cat:'Spritz',ings:[{id:'ESP-FR',ml:50},{id:'VER-CR',ml:30},{id:'LIC-CP',ml:30}]},
-    {id:'COC014',name:'Americano',cat:'Aperitivo',ings:[{id:'LIC-CP',ml:45},{id:'VER-CR',ml:45}]},
-    {id:'COC015',name:'Milano Torino',cat:'Aperitivo',ings:[{id:'LIC-CP',ml:45},{id:'VER-CR',ml:45}]},
-    {id:'COC016',name:'Garibaldi',cat:'Aperitivo',ings:[{id:'LIC-CP',ml:45}]},
-    {id:'COC017',name:'Bloody Mary',cat:'Clásico',ings:[{id:'VOD-GG',ml:60}]},
-    {id:'COC018',name:'Bloody Camarón Seco',cat:'Clásico',ings:[{id:'VOD-GG',ml:60}]},
-    {id:'COC019',name:'Aviation',cat:'Clásico',ings:[{id:'GIN-BF',ml:45}]},
-    {id:'COC020',name:'Martini Sucio',cat:'Clásico',ings:[{id:'GIN-BC',ml:75},{id:'VER-CD',ml:15}]},
-    {id:'COC021',name:'Daiquiri',cat:'Clásico',ings:[{id:'RON-BA',ml:60}]},
-    {id:'COC022',name:'Hemingway Daiquiri',cat:'Clásico',ings:[{id:'RON-MA',ml:45},{id:'LIC-LU',ml:15}]},
-    {id:'COC023',name:'Last Word',cat:'Clásico',ings:[{id:'GIN-BC',ml:30},{id:'LIC-LU',ml:30},{id:'LIC-CV',ml:30}]},
-    {id:'COC024',name:'Mezcalita de Toronja',cat:'Clásico',ings:[{id:'MEZ-VA',ml:45},{id:'LIC-NA',ml:20}]},
-    {id:'COC025',name:'Moscow Mule',cat:'Clásico',ings:[{id:'VOD-TI',ml:45}]},
-    {id:'COC026',name:'Cosmopolitan',cat:'Clásico',ings:[{id:'VOD-TI',ml:45},{id:'LIC-NA',ml:20}]},
-    {id:'COC027',name:'Lemon Drop',cat:'Clásico',ings:[{id:'VOD-TI',ml:60},{id:'LIC-NA',ml:25}]},
-    {id:'COC028',name:'Bouelvardier',cat:'Clásico',ings:[{id:'WHI-JB',ml:40},{id:'VER-CR',ml:30},{id:'LIC-CP',ml:30}]},
-    {id:'COC029',name:'Old Fashioned',cat:'Clásico',ings:[{id:'WHI-JB',ml:60}]},
-    {id:'COC030',name:'Manhattan',cat:'Clásico',ings:[{id:'WHI-JB',ml:50},{id:'VER-CR',ml:30}]},
-    {id:'COC031',name:'Black Manhattan',cat:'Clásico',ings:[{id:'WHI-WT',ml:50},{id:'LIC-AM',ml:30}]},
-    {id:'COC032',name:'Manhattan Perfecto',cat:'Clásico',ings:[{id:'WHI-WT',ml:50},{id:'VER-CD',ml:20},{id:'VER-CR',ml:20}]},
-    {id:'COC033',name:'Paper Plane',cat:'Clásico',ings:[{id:'WHI-JB',ml:30},{id:'LIC-AP',ml:30},{id:'LIC-AM',ml:30}]},
-    {id:'COC034',name:'Rob Roy',cat:'Clásico',ings:[{id:'WHI-EN',ml:50},{id:'VER-CR',ml:30}]},
-    {id:'COC035',name:'Mojito',cat:'Clásico',ings:[{id:'RON-MA',ml:45}]},
-    {id:'COC036',name:'Pisco Sour',cat:'Clásico',ings:[{id:'LIC-PIS',ml:50}]},
-    {id:'COC037',name:'Paloma',cat:'Clásico',ings:[{id:'TEQ-DO',ml:40}]},
-    {id:'COC038',name:'Margarita',cat:'Clásico',ings:[{id:'TEQ-DO',ml:60},{id:'LIC-NA',ml:20}]},
-    {id:'COC039',name:'Cadillac Margarita',cat:'Clásico',ings:[{id:'TEQ-DO',ml:60},{id:'LIC-NA',ml:25}]},
-    {id:'COC040',name:"Tommy's Margarita",cat:'Clásico',ings:[{id:'TEQ-DO',ml:60}]},
-    {id:'COC041',name:'White Negroni',cat:'Clásico',ings:[{id:'GIN-BC',ml:30},{id:'LIC-LL',ml:30}]},
-    {id:'COC042',name:'Rosita',cat:'Clásico',ings:[{id:'TEQ-DO',ml:30},{id:'LIC-CP',ml:15},{id:'VER-CR',ml:15}]},
-    {id:'COC043',name:'Siesta',cat:'Clásico',ings:[{id:'TEQ-DO',ml:40},{id:'LIC-CP',ml:15}]},
-    {id:'COC044',name:'Hanky Panky',cat:'Clásico',ings:[{id:'GIN-BC',ml:45},{id:'VER-CR',ml:45},{id:'LIC-FE',ml:10}]},
-    {id:'COC045',name:'Bijou',cat:'Clásico',ings:[{id:'GIN-BC',ml:30},{id:'LIC-CV',ml:30},{id:'VER-CR',ml:30}]},
-    {id:'COC046',name:'Alaska Martini',cat:'Clásico',ings:[{id:'GIN-BC',ml:70},{id:'LIC-CH',ml:20}]},
-    {id:'COC047',name:'Corpse Reviver #2',cat:'Clásico',ings:[{id:'GIN-BC',ml:30},{id:'LIC-LL',ml:30},{id:'LIC-NA',ml:30}]},
-    {id:'COC048',name:'Clover Club',cat:'Clásico',ings:[{id:'GIN-BC',ml:50},{id:'VER-CB',ml:20}]},
-    {id:'COC049',name:'Tom Collins',cat:'Clásico',ings:[{id:'GIN-BC',ml:60}]},
-    {id:'COC050',name:'French 75',cat:'Clásico',ings:[{id:'GIN-BC',ml:60},{id:'ESP-FR',ml:40}]},
-    {id:'COC051',name:'Long Island Tea',cat:'Clásico',ings:[{id:'VOD-TI',ml:20},{id:'RON-BA',ml:20},{id:'GIN-BC',ml:20}]},
-    {id:'COC052',name:'In Search for Delicious',cat:'Clásico',ings:[{id:'LIC-CY',ml:45},{id:'LIC-PM',ml:25}]},
-    {id:'COC053',name:'Naked and Famous',cat:'Clásico',ings:[{id:'MEZ-VM',ml:30},{id:'LIC-AP',ml:30},{id:'LIC-CH',ml:30}]},
-    {id:'COC054',name:'Adonis',cat:'Clásico',ings:[{id:'JER-TP',ml:60},{id:'VER-CR',ml:30}]},
-    {id:'COC055',name:'Old Friend',cat:'Clásico',ings:[{id:'GIN-BX',ml:50},{id:'LIC-CP',ml:15},{id:'LIC-ST',ml:10}]},
-    {id:'COC056',name:'M&M',cat:'Clásico',ings:[{id:'MEZ-VM',ml:45},{id:'LIC-AM',ml:45}]},
-    {id:'COC057',name:'Carajillo',cat:'Clásico',ings:[{id:'LIC-LI',ml:50}]},
-    {id:'COC058',name:'Dark and Stormy',cat:'Clásico',ings:[{id:'RON-HC',ml:60}]},
-    {id:'COC059',name:'Side Car',cat:'Clásico',ings:[{id:'COG-HE',ml:50},{id:'LIC-NA',ml:20}]},
-    {id:'COC060',name:'Blood and Sand',cat:'Clásico',ings:[{id:'WHI-EN',ml:30},{id:'VER-CR',ml:30},{id:'LIC-LU',ml:30}]},
-    {id:'SIG001',name:'Negroni Prohibido',cat:'Signature',ings:[{id:'GIN-BC',ml:43},{id:'VER-CR',ml:16},{id:'LIC-CP',ml:25}]},
-    {id:'SIG002',name:'Dirty Devil',cat:'Signature',ings:[{id:'GIN-BC',ml:60},{id:'VER-CD',ml:15}]},
-    {id:'SIG003',name:'Amore Mio',cat:'Signature',ings:[{id:'GIN-BC',ml:45},{id:'LIC-LU',ml:15}]},
-    {id:'SIG004',name:'Hot and High',cat:'Signature',ings:[{id:'MEZ-SOT',ml:60}]},
-    {id:'SIG005',name:'Blood Moon',cat:'Signature',ings:[{id:'WHI-EN',ml:50}]},
-    {id:'SIG006',name:'Bandits',cat:'Signature',ings:[{id:'MEZ-SOT',ml:45}]},
-    {id:'SIG007',name:'Spicy Roots',cat:'Signature',ings:[{id:'TEQ-MT',ml:30},{id:'MEZ-SOT',ml:30}]},
-    {id:'SIG008',name:'Una Horchata',cat:'Signature',ings:[{id:'RON-MA',ml:45}]},
-    {id:'SIG009',name:'Five Point Gang',cat:'Signature',ings:[{id:'RON-MG',ml:45},{id:'RON-PA',ml:15}]},
-    {id:'SIG010',name:'Seven Sins',cat:'Signature',ings:[{id:'GIN-BX',ml:50}]},
-    {id:'SIG011',name:'Phenex',cat:'Signature',ings:[{id:'VOD-BV',ml:50}]},
-    {id:'SIG012',name:'Rize Spirits',cat:'Signature',ings:[{id:'JER-TP',ml:45},{id:'VER-CR',ml:20},{id:'VER-CD',ml:15}]},
-  ],
-  sales:[],nextId:1
-};
+// ============================================================
+// 🔧 CONFIGURACIÓN — Reemplaza con tus credenciales de Supabase
+// ============================================================
+const SUPABASE_URL = 'https://TU_PROYECTO.supabase.co';
+const SUPABASE_KEY = 'TU_ANON_KEY_AQUI';
+// ============================================================
 
-let curTab='dash';
-window._wkFilter='all';
-window._cFilter='all';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+let spirits=[], recipes=[], sales=[], curTab='dash';
+let _wkFilter='all', _cFilter='all';
+
+// ── LOAD DATA ──────────────────────────────────────────────
+async function loadAll(){
+  try{
+    const [sp,rc,ri,sl]=await Promise.all([
+      sb.from('spirits').select('*').order('cat').order('name'),
+      sb.from('recipes').select('*').order('cat').order('name'),
+      sb.from('recipe_ingredients').select('*'),
+      sb.from('sales').select('*').order('created_at',{ascending:false})
+    ]);
+    if(sp.error||rc.error||ri.error||sl.error) throw new Error('Error cargando datos');
+    spirits=sp.data||[];
+    sales=sl.data||[];
+    // Attach ingredients to recipes
+    recipes=(rc.data||[]).map(r=>({
+      ...r,
+      ings:(ri.data||[]).filter(i=>i.recipe_id===r.id).map(i=>({id:i.spirit_id,ml:i.ml}))
+    }));
+    updatePill();
+    render();
+  }catch(e){
+    document.getElementById('main').innerHTML=`<div class="alert-bar"><i class="ti ti-alert-circle"></i> Error de conexión. Verifica tus credenciales de Supabase.</div>`;
+    console.error(e);
+  }
+}
+
+// ── HELPERS ───────────────────────────────────────────────
 function getConsumedML(sid){
-  return S.sales.reduce((t,s)=>{
-    const r=S.recipes.find(r=>r.id===s.cocktailId);
+  return sales.reduce((t,s)=>{
+    const r=recipes.find(r=>r.id===s.cocktail_id);
     if(!r)return t;
     const ing=r.ings.find(i=>i.id===sid);
     return t+(ing?s.qty*ing.ml:0);
   },0);
 }
-function getRemainingBottles(sp){
-  return Math.max(0,sp.stock-getConsumedML(sp.id)/sp.ml);
-}
-function getRemainingPct(sp){
-  return sp.stock===0?0:Math.min(1,getRemainingBottles(sp)/sp.stock);
-}
+function getRemainingBottles(sp){return Math.max(0,sp.stock-getConsumedML(sp.id)/sp.ml);}
+function getRemainingPct(sp){return sp.stock===0?0:Math.min(1,getRemainingBottles(sp)/sp.stock);}
 function status(p){
   if(p<=0)return{cls:'b-zero',lbl:'Agotado'};
   if(p>=0.5)return{cls:'b-ok',lbl:'OK'};
@@ -260,7 +166,12 @@ function bottleSVG(p){
     <text x="${W/2}" y="${H+11}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".6" font-family="system-ui">${Math.round(p*100)}%</text>
   </svg>`;
 }
+function updatePill(){
+  const t=sales.reduce((s,x)=>s+x.qty,0);
+  document.getElementById('top-pill').textContent=`${t} bebida${t!==1?'s':''} registrada${t!==1?'s':''}`;
+}
 
+// ── NAVIGATION ────────────────────────────────────────────
 function go(tab){
   curTab=tab;
   document.querySelectorAll('.nav-btn').forEach((el,i)=>{
@@ -268,10 +179,7 @@ function go(tab){
   });
   render();
 }
-
 function render(){
-  const total=S.sales.reduce((s,x)=>s+x.qty,0);
-  document.getElementById('top-pill').textContent=`${total} bebida${total!==1?'s':''} registrada${total!==1?'s':''}`;
   const el=document.getElementById('main');
   if(curTab==='dash')el.innerHTML=rDash();
   if(curTab==='ventas')el.innerHTML=rVentas();
@@ -279,30 +187,27 @@ function render(){
   if(curTab==='catalogo')el.innerHTML=rCatalogo();
 }
 
-/* ─── DASHBOARD ─── */
+// ── DASHBOARD ─────────────────────────────────────────────
 function rDash(){
   let ok=0,warn=0,crit=0,zero=0;
-  S.spirits.forEach(sp=>{const p=getRemainingPct(sp);if(p<=0)zero++;else if(p>=0.5)ok++;else if(p>=0.25)warn++;else crit++;});
-  const critList=S.spirits.filter(sp=>getRemainingPct(sp)<0.25);
-  const alertHTML=critList.length?`<div class="alert-bar"><i class="ti ti-alert-triangle" aria-hidden="true" style="font-size:16px"></i><span>${critList.length} licor${critList.length>1?'es':''} en nivel crítico: ${critList.slice(0,4).map(s=>s.name).join(', ')}${critList.length>4?'...':''}</span></div>`:'';
-  const cats=[...new Set(S.spirits.map(s=>s.cat))];
+  spirits.forEach(sp=>{const p=getRemainingPct(sp);if(p<=0)zero++;else if(p>=0.5)ok++;else if(p>=0.25)warn++;else crit++;});
+  const critList=spirits.filter(sp=>getRemainingPct(sp)<0.25);
+  const alertHTML=critList.length?`<div class="alert-bar"><i class="ti ti-alert-triangle" style="font-size:16px"></i><span>${critList.length} licor${critList.length>1?'es':''} en nivel crítico: ${critList.slice(0,4).map(s=>s.name).join(', ')}${critList.length>4?'...':''}</span></div>`:'';
+  const cats=[...new Set(spirits.map(s=>s.cat))];
   const selOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const cards=S.spirits.map(sp=>{
+  const cards=spirits.map(sp=>{
     const p=getRemainingPct(sp),remBot=getRemainingBottles(sp),remML=remBot*sp.ml,st=status(p);
     return`<div class="bottle-card" data-cat="${sp.cat}">
-      ${bottleSVG(p)}
-      <div class="b-name">${sp.name}</div><div class="b-cat">${sp.cat}</div>
+      ${bottleSVG(p)}<div class="b-name">${sp.name}</div><div class="b-cat">${sp.cat}</div>
       <span class="badge ${st.cls}" style="margin-top:6px">${st.lbl}</span>
       <div class="b-info">${Math.round(remML).toLocaleString('es-MX')} ml</div>
       <div class="b-info" style="font-weight:500">${remBot.toFixed(2)} botellas</div>
     </div>`;
   }).join('');
-  return`
-    <div class="page-title">Dashboard</div>
-    <div class="page-sub">Stock en tiempo real — actualizado por cada venta registrada</div>
+  return`<div class="page-title">Dashboard</div><div class="page-sub">Stock en tiempo real</div>
     ${alertHTML}
     <div class="stats-row">
-      <div class="stat"><div class="stat-lbl">Total licores</div><div class="stat-val">${S.spirits.length}</div></div>
+      <div class="stat"><div class="stat-lbl">Total licores</div><div class="stat-val">${spirits.length}</div></div>
       <div class="stat"><div class="stat-lbl" style="color:#3B6D11">OK</div><div class="stat-val" style="color:#3B6D11">${ok}</div></div>
       <div class="stat"><div class="stat-lbl" style="color:#854F0B">Bajos</div><div class="stat-val" style="color:#854F0B">${warn+crit}</div></div>
       <div class="stat"><div class="stat-lbl" style="color:#A32D2D">Agotados</div><div class="stat-val" style="color:#A32D2D">${zero}</div></div>
@@ -317,19 +222,17 @@ function filterBottles(cat){
   document.querySelectorAll('.bottle-card').forEach(el=>{el.style.display=(cat==='all'||el.dataset.cat===cat)?'':'none';});
 }
 
-/* ─── VENTAS ─── */
+// ── VENTAS ────────────────────────────────────────────────
 function rVentas(){
-  const weeks=[...new Set(S.sales.map(s=>s.week))].filter(Boolean).sort();
-  const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${window._wkFilter===w?' selected':''}>${w}</option>`).join('');
-  const rOpts=[...S.recipes].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${r.id}">${r.name} · ${r.cat}</option>`).join('');
-  const filtered=window._wkFilter==='all'?S.sales:S.sales.filter(s=>s.week===window._wkFilter);
-
-  const rows=filtered.length?[...filtered].reverse().map(s=>{
-    const r=S.recipes.find(x=>x.id===s.cocktailId);
+  const weeks=[...new Set(sales.map(s=>s.week))].filter(Boolean).sort();
+  const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
+  const rOpts=[...recipes].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${r.id}">${r.name} · ${r.cat}</option>`).join('');
+  const filtered=_wkFilter==='all'?sales:sales.filter(s=>s.week===_wkFilter);
+  const rows=filtered.length?filtered.map(s=>{
+    const r=recipes.find(x=>x.id===s.cocktail_id);
     const mlDetail=r?r.ings.map(i=>{
-      const sp=S.spirits.find(x=>x.id===i.id);
-      const total=i.ml*s.qty;
-      return sp?`<span class="ml-chip"><b>${sp.name.split(' ')[0]}</b> −${total}ml</span>`:'';
+      const sp=spirits.find(x=>x.id===i.id);
+      return sp?`<span class="ml-chip"><b>${sp.name.split(' ')[0]}</b> −${i.ml*s.qty}ml</span>`:'';
     }).join(''):'—';
     return`<tr>
       <td style="font-weight:500">${r?r.name:'?'}</td>
@@ -337,88 +240,63 @@ function rVentas(){
       <td style="text-align:center;font-weight:500">${s.qty}</td>
       <td><span class="wk-tag">${s.week||'—'}</span></td>
       <td style="max-width:220px">${mlDetail}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="delSale(${s.id})"><i class="ti ti-trash" style="color:#A32D2D;font-size:14px" aria-hidden="true"></i></button></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="delSale(${s.id})"><i class="ti ti-trash" style="color:#A32D2D;font-size:14px"></i></button></td>
     </tr>`;
   }).join(''):`<tr><td colspan="6" class="empty">Sin ventas en este período</td></tr>`;
-
-  return`
-    <div class="page-title">Registrar ventas</div>
-    <div class="page-sub">Ingresa la semana al registrar — el sistema descuenta los ML exactos de cada botella</div>
+  return`<div class="page-title">Registrar ventas</div><div class="page-sub">Cada venta descuenta los ML exactos según la receta y se guarda en la base de datos</div>
     <div class="two-col">
-      <div class="card">
-        <div class="card-head"><span class="card-title">Nueva venta</span></div>
+      <div class="card"><div class="card-head"><span class="card-title">Nueva venta</span></div>
         <div class="section-p">
           <div class="fl"><label>Semana *</label><input type="text" id="s-wk" placeholder="Ej: Semana 21" style="width:100%"></div>
-          <div class="fl"><label>Cóctel / Trago</label><select id="s-co" style="width:100%">${rOpts}</select></div>
-          <div class="fl"><label>Cantidad vendida</label><input type="number" id="s-qty" min="1" value="1" style="width:100%"></div>
-          <button class="btn btn-coral" style="width:100%;justify-content:center" onclick="addSale()"><i class="ti ti-plus" aria-hidden="true"></i> Registrar venta</button>
+          <div class="fl"><label>Cóctel</label><select id="s-co" style="width:100%">${rOpts}</select></div>
+          <div class="fl"><label>Cantidad</label><input type="number" id="s-qty" min="1" value="1" style="width:100%"></div>
+          <button class="btn btn-coral" id="btn-save" style="width:100%;justify-content:center" onclick="addSale()"><i class="ti ti-plus"></i> Registrar venta</button>
         </div>
       </div>
       <div>
         <div class="toolbar">
           <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar semana:</label>
-          <select class="sel" onchange="window._wkFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${wkOpts}</select>
-          <span style="font-size:12px;color:var(--color-text-secondary);margin-left:4px">${filtered.length} registro${filtered.length!==1?'s':''}</span>
+          <select class="sel" onchange="_wkFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${wkOpts}</select>
+          <span style="font-size:12px;color:var(--color-text-secondary)">${filtered.length} registros</span>
         </div>
-        <div class="card">
-          <table>
-            <thead><tr><th>Cóctel</th><th>Tipo</th><th style="text-align:center">Cant.</th><th>Semana</th><th>ML descontados por botella</th><th></th></tr></thead>
-            <tbody>${rows}</tbody>
-          </table>
-        </div>
+        <div class="card"><table>
+          <thead><tr><th>Cóctel</th><th>Tipo</th><th style="text-align:center">Cant.</th><th>Semana</th><th>ML descontados</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
       </div>
     </div>`;
 }
 
-function addSale(){
-  const week = document.getElementById('s-wk').value.trim();
-  const cocktailId = document.getElementById('s-co').value;
-  const qty = parseInt(document.getElementById('s-qty').value) || 1;
-  if(!week){ alert('Por favor, ingresa una semana (ej. Semana 21)'); return; }
-  S.sales.push({ id: S.nextId++, week, cocktailId, qty });
-  render();
-}
-
-function delSale(id){
-  S.sales = S.sales.filter(s => s.id !== id);
-  render();
-}
-
-/* ─── RECETAS ─── */
+// ── RECETAS ───────────────────────────────────────────────
 function rRecetas(){
-  const withPop=S.recipes.map(r=>({...r,sold:S.sales.filter(s=>s.cocktailId===r.id).reduce((t,s)=>t+s.qty,0)}));
+  const withPop=recipes.map(r=>({...r,sold:sales.filter(s=>s.cocktail_id===r.id).reduce((t,s)=>t+s.qty,0)}));
   const ranked=[...withPop].sort((a,b)=>b.sold-a.sold);
   const maxSold=ranked[0]?.sold||1;
   const top3=ranked.filter(r=>r.sold>0).slice(0,3);
-  const medals=['🥇','🥈','🥉'];
-  const podColors=['#FFF3CD','#F0F0F0','#FFF0E8'];
-
-  const top3HTML=top3.length?`
-    <div class="card" style="margin-bottom:14px">
-      <div class="card-head"><span class="card-title">⭐ Cócteles más populares</span><span class="card-sub">Basado en ventas registradas</span></div>
-      <div style="display:grid;grid-template-columns:repeat(${top3.length},1fr);gap:10px;padding:14px">
-        ${top3.map((r,i)=>`<div style="text-align:center;background:${podColors[i]};border-radius:8px;padding:12px">
-          <div style="font-size:22px">${medals[i]}</div>
-          <div style="font-size:12px;font-weight:500;margin-top:4px;line-height:1.3">${r.name}</div>
-          <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${r.sold} vendidos</div>
-        </div>`).join('')}
-      </div>
-    </div>` : '';
-
-  const cats=[...new Set(S.recipes.map(r=>r.cat))];
+  const medals=['🥇','🥈','🥉'],podColors=['#FFF3CD','#F0F0F0','#FFF0E8'];
+  const top3HTML=top3.length?`<div class="card" style="margin-bottom:14px">
+    <div class="card-head"><span class="card-title">⭐ Cócteles más populares</span><span class="card-sub">Basado en ventas registradas</span></div>
+    <div style="display:grid;grid-template-columns:repeat(${top3.length},1fr);gap:10px;padding:14px">
+      ${top3.map((r,i)=>`<div style="text-align:center;background:${podColors[i]};border-radius:8px;padding:12px">
+        <div style="font-size:22px">${medals[i]}</div>
+        <div style="font-size:12px;font-weight:500;margin-top:4px;line-height:1.3">${r.name}</div>
+        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${r.sold} vendidos</div>
+      </div>`).join('')}
+    </div></div>`:'';
+  const cats=[...new Set(recipes.map(r=>r.cat))];
   const sections=cats.map(cat=>{
     const list=ranked.filter(r=>r.cat===cat);
     const rows=list.map(r=>{
       const totalML=r.ings.reduce((t,i)=>t+i.ml,0);
-      const mainIng=r.ings.reduce((a,b)=>a.ml>=b.ml?a:b,r.ings[0]);
-      const mainSp=S.spirits.find(x=>x.id===mainIng.id);
-      const rend=mainSp?`${Math.floor(mainSp.ml/mainIng.ml)} tragos/bot.`:'—';
+      const mainIng=r.ings.length?r.ings.reduce((a,b)=>a.ml>=b.ml?a:b,r.ings[0]):null;
+      const mainSp=mainIng?spirits.find(x=>x.id===mainIng.id):null;
+      const rend=mainSp&&mainIng?`${Math.floor(mainSp.ml/mainIng.ml)} tragos/bot.`:'—';
       const globalRank=ranked.findIndex(x=>x.id===r.id);
       let rankEl='';
       if(globalRank===0&&r.sold>0)rankEl=`<span style="background:#FFF3CD;color:#856404;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥇 #1</span>`;
       else if(globalRank===1&&r.sold>0)rankEl=`<span style="background:#F0F0F0;color:#6C757D;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥈 #2</span>`;
       else if(globalRank===2&&r.sold>0)rankEl=`<span style="background:#FFF0E8;color:#A0522D;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥉 #3</span>`;
-      const ings=r.ings.map(i=>{const sp=S.spirits.find(x=>x.id===i.id);return`<span class="tag">${sp?sp.name:'?'} ${i.ml}ml</span>`;}).join('');
+      const ings=r.ings.map(i=>{const sp=spirits.find(x=>x.id===i.id);return`<span class="tag">${sp?sp.name:'?'} ${i.ml}ml</span>`;}).join('');
       const popPct=maxSold>0?Math.round((r.sold/maxSold)*100):0;
       return`<tr>
         <td style="width:65px">${rankEl}</td>
@@ -426,30 +304,23 @@ function rRecetas(){
         <td>${ings}</td>
         <td style="text-align:center;color:#D85A30;font-weight:500">${totalML}ml</td>
         <td style="text-align:center;font-size:11px;color:var(--color-text-secondary)">${rend}</td>
-        <td style="text-align:center">
-          <span style="font-weight:500">${r.sold}</span>
+        <td style="text-align:center"><span style="font-weight:500">${r.sold}</span>
           ${r.sold>0?`<div style="height:3px;background:var(--color-background-secondary);border-radius:2px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${popPct}%;background:#D85A30;border-radius:2px"></div></div>`:''}
-        </td>
-      </tr>`;
+        </td></tr>`;
     }).join('');
     return`<div class="card" style="margin-bottom:12px">
       <div class="card-head"><span class="card-title">${cat}</span><span class="card-sub">${list.length} cócteles</span></div>
       <table><thead><tr><th style="width:65px">Rank</th><th>Cóctel</th><th>Ingredientes</th><th style="text-align:center">ML</th><th style="text-align:center">Rendimiento</th><th style="text-align:center">Vendidos</th></tr></thead><tbody>${rows}</tbody></table>
     </div>`;
   }).join('');
-
-  return`
-    <div class="page-title">Recetas</div>
-    <div class="page-sub">Ordenadas por popularidad · Rendimiento = tragos por botella del licor principal</div>
-    ${top3HTML}${sections}`;
+  return`<div class="page-title">Recetas</div><div class="page-sub">Ordenadas por popularidad · Rendimiento = tragos por botella del licor principal</div>${top3HTML}${sections}`;
 }
 
-/* ─── CATÁLOGO ─── */
+// ── CATÁLOGO ──────────────────────────────────────────────
 function rCatalogo(){
-  const cats=[...new Set(S.spirits.map(s=>s.cat))].sort();
-  const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${window._cFilter===c?' selected':''}>${c}</option>`).join('');
-  const spList=window._cFilter==='all'?S.spirits:S.spirits.filter(s=>s.cat===window._cFilter);
-  
+  const cats=[...new Set(spirits.map(s=>s.cat))].sort();
+  const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${_cFilter===c?' selected':''}>${c}</option>`).join('');
+  const spList=_cFilter==='all'?spirits:spirits.filter(s=>s.cat===_cFilter);
   const rows=spList.map(sp=>{
     const consumedML=getConsumedML(sp.id),consumedBot=consumedML/sp.ml;
     const remBot=getRemainingBottles(sp),remML=remBot*sp.ml,p=getRemainingPct(sp),st=status(p);
@@ -458,50 +329,70 @@ function rCatalogo(){
       <td style="font-weight:500">${sp.name}</td>
       <td><span style="background:var(--color-background-secondary);border-radius:6px;padding:2px 7px;font-size:11px">${sp.cat}</span></td>
       <td style="text-align:center">${sp.ml}ml</td>
-      <td style="text-align:center"><span style="font-weight:500">${sp.stock.toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">inicial</span></td>
+      <td style="text-align:center"><span style="font-weight:500">${parseFloat(sp.stock).toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">inicial</span></td>
       <td style="text-align:center">${consumedBot>0?`<span style="color:#A32D2D;font-weight:500">−${consumedBot.toFixed(2)}</span>`:'—'}</td>
-      <td style="text-align:center">
-        <span style="font-weight:500;color:${p<=0?'#A32D2D':p>=0.5?'#3B6D11':p>=0.25?'#854F0B':'#A32D2D'}">${remBot.toFixed(2)}</span>
-        <span style="font-size:10px;color:var(--color-text-tertiary);display:block">${Math.round(remML).toLocaleString()} ml</span>
-      </td>
-      <td style="min-width:70px">
-        <div style="height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden;margin-bottom:4px">
-          <div style="height:100%;width:${Math.round(p*100)}%;background:${fillColor};border-radius:2px"></div>
-        </div>
-        <span style="font-size:10px;color:var(--color-text-secondary)">${Math.round(p*100)}% disponible</span>
-      </td>
+      <td style="text-align:center"><span style="font-weight:500;color:${p<=0?'#A32D2D':p>=0.5?'#3B6D11':p>=0.25?'#854F0B':'#A32D2D'}">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">${Math.round(remML).toLocaleString()}ml</span></td>
+      <td style="min-width:70px"><div style="height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round(p*100)}%;background:${fillColor};border-radius:2px"></div></div><span style="font-size:10px;color:var(--color-text-secondary)">${Math.round(p*100)}%</span></td>
+      <td><span class="badge ${st.cls}">${st.lbl}</span></td>
+      <td><div style="display:flex;align-items:center;gap:5px">
+        <input type="number" min="0.05" step="0.05" value="1" id="add-${sp.id}" class="add-input">
+        <button class="btn btn-add btn-sm" onclick="addStock('${sp.id}')"><i class="ti ti-plus"></i>Reponer</button>
+      </div></td>
     </tr>`;
   }).join('');
-
-  return `
-    <div class="page-title">Catálogo de Licores</div>
-    <div class="page-sub">Inventario inicial vs Desglose de consumo acumulado</div>
+  return`<div class="page-title">Catálogo de licores</div><div class="page-sub">Los ML restantes se actualizan con cada venta. Repón cuando llegue pedido.</div>
     <div class="toolbar">
-      <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar Tipo:</label>
-      <select class="sel" onchange="window._cFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${catOpts}</select>
+      <label style="font-size:12px;color:var(--color-text-secondary)">Categoría:</label>
+      <select class="sel" onchange="_cFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${catOpts}</select>
+      <span style="font-size:12px;color:var(--color-text-secondary)">${spList.length} licores</span>
     </div>
-    <div class="card">
-      <table>
-        <thead>
-          <tr>
-            <th>Licor</th>
-            <th>Categoría</th>
-            <th style="text-align:center">Capacidad</th>
-            <th style="text-align:center">Stock Inicial</th>
-            <th style="text-align:center">Consumido</th>
-            <th style="text-align:center">Actual (Botellas / ML)</th>
-            <th>Estado</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rows}
-        </tbody>
-      </table>
-    </div>`;
+    <div class="card"><table style="table-layout:fixed;width:100%">
+      <colgroup><col style="width:155px"><col style="width:80px"><col style="width:65px"><col style="width:72px"><col style="width:68px"><col style="width:90px"><col style="width:72px"><col style="width:65px"><col style="width:145px"></colgroup>
+      <thead><tr><th>Licor</th><th>Cat.</th><th style="text-align:center">ML/bot</th><th style="text-align:center">Inicial</th><th style="text-align:center">Consumido</th><th style="text-align:center">Restante</th><th>Nivel</th><th>Estado</th><th>Reponer</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
 }
 
-// Renderizado inicial al cargar la página
-render();
+// ── ACCIONES (con Supabase) ───────────────────────────────
+async function addSale(){
+  const week=(document.getElementById('s-wk').value||'').trim();
+  const cocktail_id=document.getElementById('s-co').value;
+  const qty=parseInt(document.getElementById('s-qty').value)||0;
+  if(!week){alert('Por favor ingresa la semana (ej: Semana 21)');return;}
+  if(!cocktail_id||qty<=0)return;
+  const btn=document.getElementById('btn-save');
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Guardando...';}
+  const {data,error}=await sb.from('sales').insert({cocktail_id,qty,week}).select();
+  if(error){alert('Error al guardar: '+error.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Registrar venta';} return;}
+  sales.unshift(data[0]);
+  updatePill();
+  render();
+}
+
+async function delSale(id){
+  if(!confirm('¿Eliminar esta venta?'))return;
+  const {error}=await sb.from('sales').delete().eq('id',id);
+  if(error){alert('Error al eliminar: '+error.message);return;}
+  sales=sales.filter(s=>s.id!==id);
+  updatePill();
+  render();
+}
+
+async function addStock(id){
+  const sp=spirits.find(s=>s.id===id);
+  if(!sp)return;
+  const inp=document.getElementById('add-'+id);
+  const qty=parseFloat(inp?inp.value:1)||1;
+  if(qty<=0)return;
+  const newStock=parseFloat((sp.stock+qty).toFixed(2));
+  const {error}=await sb.from('spirits').update({stock:newStock}).eq('id',id);
+  if(error){alert('Error al actualizar stock: '+error.message);return;}
+  sp.stock=newStock;
+  render();
+}
+
+// ── INIT ──────────────────────────────────────────────────
+loadAll();
 </script>
 </body>
 </html>
