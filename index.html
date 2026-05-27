@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Inventario Bar - Clandestinna</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
     <style>
         :root {
             --color-background-primary: #ffffff;
@@ -97,7 +98,8 @@
 // 🔧 CONFIGURACIÓN — Reemplaza con tus credenciales de Supabase
 // ============================================================
 const SUPABASE_URL = 'https://yhfeyycvhdcngwqbxvqy.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_oD_YcyBgLGXPAYyjPsDgXA_bAtXbo39';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InloZmV5eWN2aGRjbmd3cWJ4dnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4Mjc4MTYsImV4cCI6MjA5NTQwMzgxNn0.f0x3rE-brskkG_prKpjszOg1HhtTq195AQoqhjsztDY';
+
 // ============================================================
 
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
