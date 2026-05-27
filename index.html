@@ -553,7 +553,7 @@ function rDash(){
 // ═══════════════════════════════════════════
 function rVentas(){
   const weeks=getWeeks();
-  const sugg=weeks.length?`Semana ${weeks.length+1}`:'Semana 1';
+  const sugg=weeks.length?`Semana ${weeks.length+1}`:'1';
   const wkFilter2=['all',...weeks];
   const wkFilterOpts=wkFilter2.map(w=>`<option value="${w}"${w===_wkFilter?' selected':''}>${w==='all'?'Todas':w}</option>`).join('');
   const activeP=products.filter(p=>p.active!==false);
