@@ -24,7 +24,8 @@
         body{font-family:var(--font-sans);background:var(--color-background-tertiary);color:var(--color-text-primary)}
         .topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
         .logo-icon{width:30px;height:30px;background:#D85A30;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px}
-        .logo-name{font-size:15px;font-weight:500}.logo-sub{font-size:11px;color:var(--color-text-secondary)}
+        .logo-name{font-size:15px;font-weight:500}
+        .logo-sub{font-size:11px;color:var(--color-text-secondary)}
         .pill{background:#FAECE7;color:#993C1D;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;border:0.5px solid #F0997B}
         .layout{display:grid;grid-template-columns:200px 1fr}
         .sidebar{background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);padding:16px 10px;min-height:calc(100vh - 55px)}
@@ -42,19 +43,25 @@
         .stat-val{font-size:24px;font-weight:500;line-height:1}
         .card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;overflow:hidden;margin-bottom:14px}
         .card-head{padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:space-between}
-        .card-title{font-size:13px;font-weight:500}.card-sub{font-size:11px;color:var(--color-text-secondary)}
+        .card-title{font-size:13px;font-weight:500}
+        .card-sub{font-size:11px;color:var(--color-text-secondary)}
         table{width:100%;border-collapse:collapse;font-size:13px}
         th{text-align:left;padding:9px 14px;font-size:10px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.04em;border-bottom:0.5px solid var(--color-border-tertiary)}
         td{padding:9px 14px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
         tr:last-child td{border-bottom:none}
         tr:hover td{background:var(--color-background-secondary)}
         .badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
-        .b-ok{background:#EAF3DE;color:#3B6D11}.b-warn{background:#FAEEDA;color:#854F0B}.b-crit{background:#FCEBEB;color:#A32D2D}.b-zero{background:#F7C1C1;color:#791F1F}
+        .b-ok{background:#EAF3DE;color:#3B6D11}
+        .b-warn{background:#FAEEDA;color:#854F0B}
+        .b-crit{background:#FCEBEB;color:#A32D2D}
+        .b-zero{background:#F7C1C1;color:#791F1F}
         .btn{padding:7px 13px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
         .btn:hover{background:var(--color-background-secondary)}
-        .btn-coral{background:#D85A30;color:#fff;border-color:#D85A30}.btn-coral:hover{opacity:.88}
+        .btn-coral{background:#D85A30;color:#fff;border-color:#D85A30}
+        .btn-coral:hover{opacity:.88}
         .btn-sm{padding:4px 9px;font-size:11px}
-        .btn-ghost{border-color:transparent;background:none;color:var(--color-text-secondary)}.btn-ghost:hover{background:var(--color-background-secondary)}
+        .btn-ghost{border-color:transparent;background:none;color:var(--color-text-secondary)}
+        .btn-ghost:hover{background:var(--color-background-secondary)}
         .fl{margin-bottom:10px}
         .fl label{font-size:11px;color:var(--color-text-secondary);display:block;margin-bottom:3px;font-weight:500;text-transform:uppercase;letter-spacing:.04em}
         .fl input,.fl select,.sel{padding:7px 9px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px}
@@ -65,12 +72,14 @@
         .empty{text-align:center;padding:28px;color:var(--color-text-tertiary);font-size:13px}
         .bottle-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:10px}
         .bottle-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:14px 10px 12px;text-align:center}
-        .b-name{font-size:11px;font-weight:500;margin-top:8px;line-height:1.3}.b-cat{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}.b-info{font-size:10px;color:var(--color-text-secondary);margin-top:4px}
+        .b-name{font-size:11px;font-weight:500;margin-top:8px;line-height:1.3}
+        .b-cat{font-size:10px;color:var(--color-text-tertiary);margin-top:2px}
+        .b-info{font-size:10px;color:var(--color-text-secondary);margin-top:4px}
         .wk-tag{background:#E8F4FD;color:#1565C0;border-radius:5px;padding:2px 7px;font-size:11px;font-weight:500}
         .ml-chip{display:inline-block;background:var(--color-background-secondary);border-radius:4px;padding:1px 6px;font-size:10px;margin:1px;color:var(--color-text-secondary)}
         .toolbar{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
         
-        /* ── NUEVOS ESTILOS INTERACTIVOS 2026 ── */
+        /* ── INTERACTIVIDAD Y SEGMENTACIÓN ── */
         .segmented-control {display:flex;background:var(--color-background-secondary);padding:3px;border-radius:8px;margin-bottom:10px}
         .segmented-control button {flex:1;background:none;border:none;padding:6px;font-size:11px;font-weight:500;color:var(--color-text-secondary);cursor:pointer;border-radius:6px;transition:all 0.15s}
         .segmented-control button.active {background:var(--color-background-primary);color:var(--color-text-primary);box-shadow:0 1px 3px rgba(0,0,0,0.08)}
@@ -103,7 +112,7 @@
     <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details"></i>Recetas</button>
     <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle"></i>Catálogo</button>
   </div>
-  <div class="main" id="main"><div class="loading"><div class="spinner"></div><br>Cargando datos...</div></div>
+  <div class="main" id="main">Cargando datos...</div>
 </div>
 
 <script>
@@ -114,7 +123,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 let spirits=[], recipes=[], sales=[], curTab='dash';
 let _wkFilter='all', _cFilter='all', _recTabFilter='all';
-let _saleTypeFilter='coctel', _coctelSubFilter='Clásica';
+let _saleTypeFilter='coctel';
+let _coctelSubFilter='Clásica';
+let _shotSubFilter='destilado';
+let _copaSubFilter='Tinto';
+let _botellaSubFilter='destilado';
 let _salesCollapsed = false;
 
 // ── LOAD DATA ──────────────────────────────────────────────
@@ -128,7 +141,6 @@ async function loadAll(){
     ]);
     if(sp.error||rc.error||ri.error||sl.error) throw new Error('Error cargando datos');
     
-    // Validar y estructurar el catálogo mixto salvaguardando inconsistencias
     spirits=(sp.data||[]).map(s => ({
       ...s,
       product_type: s.product_type || inferProductType(s.cat),
@@ -153,38 +165,28 @@ function inferProductType(category){
   if(c.includes('vino')) return 'vino';
   if(c.includes('cerveza')) return 'cerveza';
   if(c.includes('agua') || c.includes('refresco')) return 'agua';
-  if(c.includes('destilado') || c.includes('tequila') || c.includes('mezcal') || c.includes('ron') || c.includes('gin')) return 'destilado';
+  if(c.includes('destilado') || c.includes('tequila') || c.includes('mezcal') || c.includes('ron') || c.includes('gin') || c.includes('ginebra') || c.includes('whisky')) return 'destilado';
   return 'licor'; 
 }
 
 // ── LÓGICA DE STOCK MIXTO MEDIDO (ML + UNIDADES) ───────────
 function getConsumedML(sid){
   return sales.reduce((t,s)=>{
-    // 1. Descuento por Cóctel Directo en Receta
     if(!s.sale_mode || s.sale_mode === 'coctel') {
       const r=recipes.find(r=>r.id===s.cocktail_id);
       if(!r) return t;
       const ing=r.ings.find(i=>i.id===sid);
       return t+(ing?s.qty*ing.ml:0);
     }
-    // 2. Descuento por shots de destilados independientes (45 ml)
-    if(s.sale_mode === 'shot' && s.cocktail_id === sid) {
-      return t + (s.qty * 45);
-    }
-    // 3. Descuento por copas de vino independientes (150 ml)
-    if(s.sale_mode === 'copa' && s.cocktail_id === sid) {
-      return t + (s.qty * 150);
-    }
+    if(s.sale_mode === 'shot' && s.cocktail_id === sid) return t + (s.qty * 45);
+    if(s.sale_mode === 'copa' && s.cocktail_id === sid) return t + (s.qty * 150);
     return t;
   },0);
 }
 
 function getConsumedUnits(sid){
   return sales.reduce((t,s)=>{
-    // Descuento directo por botellas enteras o piezas cerradas (Cerveza, agua, botella vino/destilado)
-    if((s.sale_mode === 'botella' || s.sale_mode === 'unidad') && s.cocktail_id === sid) {
-      return t + s.qty;
-    }
+    if((s.sale_mode === 'botella' || s.sale_mode === 'unidad') && s.cocktail_id === sid) return t + s.qty;
     return t;
   },0);
 }
@@ -193,7 +195,6 @@ function getRemainingBottles(sp){
   if(sp.product_type === 'cerveza' || sp.product_type === 'agua') {
     return Math.max(0, sp.stock - getConsumedUnits(sp.id));
   }
-  // Para Destilados, Vinos y Licores: Restar unidades completas consumidas y los ML drenados fraccionados
   const totalDrainedFromVolume = getConsumedML(sp.id) / sp.ml;
   const totalFullUnitsSold = getConsumedUnits(sp.id);
   return Math.max(0, sp.stock - (totalDrainedFromVolume + totalFullUnitsSold));
@@ -234,6 +235,7 @@ function go(tab){
   });
   render();
 }
+
 function render(){
   const el=document.getElementById('main');
   if(curTab==='dash')el.innerHTML=rDash();
@@ -247,7 +249,7 @@ function rDash(){
   let ok=0,warn=0,crit=0,zero=0;
   spirits.forEach(sp=>{const p=getRemainingPct(sp);if(p<=0)zero++;else if(p>=0.5)ok++;else if(p>=0.25)warn++;else crit++;});
   const critList=spirits.filter(sp=>getRemainingPct(sp)<0.25);
-  const alertHTML=critList.length?`<div class="alert-bar"><i class="ti ti-alert-triangle" style="font-size:16px"></i><span>${critList.length} productos críticos: ${critList.slice(0,3).map(s=>s.name).join(', ')}</span></div>`:'';
+  const alertHTML=critList.length?`<div class="alert-bar"><i class="ti ti-alert-triangle" style="font-size:16px"></i><span>${critList.length} licores críticos: ${critList.slice(0,3).map(s=>s.name).join(', ')}</span></div>`:'';
   const cats=[...new Set(spirits.map(s=>s.cat))];
   const selOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
   const cards=spirits.map(sp=>{
@@ -277,68 +279,101 @@ function filterBottles(cat){
   document.querySelectorAll('.bottle-card').forEach(el=>{el.style.display=(cat==='all'||el.dataset.cat===cat)?'':'none';});
 }
 
-// ── VENTAS (INTERFAZ INNOVADORA 2026 MODO MIXTO) ───────────
-function changeSaleType(type){
-  _saleTypeFilter = type;
-  render();
-}
-function changeCoctelSubFilter(sub){
-  _coctelSubFilter = sub;
-  render();
-}
+// ── VENTAS (INTERFAZ MODO MIXTO EN CASCADA DINÁMICA) ───────────
+function changeSaleType(type){ _saleTypeFilter = type; render(); }
+function changeCoctelSubFilter(sub){ _coctelSubFilter = sub; render(); }
+function changeShotSubFilter(sub){ _shotSubFilter = sub; render(); }
+function changeCopaSubFilter(sub){ _copaSubFilter = sub; render(); }
+function changeBotellaSubFilter(sub){ _botellaSubFilter = sub; render(); }
+
 function toggleSalesTable(){
   _salesCollapsed = !_salesCollapsed;
   const content = document.getElementById('sales-table-content');
   const icon = document.getElementById('collapse-icon');
-  if(_salesCollapsed){
-    content.classList.add('collapsed');
-    icon.className = 'ti ti-plus';
-  } else {
-    content.classList.remove('collapsed');
-    icon.className = 'ti ti-minus';
-  }
+  if(_salesCollapsed){ content.classList.add('collapsed'); icon.className = 'ti ti-plus'; } 
+  else { content.classList.remove('collapsed'); icon.className = 'ti ti-minus'; }
 }
 
 function rVentas(){
   const weeks=[...new Set(sales.map(s=>s.week))].filter(Boolean).sort();
   const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
-  
-  // Renderizado dinámico del selector de producto/cóctel según modo de negocio
-  let primarySelectorHTML = '';
+  let secondarySelectorHTML = '';
+  let filteredOptionsHTML = '';
   
   if(_saleTypeFilter === 'coctel') {
-    // Menú dinámico de Cócteles filtrado por Clásica / Signature
-    primarySelectorHTML = `
+    secondarySelectorHTML = `
       <div class="fl">
         <label>Tipo de Cóctel</label>
         <div class="segmented-control">
           <button class="${_coctelSubFilter==='Clásica'?'active':''}" onclick="changeCoctelSubFilter('Clásica')">Clásicas</button>
           <button class="${_coctelSubFilter==='Signature'?'active':''}" onclick="changeCoctelSubFilter('Signature')">Signatures</button>
         </div>
-      </div>
-      <div class="fl">
-        <label>Cóctel Seleccionado</label>
-        <select id="s-co" style="width:100%">
-          ${recipes.filter(r=>r.cat === _coctelSubFilter).map(r=>`<option value="${r.id}">${r.name}</option>`).join('') || '<option value="">Sin recetas en esta categoría</option>'}
-        </select>
       </div>`;
-  } else {
-    // Modos Directos por Botella Abierta/Cerrada (Destilados, Vinos, Cervezas, Aguas)
-    let filteredSpirits = [];
-    if(_saleTypeFilter === 'shot') filteredSpirits = spirits.filter(s=>s.product_type === 'destilado');
-    if(_saleTypeFilter === 'copa') filteredSpirits = spirits.filter(s=>s.product_type === 'vino');
-    if(_saleTypeFilter === 'botella') filteredSpirits = spirits.filter(s=>s.product_type === 'destilado' || s.product_type === 'vino');
-    if(_saleTypeFilter === 'unidad') filteredSpirits = spirits.filter(s=>s.product_type === 'cerveza' || s.product_type === 'agua');
+    
+    filteredOptionsHTML = recipes
+      .filter(r => r.cat === _coctelSubFilter)
+      .map(r => `<option value="${r.id}">${r.name}</option>`)
+      .join('') || '<option value="">Sin recetas en esta categoría</option>';
 
-    let modeLabel = _saleTypeFilter === 'shot' ? 'Shot (45ml)' : _saleTypeFilter === 'copa' ? 'Copa (150ml)' : _saleTypeFilter === 'botella' ? 'Botella Entera' : 'Pieza Cerrada';
-
-    primarySelectorHTML = `
+  } else if(_saleTypeFilter === 'shot') {
+    secondarySelectorHTML = `
       <div class="fl">
-        <label>Producto Directo — [${modeLabel}]</label>
-        <select id="s-co" style="width:100%">
-          ${filteredSpirits.map(s=>`<option value="${s.id}">${s.name} (${s.cat})</option>`).join('') || '<option value="">No hay productos compatibles</option>'}
-        </select>
+        <label>Categoría de Shot</label>
+        <div class="segmented-control">
+          <button class="${_shotSubFilter==='destilado'?'active':''}" onclick="changeShotSubFilter('destilado')">Destilados</button>
+          <button class="${_shotSubFilter==='licor'?'active':''}" onclick="changeShotSubFilter('licor')">Licores</button>
+        </div>
       </div>`;
+      
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === _shotSubFilter)
+      .map(s => `<option value="${s.id}">${s.name} (${s.cat})</option>`)
+      .join('') || '<option value="">Sin productos en esta categoría</option>';
+
+  } else if(_saleTypeFilter === 'copa') {
+    secondarySelectorHTML = `
+      <div class="fl">
+        <label>Tipo de Vino (Copa 150ml)</label>
+        <div class="segmented-control">
+          <button class="${_copaSubFilter==='Blanco'?'active':''}" onclick="changeCopaSubFilter('Blanco')">Blanco</button>
+          <button class="${_copaSubFilter==='Espumoso'?'active':''}" onclick="changeCopaSubFilter('Espumoso')">Espumoso</button>
+          <button class="${_copaSubFilter==='Rosado'?'active':''}" onclick="changeCopaSubFilter('Rosado')">Rosado</button>
+          <button class="${_copaSubFilter==='Tinto'?'active':''}" onclick="changeCopaSubFilter('Tinto')">Tinto</button>
+        </div>
+      </div>`;
+      
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === 'vino' && s.cat.toLowerCase().includes(_copaSubFilter.toLowerCase()))
+      .map(s => `<option value="${s.id}">${s.name}</option>`)
+      .join('') || '<option value="">Sin vinos en esta categoría</option>';
+
+  } else if(_saleTypeFilter === 'botella') {
+    secondarySelectorHTML = `
+      <div class="fl">
+        <label>Tipo de Botella</label>
+        <div class="segmented-control">
+          <button class="${_botellaSubFilter==='destilado'?'active':''}" onclick="changeBotellaSubFilter('destilado')">Destilado</button>
+          <button class="${_botellaSubFilter==='licor'?'active':''}" onclick="changeBotellaSubFilter('licor')">Licor</button>
+          <button class="${_botellaSubFilter==='vino'?'active':''}" onclick="changeBotellaSubFilter('vino')">Vino</button>
+        </div>
+      </div>`;
+      
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === _botellaSubFilter)
+      .map(s => `<option value="${s.id}">${s.name} (${s.cat})</option>`)
+      .join('') || '<option value="">Sin botellas en esta categoría</option>';
+
+  } else if(_saleTypeFilter === 'unidad') {
+    secondarySelectorHTML = `
+      <div class="fl">
+        <label>Pieza / Unidad Cerrada</label>
+        <div style="font-size:11px; color:var(--color-text-secondary); padding: 4px 0;">Mostrando Cervezas y Aguas</div>
+      </div>`;
+      
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === 'cerveza' || s.product_type === 'agua')
+      .map(s => `<option value="${s.id}">${s.name} (${s.cat})</option>`)
+      .join('') || '<option value="">Sin piezas en el catálogo</option>';
   }
 
   const filtered=_wkFilter==='all'?sales:sales.filter(s=>s.week===_wkFilter);
@@ -357,9 +392,9 @@ function rVentas(){
     } else {
       const sp=spirits.find(x=>x.id===s.cocktail_id);
       nameDisplay = sp ? sp.name : '?';
-      if(s.sale_mode === 'shot') detailHTML = `<span class="ml-chip" style="background:#FFF0E8;color:#D85A30">Consumo Shot: −${s.qty*45}ml</span>`;
-      if(s.sale_mode === 'copa') detailHTML = `<span class="ml-chip" style="background:#FFF0E8;color:#D85A30">Consumo Copa: −${s.qty*150}ml</span>`;
-      if(s.sale_mode === 'botella' || s.sale_mode === 'unidad') detailHTML = `<span class="ml-chip" style="background:#EAF3DE;color:#3B6D11">Descuento: −${s.qty} Unidad(es)</span>`;
+      if(s.sale_mode === 'shot') detailHTML = `<span class="ml-chip" style="background:#FFF0E8;color:#D85A30">−${s.qty*45}ml (Shot)</span>`;
+      if(s.sale_mode === 'copa') detailHTML = `<span class="ml-chip" style="background:#FFF0E8;color:#D85A30">−${s.qty*150}ml (Copa)</span>`;
+      if(s.sale_mode === 'botella' || s.sale_mode === 'unidad') detailHTML = `<span class="ml-chip" style="background:#EAF3DE;color:#3B6D11">−${s.qty} Unidad(es)</span>`;
     }
 
     return`<tr>
@@ -372,7 +407,7 @@ function rVentas(){
     </tr>`;
   }).join(''):`<tr><td colspan="6" class="empty">Sin transacciones registradas</td></tr>`;
 
-  return`<div class="page-title">Registrar ventas</div><div class="page-sub">Panel unificado de despacho automatizado</div>
+  return`<div class="page-title">Registrar ventas</div><div class="page-sub">Despacho automatizado integrado</div>
     <div class="two-col">
       <div class="card"><div class="card-head"><span class="card-title">Despacho de Barra</span></div>
         <div class="section-p">
@@ -382,11 +417,20 @@ function rVentas(){
               <button class="${_saleTypeFilter==='shot'?'active':''}" onclick="changeSaleType('shot')">Shot</button>
               <button class="${_saleTypeFilter==='copa'?'active':''}" onclick="changeSaleType('copa')">Copa</button>
               <button class="${_saleTypeFilter==='botella'?'active':''}" onclick="changeSaleType('botella')">Botella</button>
-              <button class="${_saleTypeFilter==='unidad'?'active':''}" onclick="changeSaleType('unidad')">Pza</button>
+              <button class="${_saleTypeFilter==='unidad'?'active':''}" onclick="changeSaleType('unidad')">Pieza</button>
             </div>
           </div>
           <div class="fl"><label>Semana operativa *</label><input type="text" id="s-wk" placeholder="Ej: Semana 21" style="width:100%"></div>
-          ${primarySelectorHTML}
+          
+          ${secondarySelectorHTML}
+          
+          <div class="fl">
+            <label>Producto Seleccionado</label>
+            <select id="s-co" style="width:100%">
+              ${filteredOptionsHTML}
+            </select>
+          </div>
+          
           <div class="fl"><label>Cantidad despachada</label><input type="number" id="s-qty" min="1" value="1" style="width:100%"></div>
           <button class="btn btn-coral" id="btn-save" style="width:100%;justify-content:center;margin-top:5px" onclick="addSale()"><i class="ti ti-plus"></i> Registrar Operación</button>
         </div>
@@ -394,26 +438,21 @@ function rVentas(){
       <div>
         <div class="toolbar" style="justify-content: space-between;">
           <div>
-            <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar por periodo:</label>
+            <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar periodo:</label>
             <select class="sel" onchange="_wkFilter=this.value;render()" style="font-size:12px;padding:5px 9px; width:160px; display:inline-block">${wkOpts}</select>
-            <span style="font-size:12px;color:var(--color-text-secondary); margin-left:8px">${filtered.length} filas</span>
           </div>
           <button class="btn btn-ghost" onclick="toggleSalesTable()"><i id="collapse-icon" class="${_salesCollapsed?'ti ti-plus':'ti ti-minus'}"></i></button>
         </div>
         <div class="card collapsible-content ${_salesCollapsed?'collapsed':''}" id="sales-table-content"><table>
-          <thead><tr><th>Item Despachado</th><th>Modalidad</th><th style="text-align:center">Cant.</th><th>Semana</th><th>Impacto en Inventario</th><th></th></tr></thead>
+          <thead><tr><th>Item Despachado</th><th>Modalidad</th><th style="text-align:center">Cant.</th><th>Semana</th><th>Impacto Inventario</th><th></th></tr></thead>
           <tbody>${rows}</tbody>
         </table></div>
       </div>
     </div>`;
 }
 
-// ── RECETAS (CON FILTROS AGILES DE CATEGORÍA) ──────────────
-function filterRecipeTab(cat){
-  _recTabFilter = cat;
-  render();
-}
-
+// ── RECETAS (CON FILTROS DE CATEGORÍA AGIL) ────────────────
+function filterRecipeTab(cat){ _recTabFilter = cat; render(); }
 function rRecetas(){
   const withPop=recipes.map(r=>({...r,sold:sales.filter(s=>s.cocktail_id===r.id && (!s.sale_mode || s.sale_mode==='coctel')).reduce((t,s)=>t+s.qty,0)}));
   const ranked=[...withPop].sort((a,b)=>b.sold-a.sold);
@@ -448,15 +487,15 @@ function rRecetas(){
     }).join('');
 
     return`<div class="card" style="margin-bottom:12px">
-      <div class="card-head"><span class="card-title">${cat}</span><span class="card-sub">${list.length} formulaciones</span></div>
-      <table><thead><tr><th>Cóctel</th><th>Composición</th><th style="text-align:center">Vol Total</th><th style="text-align:center">Rendimiento Promedio</th><th style="text-align:center">Despachados</th></tr></thead><tbody>${rows}</tbody></table>
+      <div class="card-head"><span class="card-title">${cat}</span><span class="card-sub">${list.length} cócteles</span></div>
+      <table><thead><tr><th>Cóctel</th><th>Composición</th><th style="text-align:center">Vol Total</th><th style="text-align:center">Rendimiento</th><th style="text-align:center">Despachados</th></tr></thead><tbody>${rows}</tbody></table>
     </div>`;
   }).join('');
 
-  return`<div class="page-title">Recetario Estructurado</div><div class="page-sub">Visualización rápida y rendimiento volumétrico por botella</div>${filterTabsHTML}${sections}`;
+  return`<div class="page-title">Recetario Estructurado</div><div class="page-sub">Visualización rápida y rendimiento volumétrico</div>${filterTabsHTML}${sections}`;
 }
 
-// ── CATÁLOGO (INTEGRACIÓN DE MERMAS Y ENTRADAS) ─────────────
+// ── CATÁLOGO (ALTA INTEGRADA + MERMAS + ENTRADAS) ───────────
 function rCatalogo(){
   const cats=[...new Set(spirits.map(s=>s.cat))].sort();
   const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${_cFilter===c?' selected':''}>${c}</option>`).join('');
@@ -486,43 +525,67 @@ function rCatalogo(){
       <td style="text-align:center">${sp.ml}ml</td>
       <td style="text-align:center"><span style="font-weight:500">${parseFloat(sp.stock).toFixed(2)}</span></td>
       <td style="text-align:center; color:#A32D2D">${consumedString}</td>
-      <td style="text-align:center"><span style="font-weight:500">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">${remainingSubString}</span></td>
+      <td style="text-align:center"><span style="font-weight:500; color:${p<=0?'#A32D2D':p>=0.5?'#3B6D11':'#854F0B'}">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">${remainingSubString}</span></td>
       <td style="min-width:70px"><div style="height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round(p*100)}%;background:${fillColor};border-radius:2px"></div></div><span style="font-size:10px;color:var(--color-text-secondary)">${Math.round(p*100)}%</span></td>
       <td><span class="badge ${st.cls}">${st.lbl}</span></td>
       <td>
         <div style="display:flex;align-items:center;gap:4px">
-          <button class="btn btn-sm btn-coral" style="padding:4px 6px" onclick="adjustStock('${sp.id}', 1.0)" title="Agregar 1 unidad mas"><i class="ti ti-plus"></i>1</button>
-          <button class="btn-danger-sm" onclick="adjustStock('${sp.id}', -1.0)" title="Descontar 1 unidad por merma o ajuste"><i class="ti ti-minus"></i>1</button>
+          <button class="btn btn-sm btn-coral" style="padding:4px 6px" onclick="adjustStock('${sp.id}', 1.0)"><i class="ti ti-plus"></i>1</button>
+          <button class="btn-danger-sm" onclick="adjustStock('${sp.id}', -1.0)"><i class="ti ti-minus"></i>1</button>
         </div>
       </td>
     </tr>`;
   }).join('');
 
-  return`<div class="page-title">Catálogo y Control de Bodega</div><div class="page-sub">Ajuste rápido de inventario (Entradas vs Mermas/Consumos internos)</div>
-    <div class="toolbar">
-      <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar Familia:</label>
-      <select class="sel" onchange="_cFilter=this.value;render()" style="font-size:12px;padding:5px 9px; width:180px">${catOpts}</select>
-      <span style="font-size:12px;color:var(--color-text-secondary)">${spList.length} referencias</span>
-    </div>
-    <div class="card"><table style="table-layout:fixed;width:100%">
-      <colgroup><col style="width:165px"><col style="width:90px"><col style="width:65px"><col style="width:72px"><col style="width:85px"><col style="width:90px"><col style="width:72px"><col style="width:65px"><col style="width:110px"></colgroup>
-      <thead><tr><th>Línea Producto</th><th>Cat.</th><th style="text-align:center">Capacidad</th><th style="text-align:center">Inicial</th><th style="text-align:center">Consumo Total</th><th style="text-align:center">Disponible</th><th>Nivel</th><th>Estado</th><th>Ajuste Físico</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
+  return`<div class="page-title">Catálogo y Control de Bodega</div><div class="page-sub">Gestiona existencias, altas y mermas operativas</div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-head"><span class="card-title">Nuevo Producto</span></div>
+        <div class="section-p">
+          <div class="fl"><label>Nombre del Producto *</label><input type="text" id="new-name" placeholder="Ej: Tequila Cascahuín Blanco" style="width:100%"></div>
+          <div class="fl"><label>Categoría / Familia *</label><input type="text" id="new-cat" placeholder="Ej: Tequila" style="width:100%"></div>
+          <div class="fl"><label>Gobernanza Lógica (Tipo)</label>
+            <select id="new-type" style="width:100%">
+              <option value="destilado">Destilado (Venta Shot/Botella)</option>
+              <option value="licor">Licor (Solo Coctelería por ml)</option>
+              <option value="vino">Vino (Venta Copa/Botella)</option>
+              <option value="cerveza">Cerveza (Venta por Unidad)</option>
+              <option value="agua">Agua / Refresco (Venta por Unidad)</option>
+            </select>
+          </div>
+          <div class="fl"><label>Capacidad Estándar (ml)</label><input type="number" id="new-ml" value="750" style="width:100%"></div>
+          <div class="fl"><label>Inventario Inicial (Botellas/Pzas)</label><input type="number" step="0.1" id="new-stock" value="1" style="width:100%"></div>
+          <button class="btn btn-coral" id="btn-add-product" style="width:100%;justify-content:center;margin-top:5px" onclick="addNewProduct()"><i class="ti ti-plus"></i> Guardar en Catálogo</button>
+        </div>
+      </div>
+      
+      <div>
+        <div class="toolbar">
+          <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar Familia:</label>
+          <select class="sel" onchange="_cFilter=this.value;render()" style="font-size:12px;padding:5px 9px; width:160px">${catOpts}</select>
+          <span style="font-size:12px;color:var(--color-text-secondary)">${spList.length} referencias</span>
+        </div>
+        <div class="card"><table style="table-layout:fixed;width:100%">
+          <colgroup><col style="width:145px"><col style="width:80px"><col style="width:65px"><col style="width:55px"><col style="width:75px"><col style="width:75px"><col style="width:65px"><col style="width:65px"><col style="width:75px"></colgroup>
+          <thead><tr><th>Producto</th><th>Cat.</th><th style="text-align:center">Cap.</th><th style="text-align:center">Inic.</th><th style="text-align:center">Consumo</th><th style="text-align:center">Dispo.</th><th>Nivel</th><th>Estado</th><th>Ajuste</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table></div>
+      </div>
+    </div>`;
 }
 
 // ── ACCIONES PERSISTENTES CON SUPABASE ─────────────────────
 async function addSale(){
   const week=(document.getElementById('s-wk').value||'').trim();
-  const cocktail_id=document.getElementById('s-co').value;
+  const cocktail_id=parseInt(document.getElementById('s-co').value);
   const qty=parseInt(document.getElementById('s-qty').value)||0;
+
   if(!week){alert('Por favor especifica la semana de operación.');return;}
-  if(!cocktail_id||qty<=0) return;
+  if(!cocktail_id||qty<=0) {alert('Selecciona un producto o cantidad válida.'); return;}
 
   const btn=document.getElementById('btn-save');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Confirmando Transacción...';}
   
-  // Guardamos usando la nueva columna sale_mode mapeada
   const {data,error}=await sb.from('sales').insert({
     cocktail_id,
     qty,
@@ -543,7 +606,7 @@ async function addSale(){
 async function delSale(id){
   if(!confirm('¿Deseas eliminar permanentemente este registro de venta?'))return;
   const {error}=await sb.from('sales').delete().eq('id',id);
-  if(error){alert('Error al remover: '+error.message);return;}
+  if(error){alert('Error al remover: '+error.message);return;}\
   sales=sales.filter(s=>s.id!==id);
   updatePill();
   render();
@@ -554,16 +617,47 @@ async function adjustStock(id, amount){
   if(!sp)return;
   const newStock=parseFloat((sp.stock+amount).toFixed(2));
   if(newStock < 0) {
-     alert('El stock disponible no puede ser negativo.');
+     alert('El inventario inicial no puede ser inferior a 0.');
      return;
   }
   const {error}=await sb.from('spirits').update({stock:newStock}).eq('id',id);
-  if(error){alert('Error de persistencia: '+error.message);return;}
+  if(error){alert('Error de ajuste: '+error.message);return;}
   sp.stock=newStock;
   render();
 }
 
-// ── INIT ──────────────────────────────────────────────────
+async function addNewProduct(){
+  const name=(document.getElementById('new-name').value||'').trim();
+  const cat=(document.getElementById('new-cat').value||'').trim();
+  const product_type=document.getElementById('new-type').value;
+  const ml=parseFloat(document.getElementById('new-ml').value)||750;
+  const stock=parseFloat(document.getElementById('new-stock').value)||0;
+
+  if(!name||!cat){alert('Nombre y Categoría son campos mandatorios.');return;}
+
+  const btn=document.getElementById('btn-add-product');
+  if(btn){btn.disabled=true;btn.innerHTML='Guardando...';}
+
+  const {data,error}=await sb.from('spirits').insert({name,cat,product_type,ml,stock}).select();
+  
+  if(error){
+    alert('Error al crear producto: '+error.message);
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Guardar en Catálogo';}
+    return;
+  }
+
+  spirits.push(data[0]);
+  spirits.sort((a,b)=>a.cat.localeCompare(b.cat)||(a.name.localeCompare(b.name)));
+  
+  document.getElementById('new-name').value='';
+  document.getElementById('new-cat').value='';
+  document.getElementById('new-stock').value='1';
+  
+  if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Guardar en Catálogo';}
+  render();
+}
+
+// Init
 loadAll();
 </script>
 </body>
