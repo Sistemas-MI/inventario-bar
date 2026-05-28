@@ -5,765 +5,328 @@
     <title>Inventario Bar - Clandestinna</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <style>
-        :root {
-    /* Paleta Speakeasy - Clandestinna 2026 */
-    --color-background-primary: #151516;   /* Fondo de tarjetas y sidebar */
-    --color-background-secondary: #1e1e20; /* Elementos secundarios */
-    --color-background-tertiary: #0c0c0d;  /* Fondo general de la app (Negro Mate) */
-    --color-coral: #d85a30;                /* Coral insignia */
-    --color-amber: #e29547;                /* Luz ámbar de barra */
-    --color-text-primary: #f4f4f5;         /* Blanco marfil */
-    --color-text-secondary: #a1a1aa;       /* Gris apagado */
-    --color-text-tertiary: #52525b;        /* Gris oscuro */
-    --color-border-tertiary: rgba(255, 255, 255, 0.06);
-    --color-border-secondary: rgba(255, 255, 255, 0.12);
-    --color-border-primary: rgba(255, 255, 255, 0.2);
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    --font-serif: 'Playfair Display', 'Cinzel', 'Georgia', serif;
-    --border-radius-md: 10px;
-    --border-radius-lg: 16px;
-}
-
-*{
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: var(--font-sans);
-    background: var(--color-background-tertiary);
-    color: var(--color-text-primary);
-    letter-spacing: -0.01em;
-    -webkit-font-smoothing: antialiased;
-}
-
-/* TOPBAR ESTILO PREMIUM */
-.topbar {
-    background: var(--color-background-primary);
-    border-bottom: 1px solid var(--color-border-tertiary);
-    padding: 14px 28px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    backdrop-filter: blur(20px);
-}
-
-.logo-icon {
-    width: 34px;
-    height: 34px;
-    background: linear-gradient(135deg, var(--color-coral), #b33e19);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: 16px;
-    box-shadow: 0 4px 12px rgba(216, 90, 48, 0.25);
-}
-
-.logo-name {
-    font-family: var(--font-serif);
-    font-size: 18px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    color: var(--color-text-primary);
-}
-
-.logo-sub {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
-.pill {
-    background: rgba(216, 90, 48, 0.1);
-    color: var(--color-coral);
-    font-size: 11px;
-    font-weight: 600;
-    padding: 4px 14px;
-    border-radius: 20px;
-    border: 1px solid rgba(216, 90, 48, 0.25);
-    letter-spacing: 0.02em;
-}
-
-/* LAYOUT */
-.layout {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-}
-
-.sidebar {
-    background: var(--color-background-primary);
-    border-right: 1px solid var(--color-border-tertiary);
-    padding: 24px 14px;
-    min-height: calc(100vh - 63px);
-}
-
-.nav-lbl {
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--color-text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: .12em;
-    padding: 0 12px;
-    margin-bottom: 8px;
-    margin-top: 20px;
-}
-
-.nav-lbl:first-child { margin-top: 0; }
-
-.nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: var(--border-radius-md);
-    cursor: pointer;
-    font-size: 13px;
-    color: var(--color-text-secondary);
-    margin-bottom: 4px;
-    transition: all .2s ease;
-    border: none;
-    background: none;
-    width: 100%;
-    text-align: left;
-}
-
-.nav-btn:hover {
-    background: var(--color-background-secondary);
-    color: var(--color-text-primary);
-}
-
-.nav-btn.active {
-    background: rgba(216, 90, 48, 0.12);
-    color: #ff7e54;
-    font-weight: 600;
-    border-left: 3px solid var(--color-coral);
-    border-radius: 4px var(--border-radius-md) var(--border-radius-md) 4px;
-    padding-left: 11px;
-}
-
-/* CONTENIDO PRINCIPAL */
-.main {
-    padding: 32px;
-    max-width: 1400px;
-    width: 100%;
-}
-
-.page-title {
-    font-family: var(--font-serif);
-    font-size: 26px;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    margin-bottom: 4px;
-    color: var(--color-text-primary);
-}
-
-.page-sub {
-    font-size: 13px;
-    color: var(--color-text-secondary);
-    margin-bottom: 28px;
-}
-
-/* TARJETAS DE INDICADORES (STATS) */
-.stats-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 28px;
-}
-
-.stat {
-    background: var(--color-background-primary);
-    border: 1px solid var(--color-border-tertiary);
-    border-radius: var(--border-radius-lg);
-    padding: 18px 20px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-
-.stat-lbl {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 8px;
-}
-
-.stat-val {
-    font-family: var(--font-serif);
-    font-size: 32px;
-    font-weight: 500;
-    line-height: 1;
-}
-
-/* COMPONENTES DE TARJETAS (CARDS) */
-.card {
-    background: var(--color-background-primary);
-    border: 1px solid var(--color-border-tertiary);
-    border-radius: var(--border-radius-lg);
-    overflow: hidden;
-    margin-bottom: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-}
-
-.card-head {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--color-border-tertiary);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(255, 255, 255, 0.01);
-}
-
-.card-title {
-    font-family: var(--font-serif);
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.03em;
-}
-
-.card-sub {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-}
-
-/* TABLAS NEGRO PREMIUM */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 13px;
-}
-
-th {
-    text-align: left;
-    padding: 12px 18px;
-    font-size: 10px;
-    color: var(--color-text-secondary);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    background: rgba(0, 0, 0, 0.15);
-    border-bottom: 1px solid var(--color-border-tertiary);
-}
-
-td {
-    padding: 12px 18px;
-    border-bottom: 1px solid var(--color-border-tertiary);
-    vertical-align: middle;
-    color: var(--color-text-primary);
-}
-
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: rgba(255, 255, 255, 0.02); }
-
-/* BADGES CLANDESTINOS (Brillo fino en lugar de plastrón de color) */
-.badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 600;
-    background: rgba(0, 0, 0, 0.3);
-}
-.b-ok { color: #86efac; border: 1px solid rgba(34, 197, 94, 0.2); }
-.b-warn { color: #fde047; border: 1px solid rgba(234, 179, 8, 0.2); }
-.b-crit { color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); }
-.b-zero { color: #ef4444; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); }
-
-/* BOTONES */
-.btn {
-    padding: 8px 16px;
-    border: 1px solid var(--color-border-secondary);
-    border-radius: var(--border-radius-md);
-    background: var(--color-background-secondary);
-    color: var(--color-text-primary);
-    font-size: 12px;
-    font-weight: 500;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    transition: all 0.2s ease;
-}
-
-.btn:hover {
-    background: #2a2a2d;
-    border-color: var(--color-border-primary);
-}
-
-.btn-coral {
-    background: var(--color-coral);
-    color: #fff;
-    border-color: var(--color-coral);
-    box-shadow: 0 4px 12px rgba(216, 90, 48, 0.2);
-}
-
-.btn-coral:hover {
-    background: #f06a3e;
-    opacity: 1;
-    transform: translateY(-1px);
-}
-
-.btn-sm { padding: 5px 10px; font-size: 11px; }
-
-/* ENTRADAS DE FORMULARIO (INPUTS) */
-.fl { margin-bottom: 14px; }
-.fl label {
-    font-size: 10px;
-    color: var(--color-text-secondary);
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-}
-
-.fl input, .fl select, .sel {
-    padding: 9px 12px;
-    border: 1px solid var(--color-border-tertiary);
-    border-radius: var(--border-radius-md);
-    background: var(--color-background-secondary);
-    color: var(--color-text-primary);
-    font-size: 13px;
-    width: 100%;
-    transition: all 0.2s ease;
-}
-
-.fl input:focus, .fl select:focus, .sel:focus {
-    outline: none;
-    border-color: var(--color-coral);
-    box-shadow: 0 0 0 2px rgba(216, 90, 48, 0.15);
-}
-
-/* BARRA DE ALERTAS */
-.alert-bar {
-    background: rgba(216, 90, 48, 0.08);
-    border: 1px solid rgba(216, 90, 48, 0.2);
-    border-radius: var(--border-radius-md);
-    padding: 12px 16px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 24px;
-    font-size: 13px;
-    color: #ff8e66;
-}
-
-/* CUADRÍCULA DE BOTELLAS (DASHBOARD) */
-.bottle-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 14px;
-}
-
-.bottle-card {
-    background: var(--color-background-primary);
-    border: 1px solid var(--color-border-tertiary);
-    border-radius: var(--border-radius-lg);
-    padding: 18px 12px 14px;
-    text-align: center;
-    transition: transform 0.2s ease, border-color 0.2s ease;
-}
-
-.bottle-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(216, 90, 48, 0.3);
-}
-
-.b-name {
-    font-size: 12px;
-    font-weight: 600;
-    margin-top: 10px;
-    line-height: 1.3;
-    color: var(--color-text-primary);
-}
-
-.b-cat {
-    font-size: 10px;
-    color: var(--color-text-tertiary);
-    margin-top: 2px;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-}
-
-.b-info {
-    font-size: 11px;
-    color: var(--color-text-secondary);
-    margin-top: 4px;
-}
-
-/* CHIPS Y ETIQUETAS Y DETALLES */
-.tag {
-    display: inline-block;
-    background: rgba(255, 255, 255, 0.04);
-    color: var(--color-text-secondary);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 11px;
-    margin: 2px;
-    border: 1px solid var(--color-border-tertiary);
-}
-
-.ml-chip {
-    display: inline-block;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 4px;
-    padding: 2px 6px;
-    font-size: 10px;
-    margin: 2px 1px;
-    color: var(--color-amber);
-    border: 1px solid rgba(226, 149, 71, 0.15);
-}
-
-.wk-tag {
-    background: rgba(226, 149, 71, 0.1);
-    color: var(--color-amber);
-    border-radius: 5px;
-    padding: 2px 8px;
-    font-size: 11px;
-    font-weight: 600;
-    border: 1px solid rgba(226, 149, 71, 0.2);
-}
-
-.add-input {
-    width: 50px !important;
-    background: var(--color-background-secondary);
-    border: 1px solid var(--color-border-tertiary);
-    color: #fff;
-    padding: 4px;
-    border-radius: 6px;
-    text-align: center;
-}
-
-.loading {
-    text-align: center;
-    padding: 40px;
-    color: var(--color-text-secondary);
-}
-    </style>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="topbar">
-  <div style="display:flex;align-items:center;gap:10px">
-    <div class="logo-icon"><i class="ti ti-bottle"></i></div>
-    <div><div class="logo-name">Clandestinna</div><div class="logo-sub">Control de inventario</div></div>
-  </div>
-  <div id="top-pill" class="pill">Conectando...</div>
-</div>
+<div>
+    <div class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <div class="logo-icon"><i class="ti ti-bottle"></i></div>
+            <div>
+                <div class="logo-name">CLANDESTINNA</div>
+                <div class="logo-sub">Control de Inventario</div>
+            </div>
+        </div>
+        <div class="pill" id="top-pill">Cargando datos...</div>
+    </div>
 
-<div class="layout">
-  <div class="sidebar">
-    <div class="nav-lbl">Control</div>
-    <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
-    <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt"></i>Registrar ventas</button>
-    <div class="nav-lbl">Configuración</div>
-    <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details"></i>Recetas</button>
-    <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle"></i>Catálogo</button>
-  </div>
-  <div class="main" id="main"><div class="loading"><div class="spinner"></div><br>Cargando datos...</div></div>
+    <div class="layout">
+        <div class="sidebar">
+            <div class="nav-lbl">Control</div>
+            <button class="nav-btn active" onclick="go('dash')"><i class="ti ti-layout-dashboard"></i>Dashboard</button>
+            <button class="nav-btn" onclick="go('ventas')"><i class="ti ti-receipt"></i>Registrar ventas</button>
+            <div class="nav-lbl">Configuración</div>
+            <button class="nav-btn" onclick="go('recetas')"><i class="ti ti-list-details"></i>Recetas</button>
+            <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle"></i>Catálogo</button>
+        </div>
+        <div class="main" id="main">
+            <div class="loading"><i class="ti ti-loader-2 ti-spin"></i> Conectando con Supabase...</div>
+        </div>
+    </div>
 </div>
 
 <script>
-// ============================================================
-// 🔧 CONFIGURACIÓN — Reemplaza con tus credenciales de Supabase
-// ============================================================
+// ==========================================================================
+// CONFIGURACIÓN DE BASE DE DATOS (SUPABASE REAL)
+// ==========================================================================
 const SUPABASE_URL = 'https://yhfeyycvhdcngwqbxvqy.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InloZmV5eWN2aGRjbmd3cWJ4dnF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4Mjc4MTYsImV4cCI6MjA5NTQwMzgxNn0.f0x3rE-brskkG_prKpjszOg1HhtTq195AQoqhjsztDY';
 
-// ============================================================
-
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let spirits=[], recipes=[], sales=[], curTab='dash';
-let _wkFilter='all', _cFilter='all';
+let spirits = [];
+let recipes = [];
+let sales = [];
+let curTab = 'dash';
 
-// ── LOAD DATA ──────────────────────────────────────────────
-async function loadAll(){
-  try{
-    const [sp,rc,ri,sl]=await Promise.all([
-      sb.from('spirits').select('*').order('cat').order('name'),
-      sb.from('recipes').select('*').order('cat').order('name'),
-      sb.from('recipe_ingredients').select('*'),
-      sb.from('sales').select('*').order('created_at',{ascending:false})
-    ]);
-    if(sp.error||rc.error||ri.error||sl.error) throw new Error('Error cargando datos');
-    spirits=sp.data||[];
-    sales=sl.data||[];
-    // Attach ingredients to recipes
-    recipes=(rc.data||[]).map(r=>({
-      ...r,
-      ings:(ri.data||[]).filter(i=>i.recipe_id===r.id).map(i=>({id:i.spirit_id,ml:i.ml}))
-    }));
+// Filtros Globales
+window._wkFilter = 'all';
+
+// Inicialización de la Aplicación
+async function init() {
+  try {
+    let { data: sp } = await sb.from('spirits').select('*').order('name');
+    let { data: rc } = await sb.from('recipes').select('*, recipe_ingredients(*)');
+    let { data: sl } = await sb.from('sales').select('*').order('id', { ascending: false });
+    
+    spirits = sp || [];
+    recipes = rc || [];
+    sales = sl || [];
+    
     updatePill();
-    render();
-  }catch(e){
-    document.getElementById('main').innerHTML=`<div class="alert-bar"><i class="ti ti-alert-circle"></i> Error de conexión. Verifica tus credenciales de Supabase.</div>`;
-    console.error(e);
+    go('dash');
+  } catch(e) {
+    document.getElementById('main').innerHTML = `<div class="loading" style="color:var(--color-coral)">Error al inicializar la base de datos: ${e.message}</div>`;
   }
 }
 
-// ── HELPERS ───────────────────────────────────────────────
-function getConsumedML(sid){
-  return sales.reduce((t,s)=>{
-    const r=recipes.find(r=>r.id===s.cocktail_id);
-    if(!r)return t;
-    const ing=r.ings.find(i=>i.id===sid);
-    return t+(ing?s.qty*ing.ml:0);
-  },0);
+function updatePill() {
+  const total = sales.reduce((s, x) => s + x.qty, 0);
+  document.getElementById('top-pill').textContent = `${total} bebida${total !== 1 ? 's' : ''} vendida${total !== 1 ? 's' : ''}`;
 }
-function getRemainingBottles(sp){return Math.max(0,sp.stock-getConsumedML(sp.id)/sp.ml);}
-function getRemainingPct(sp){return sp.stock===0?0:Math.min(1,getRemainingBottles(sp)/sp.stock);}
-function status(p){
-  if(p<=0)return{cls:'b-zero',lbl:'Agotado'};
-  if(p>=0.5)return{cls:'b-ok',lbl:'OK'};
-  if(p>=0.25)return{cls:'b-warn',lbl:'Bajo'};
-  return{cls:'b-crit',lbl:'Crítico'};
+
+// Lógica de Consumo y Niveles de Insumos
+function getConsumedML(sid) {
+  return sales.reduce((t, s) => {
+    const r = recipes.find(x => x.id === s.cocktail_id);
+    if (!r || !r.recipe_ingredients) return t;
+    const ing = r.recipe_ingredients.find(i => i.id_spirit === sid);
+    return t + (ing ? s.qty * ing.ml : 0);
+  }, 0);
 }
-function bottleSVG(p){
-  const W=32,H=72,c=p<=0?'#F09595':p>=0.5?'#639922':p>=0.25?'#BA7517':'#E24B4A';
-  const fH=Math.round((H-14)*Math.max(0,Math.min(1,p))),fY=H-4-fH;
-  const uid='b'+Math.round(p*1000)+'_'+Math.round(Math.random()*9999);
-  return`<svg width="${W}" height="${H+12}" viewBox="0 0 ${W} ${H+12}" style="display:block;margin:0 auto">
+
+function getRemainingBottles(sp) {
+  const rem = sp.stock - (getConsumedML(sp.id) / sp.ml);
+  return rem < 0 ? 0 : rem;
+}
+
+function getRemainingPct(sp) {
+  if (sp.stock === 0) return 0;
+  const p = getRemainingBottles(sp) / sp.stock;
+  return p > 1 ? 1 : p;
+}
+
+function status(p) {
+  if (p <= 0) return { cls: 'b-zero', lbl: 'Agotado' };
+  if (p >= 0.5) return { cls: 'b-ok', lbl: 'OK' };
+  if (p >= 0.25) return { cls: 'b-warn', lbl: 'Bajo' };
+  return { cls: 'b-crit', lbl: 'Crítico' };
+}
+
+// Generador de Componentes SVG (Botellas)
+function bottleSVG(p) {
+  const W = 32, H = 72;
+  const fillH = Math.round((H - 14) * p);
+  const fillY = H - 4 - fillH;
+  const color = p <= 0 ? '#ef4444' : p >= 0.5 ? '#86efac' : p >= 0.25 ? '#fde047' : '#fca5a5';
+  const uid = 'b' + Math.round(p * 100) + '_' + Math.round(Math.random() * 1000);
+  return `<svg width="${W}" height="${H+12}" viewBox="0 0 ${W} ${H+12}" style="display:block;margin:0 auto">
     <defs><clipPath id="${uid}"><rect x="5" y="12" width="${W-10}" height="${H-12}" rx="3"/></clipPath></defs>
     <rect x="11" y="2" width="${W-22}" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1" opacity=".2"/>
     <rect x="5" y="12" width="${W-10}" height="${H-12}" rx="3" fill="none" stroke="currentColor" stroke-width="1" opacity=".15"/>
-    <rect x="5" y="${fY}" width="${W-10}" height="${fH+4}" fill="${c}" opacity=".8" clip-path="url(#${uid})"/>
-    <text x="${W/2}" y="${H+11}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".6" font-family="system-ui">${Math.round(p*100)}%</text>
+    <rect x="5" y="${fillY}" width="${W-10}" height="${fillH+4}" fill="${color}" opacity=".7" clip-path="url(#${uid})"/>
+    <text x="${W/2}" y="${H+11}" text-anchor="middle" font-size="10" fill="currentColor" opacity=".5">${Math.round(p*100)}%</text>
   </svg>`;
 }
-function updatePill(){
-  const t=sales.reduce((s,x)=>s+x.qty,0);
-  document.getElementById('top-pill').textContent=`${t} bebida${t!==1?'s':''} registrada${t!==1?'s':''}`;
-}
 
-// ── NAVIGATION ────────────────────────────────────────────
-function go(tab){
-  curTab=tab;
-  document.querySelectorAll('.nav-btn').forEach((el,i)=>{
-    el.classList.toggle('active',['dash','ventas','recetas','catalogo'][i]===tab);
+// Enrutador de Secciones
+function go(tab) {
+  curTab = tab;
+  document.querySelectorAll('.nav-btn').forEach((el, i) => {
+    el.classList.toggle('active', ['dash', 'ventas', 'recetas', 'catalogo'][i] === tab);
   });
   render();
 }
-function render(){
-  const el=document.getElementById('main');
-  if(curTab==='dash')el.innerHTML=rDash();
-  if(curTab==='ventas')el.innerHTML=rVentas();
-  if(curTab==='recetas')el.innerHTML=rRecetas();
-  if(curTab==='catalogo')el.innerHTML=rCatalogo();
+
+function render() {
+  const el = document.getElementById('main');
+  if (curTab === 'dash') el.innerHTML = rDash();
+  if (curTab === 'ventas') el.innerHTML = rVentas();
+  if (curTab === 'recetas') el.innerHTML = rRecetas();
+  if (curTab === 'catalogo') el.innerHTML = rCatalogo();
 }
 
-// ── DASHBOARD ─────────────────────────────────────────────
-function rDash(){
-  let ok=0,warn=0,crit=0,zero=0;
-  spirits.forEach(sp=>{const p=getRemainingPct(sp);if(p<=0)zero++;else if(p>=0.5)ok++;else if(p>=0.25)warn++;else crit++;});
-  const critList=spirits.filter(sp=>getRemainingPct(sp)<0.25);
-  const alertHTML=critList.length?`<div class="alert-bar"><i class="ti ti-alert-triangle" style="font-size:16px"></i><span>${critList.length} licor${critList.length>1?'es':''} en nivel crítico: ${critList.slice(0,4).map(s=>s.name).join(', ')}${critList.length>4?'...':''}</span></div>`:'';
-  const cats=[...new Set(spirits.map(s=>s.cat))];
-  const selOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-  const cards=spirits.map(sp=>{
-    const p=getRemainingPct(sp),remBot=getRemainingBottles(sp),remML=remBot*sp.ml,st=status(p);
-    return`<div class="bottle-card" data-cat="${sp.cat}">
-      ${bottleSVG(p)}<div class="b-name">${sp.name}</div><div class="b-cat">${sp.cat}</div>
-      <span class="badge ${st.cls}" style="margin-top:6px">${st.lbl}</span>
-      <div class="b-info">${Math.round(remML).toLocaleString('es-MX')} ml</div>
-      <div class="b-info" style="font-weight:500">${remBot.toFixed(2)} botellas</div>
+// ==========================================================================
+// RENDERIZADO DE MÓDULOS DE INTERFAZ
+// ==========================================================================
+function rDash() {
+  let ok = 0, warn = 0, crit = 0, zero = 0;
+  spirits.forEach(sp => {
+    const p = getRemainingPct(sp);
+    if (p <= 0) zero++; else if (p >= 0.5) ok++; else if (p >= 0.25) warn++; else crit++;
+  });
+  
+  const crits = spirits.filter(sp => getRemainingPct(sp) < 0.25);
+  const alertHTML = crits.length ? `<div class="alert-bar"><i class="ti ti-alert-triangle"></i><span>Hay ${crits.length} licores en nivel crítico o agotados. Revisa el catálogo.</span></div>` : '';
+  
+  const cards = spirits.map(sp => {
+    const p = getRemainingPct(sp);
+    const rem = getRemainingBottles(sp);
+    const st = status(p);
+    return `<div class="bottle-card">
+      ${bottleSVG(p)}
+      <div class="b-name">${sp.name}</div>
+      <div class="b-cat">${sp.cat}</div>
+      <div style="margin-top:8px"><span class="badge ${st.cls}">${st.lbl}</span></div>
+      <div class="b-info">${Math.round(rem * sp.ml)} ml disp.</div>
+      <div class="b-info" style="font-weight:500;color:var(--color-text-primary)">${rem.toFixed(2)} bot.</div>
     </div>`;
   }).join('');
-  return`<div class="page-title">Dashboard</div><div class="page-sub">Stock en tiempo real</div>
+  
+  return `<div class="page-title">Dashboard General</div>
+    <div class="page-sub">Inventario en tiempo real sincronizado en la nube</div>
     ${alertHTML}
     <div class="stats-row">
-      <div class="stat"><div class="stat-lbl">Total licores</div><div class="stat-val">${spirits.length}</div></div>
-      <div class="stat"><div class="stat-lbl" style="color:#3B6D11">OK</div><div class="stat-val" style="color:#3B6D11">${ok}</div></div>
-      <div class="stat"><div class="stat-lbl" style="color:#854F0B">Bajos</div><div class="stat-val" style="color:#854F0B">${warn+crit}</div></div>
-      <div class="stat"><div class="stat-lbl" style="color:#A32D2D">Agotados</div><div class="stat-val" style="color:#A32D2D">${zero}</div></div>
+      <div class="stat"><div class="stat-lbl">Total Etiquetas</div><div class="stat-val">${spirits.length}</div></div>
+      <div class="stat"><div class="stat-lbl" style="color:#86efac">Licores OK</div><div class="stat-val" style="color:#86efac">${ok}</div></div>
+      <div class="stat"><div class="stat-lbl" style="color:#fde047">Nivel Bajo</div><div class="stat-val" style="color:#fde047">${warn + crit}</div></div>
+      <div class="stat"><div class="stat-lbl" style="color:#ef4444">Agotados</div><div class="stat-val" style="color:#ef4444">${zero}</div></div>
     </div>
-    <div class="toolbar">
-      <label style="font-size:12px;color:var(--color-text-secondary)">Categoría:</label>
-      <select class="sel" onchange="filterBottles(this.value)" style="font-size:12px;padding:5px 9px">${selOpts}</select>
-    </div>
-    <div class="bottle-grid" id="btl-grid">${cards}</div>`;
-}
-function filterBottles(cat){
-  document.querySelectorAll('.bottle-card').forEach(el=>{el.style.display=(cat==='all'||el.dataset.cat===cat)?'':'none';});
+    <div class="bottle-grid">${cards}</div>`;
 }
 
-// ── VENTAS ────────────────────────────────────────────────
-function rVentas(){
-  const weeks=[...new Set(sales.map(s=>s.week))].filter(Boolean).sort();
-  const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
-  const rOpts=[...recipes].sort((a,b)=>a.name.localeCompare(b.name)).map(r=>`<option value="${r.id}">${r.name} · ${r.cat}</option>`).join('');
-  const filtered=_wkFilter==='all'?sales:sales.filter(s=>s.week===_wkFilter);
-  const rows=filtered.length?filtered.map(s=>{
-    const r=recipes.find(x=>x.id===s.cocktail_id);
-    const mlDetail=r?r.ings.map(i=>{
-      const sp=spirits.find(x=>x.id===i.id);
-      return sp?`<span class="ml-chip"><b>${sp.name.split(' ')[0]}</b> −${i.ml*s.qty}ml</span>`:'';
-    }).join(''):'—';
-    return`<tr>
-      <td style="font-weight:500">${r?r.name:'?'}</td>
-      <td><span class="badge" style="background:#EEEDFE;color:#3C3489">${r?r.cat:'?'}</span></td>
-      <td style="text-align:center;font-weight:500">${s.qty}</td>
-      <td><span class="wk-tag">${s.week||'—'}</span></td>
-      <td style="max-width:220px">${mlDetail}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="delSale(${s.id})"><i class="ti ti-trash" style="color:#A32D2D;font-size:14px"></i></button></td>
+function rVentas() {
+  const weeks = [...new Set(sales.map(s => s.week))].filter(Boolean).sort();
+  const wkOpts = `<option value="all">Ver todas las semanas</option>` + weeks.map(w => `<option value="${w}" ${window._wkFilter === w ? 'selected' : ''}>${w}</option>`).join('');
+  const rOpts = [...recipes].sort((a,b) => a.name.localeCompare(b.name)).map(r => `<option value="${r.id}">${r.name} (${r.cat})</option>`).join('');
+  
+  const filtered = window._wkFilter === 'all' ? sales : sales.filter(s => s.week === window._wkFilter);
+  const rows = filtered.length ? filtered.map(s => {
+    const r = recipes.find(x => x.id === s.cocktail_id);
+    const ingsHTML = r && r.recipe_ingredients ? r.recipe_ingredients.map(i => {
+      const sp = spirits.find(x => x.id === i.id_spirit);
+      return sp ? `<span class="ml-chip">${sp.name.split(' ')[0]}: -${i.ml * s.qty}ml</span>` : '';
+    }).join('') : '—';
+    
+    return `<tr>
+      <td style="font-weight:600">${r ? r.name : 'Cóctel Desconocido'}</td>
+      <td><span class="tag">${r ? r.cat : '—'}</span></td>
+      <td style="text-align:center;font-weight:600">${s.qty}</td>
+      <td><span class="wk-tag">${s.week}</span></td>
+      <td><div style="display:flex;flex-wrap:wrap;gap:2px">${ingsHTML}</div></td>
+      <td style="text-align:right"><button class="btn btn-sm" style="color:#ef4444" onclick="delSale(${s.id})"><i class="ti ti-trash"></i></button></td>
     </tr>`;
-  }).join(''):`<tr><td colspan="6" class="empty">Sin ventas en este período</td></tr>`;
-  return`<div class="page-title">Registrar ventas</div><div class="page-sub">Cada venta descuenta los ML exactos según la receta y se guarda en la base de datos</div>
-    <div class="two-col">
-      <div class="card"><div class="card-head"><span class="card-title">Nueva venta</span></div>
-        <div class="section-p">
-          <div class="fl"><label>Semana *</label><input type="text" id="s-wk" placeholder="Ej: Semana 21" style="width:100%"></div>
-          <div class="fl"><label>Cóctel</label><select id="s-co" style="width:100%">${rOpts}</select></div>
-          <div class="fl"><label>Cantidad</label><input type="number" id="s-qty" min="1" value="1" style="width:100%"></div>
-          <button class="btn btn-coral" id="btn-save" style="width:100%;justify-content:center" onclick="addSale()"><i class="ti ti-plus"></i> Registrar venta</button>
+  }).join('') : '<tr><td colspan="6" class="empty">No hay ventas registradas en esta selección.</td></tr>';
+
+  return `<div class="page-title">Módulo de Ventas</div>
+    <div class="page-sub">Registra consumos para descontar automáticamente mililitros de la barra</div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:24px;align-items:start">
+      <div class="card">
+        <div class="card-head"><div class="card-title">Registrar Trago</div></div>
+        <div style="padding:20px">
+          <div class="fl"><label>Semana operativa</label><input type="text" id="s-wk" placeholder="ej: Semana 24" value="${window._wkFilter !== 'all' ? window._wkFilter : ''}"></div>
+          <div class="fl"><label>Selecciona Cóctel</label><select id="s-co">${rOpts}</select></div>
+          <div class="fl"><label>Cantidad Vendida</label><input type="number" id="s-qty" value="1" min="1"></div>
+          <button class="btn btn-coral" id="btn-save" style="width:100%;justify-content:center;margin-top:10px" onclick="saveSale()"><i class="ti ti-plus"></i> Registrar en la barra</button>
         </div>
       </div>
-      <div>
-        <div class="toolbar">
-          <label style="font-size:12px;color:var(--color-text-secondary)">Filtrar semana:</label>
-          <select class="sel" onchange="_wkFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${wkOpts}</select>
-          <span style="font-size:12px;color:var(--color-text-secondary)">${filtered.length} registros</span>
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">Historial de Salidas</div>
+          <select class="sel" style="width:auto;padding:4px 10px;font-size:12px" onchange="window._wkFilter=this.value;render()">${wkOpts}</select>
         </div>
-        <div class="card"><table>
-          <thead><tr><th>Cóctel</th><th>Tipo</th><th style="text-align:center">Cant.</th><th>Semana</th><th>ML descontados</th><th></th></tr></thead>
+        <table>
+          <thead>
+            <tr><th>Cóctel</th><th>Categoría</th><th style="text-align:center">Cant.</th><th>Semana</th><th>Descuento de Insumo</th><th style="text-align:right">Acción</th></tr>
+          </thead>
           <tbody>${rows}</tbody>
-        </table></div>
+        </table>
       </div>
     </div>`;
 }
 
-// ── RECETAS ───────────────────────────────────────────────
-function rRecetas(){
-  const withPop=recipes.map(r=>({...r,sold:sales.filter(s=>s.cocktail_id===r.id).reduce((t,s)=>t+s.qty,0)}));
-  const ranked=[...withPop].sort((a,b)=>b.sold-a.sold);
-  const maxSold=ranked[0]?.sold||1;
-  const top3=ranked.filter(r=>r.sold>0).slice(0,3);
-  const medals=['🥇','🥈','🥉'],podColors=['#FFF3CD','#F0F0F0','#FFF0E8'];
-  const top3HTML=top3.length?`<div class="card" style="margin-bottom:14px">
-    <div class="card-head"><span class="card-title">⭐ Cócteles más populares</span><span class="card-sub">Basado en ventas registradas</span></div>
-    <div style="display:grid;grid-template-columns:repeat(${top3.length},1fr);gap:10px;padding:14px">
-      ${top3.map((r,i)=>`<div style="text-align:center;background:${podColors[i]};border-radius:8px;padding:12px">
-        <div style="font-size:22px">${medals[i]}</div>
-        <div style="font-size:12px;font-weight:500;margin-top:4px;line-height:1.3">${r.name}</div>
-        <div style="font-size:11px;color:var(--color-text-secondary);margin-top:2px">${r.sold} vendidos</div>
-      </div>`).join('')}
-    </div></div>`:'';
-  const cats=[...new Set(recipes.map(r=>r.cat))];
-  const sections=cats.map(cat=>{
-    const list=ranked.filter(r=>r.cat===cat);
-    const rows=list.map(r=>{
-      const totalML=r.ings.reduce((t,i)=>t+i.ml,0);
-      const mainIng=r.ings.length?r.ings.reduce((a,b)=>a.ml>=b.ml?a:b,r.ings[0]):null;
-      const mainSp=mainIng?spirits.find(x=>x.id===mainIng.id):null;
-      const rend=mainSp&&mainIng?`${Math.floor(mainSp.ml/mainIng.ml)} tragos/bot.`:'—';
-      const globalRank=ranked.findIndex(x=>x.id===r.id);
-      let rankEl='';
-      if(globalRank===0&&r.sold>0)rankEl=`<span style="background:#FFF3CD;color:#856404;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥇 #1</span>`;
-      else if(globalRank===1&&r.sold>0)rankEl=`<span style="background:#F0F0F0;color:#6C757D;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥈 #2</span>`;
-      else if(globalRank===2&&r.sold>0)rankEl=`<span style="background:#FFF0E8;color:#A0522D;border-radius:5px;padding:2px 6px;font-size:11px;font-weight:600">🥉 #3</span>`;
-      const ings=r.ings.map(i=>{const sp=spirits.find(x=>x.id===i.id);return`<span class="tag">${sp?sp.name:'?'} ${i.ml}ml</span>`;}).join('');
-      const popPct=maxSold>0?Math.round((r.sold/maxSold)*100):0;
-      return`<tr>
-        <td style="width:65px">${rankEl}</td>
-        <td style="font-weight:500">${r.name}</td>
-        <td>${ings}</td>
-        <td style="text-align:center;color:#D85A30;font-weight:500">${totalML}ml</td>
-        <td style="text-align:center;font-size:11px;color:var(--color-text-secondary)">${rend}</td>
-        <td style="text-align:center"><span style="font-weight:500">${r.sold}</span>
-          ${r.sold>0?`<div style="height:3px;background:var(--color-background-secondary);border-radius:2px;margin-top:4px;overflow:hidden"><div style="height:100%;width:${popPct}%;background:#D85A30;border-radius:2px"></div></div>`:''}
-        </td></tr>`;
-    }).join('');
-    return`<div class="card" style="margin-bottom:12px">
-      <div class="card-head"><span class="card-title">${cat}</span><span class="card-sub">${list.length} cócteles</span></div>
-      <table><thead><tr><th style="width:65px">Rank</th><th>Cóctel</th><th>Ingredientes</th><th style="text-align:center">ML</th><th style="text-align:center">Rendimiento</th><th style="text-align:center">Vendidos</th></tr></thead><tbody>${rows}</tbody></table>
+function rRecetas() {
+  const cards = recipes.map(r => {
+    const ings = r.recipe_ingredients && r.recipe_ingredients.length ? r.recipe_ingredients.map(i => {
+      const sp = spirits.find(x => x.id === i.id_spirit);
+      return `<div style="font-size:12px;margin-bottom:4px;display:flex;justify-content:between;color:var(--color-text-secondary)">
+        <span>• ${sp ? sp.name : i.id_spirit}</span>
+        <span style="color:var(--color-amber);font-weight:600">${i.ml} ml</span>
+      </div>`;
+    }).join('') : '<div class="empty" style="padding:0;text-align:left">Sin ingredientes configurados</div>';
+    
+    return `<div class="card" style="margin-bottom:14px">
+      <div class="card-head"><div><div class="card-title">${r.name}</div><div class="card-sub">${r.cat}</div></div><span class="tag">${r.id}</span></div>
+      <div style="padding:16px;background:rgba(0,0,0,0.1)">${ings}</div>
     </div>`;
   }).join('');
-  return`<div class="page-title">Recetas</div><div class="page-sub">Ordenadas por popularidad · Rendimiento = tragos por botella del licor principal</div>${top3HTML}${sections}`;
+  
+  return `<div class="page-title">Fichas Técnicas y Recetas</div>
+    <div class="page-sub">Consulta las dosificaciones exactas de cada preparación</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">${cards}</div>`;
 }
 
-// ── CATÁLOGO ──────────────────────────────────────────────
-function rCatalogo(){
-  const cats=[...new Set(spirits.map(s=>s.cat))].sort();
-  const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${_cFilter===c?' selected':''}>${c}</option>`).join('');
-  const spList=_cFilter==='all'?spirits:spirits.filter(s=>s.cat===_cFilter);
-  const rows=spList.map(sp=>{
-    const consumedML=getConsumedML(sp.id),consumedBot=consumedML/sp.ml;
-    const remBot=getRemainingBottles(sp),remML=remBot*sp.ml,p=getRemainingPct(sp),st=status(p);
-    const fillColor=p<=0?'#F09595':p>=0.5?'#97C459':p>=0.25?'#EF9F27':'#E24B4A';
-    return`<tr>
-      <td style="font-weight:500">${sp.name}</td>
-      <td><span style="background:var(--color-background-secondary);border-radius:6px;padding:2px 7px;font-size:11px">${sp.cat}</span></td>
-      <td style="text-align:center">${sp.ml}ml</td>
-      <td style="text-align:center"><span style="font-weight:500">${parseFloat(sp.stock).toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">inicial</span></td>
-      <td style="text-align:center">${consumedBot>0?`<span style="color:#A32D2D;font-weight:500">−${consumedBot.toFixed(2)}</span>`:'—'}</td>
-      <td style="text-align:center"><span style="font-weight:500;color:${p<=0?'#A32D2D':p>=0.5?'#3B6D11':p>=0.25?'#854F0B':'#A32D2D'}">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--color-text-tertiary);display:block">${Math.round(remML).toLocaleString()}ml</span></td>
-      <td style="min-width:70px"><div style="height:4px;background:var(--color-background-secondary);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.round(p*100)}%;background:${fillColor};border-radius:2px"></div></div><span style="font-size:10px;color:var(--color-text-secondary)">${Math.round(p*100)}%</span></td>
-      <td><span class="badge ${st.cls}">${st.lbl}</span></td>
-      <td><div style="display:flex;align-items:center;gap:5px">
-        <input type="number" min="0.05" step="0.05" value="1" id="add-${sp.id}" class="add-input">
-        <button class="btn btn-add btn-sm" onclick="addStock('${sp.id}')"><i class="ti ti-plus"></i>Reponer</button>
-      </div></td>
+function rCatalogo() {
+  const rows = spirits.map(sp => {
+    return `<tr>
+      <td style="font-weight:600">${sp.name}</td>
+      <td><span class="tag">${sp.cat}</span></td>
+      <td style="text-align:center">${sp.ml} ml</td>
+      <td style="text-align:center;font-weight:600;color:var(--color-amber)">${sp.stock}</td>
+      <td style="text-align:right">
+        <div style="display:inline-flex;gap:4px">
+          <input type="number" class="add-input" id="add-${sp.id}" value="1" min="0" step="0.1">
+          <button class="btn btn-sm btn-coral" onclick="addStock('${sp.id}')"><i class="ti ti-plus"></i> Reponer</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
-  return`<div class="page-title">Catálogo de licores</div><div class="page-sub">Los ML restantes se actualizan con cada venta. Repón cuando llegue pedido.</div>
-    <div class="toolbar">
-      <label style="font-size:12px;color:var(--color-text-secondary)">Categoría:</label>
-      <select class="sel" onchange="_cFilter=this.value;render()" style="font-size:12px;padding:5px 9px">${catOpts}</select>
-      <span style="font-size:12px;color:var(--color-text-secondary)">${spList.length} licores</span>
-    </div>
-    <div class="card"><table style="table-layout:fixed;width:100%">
-      <colgroup><col style="width:155px"><col style="width:80px"><col style="width:65px"><col style="width:72px"><col style="width:68px"><col style="width:90px"><col style="width:72px"><col style="width:65px"><col style="width:145px"></colgroup>
-      <thead><tr><th>Licor</th><th>Cat.</th><th style="text-align:center">ML/bot</th><th style="text-align:center">Inicial</th><th style="text-align:center">Consumido</th><th style="text-align:center">Restante</th><th>Nivel</th><th>Estado</th><th>Reponer</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table></div>`;
+
+  return `<div class="page-title">Catálogo Base de Licores</div>
+    <div class="page-sub">Ajusta el ingreso de botellas completas compradas para el almacén</div>
+    <div class="card">
+      <table>
+        <thead>
+          <tr><th>Nombre de Botella</th><th>Categoría</th><th style="text-align:center">Volumen</th><th style="text-align:center">Stock Inicial</th><th style="text-align:right">Ingreso de Botella</th></tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 
-// ── ACCIONES (con Supabase) ───────────────────────────────
-async function addSale(){
-  const week=(document.getElementById('s-wk').value||'').trim();
-  const cocktail_id=document.getElementById('s-co').value;
-  const qty=parseInt(document.getElementById('s-qty').value)||0;
-  if(!week){alert('Por favor ingresa la semana (ej: Semana 21)');return;}
-  if(!cocktail_id||qty<=0)return;
-  const btn=document.getElementById('btn-save');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Guardando...';}
-  const {data,error}=await sb.from('sales').insert({cocktail_id,qty,week}).select();
-  if(error){alert('Error al guardar: '+error.message);if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Registrar venta';} return;}
+// ==========================================================================
+// CONTROLADORES DE EVENTOS Y ACCIONES (SUPABASE)
+// ==========================================================================
+async function saveSale() {
+  const week = (document.getElementById('s-wk').value || '').trim();
+  const cocktail_id = document.getElementById('s-co').value;
+  const qty = parseInt(document.getElementById('s-qty').value) || 0;
+  
+  if (!week) { alert('Ingresa la semana operativa (ej: Semana 1).'); return; }
+  if (!cocktail_id || qty <= 0) return;
+  
+  const btn = document.getElementById('btn-save');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2 ti-spin"></i> Guardando...'; }
+  
+  const { data, error } = await sb.from('sales').insert({ cocktail_id, qty, week }).select();
+  if (error) { 
+    alert('Error al guardar venta: ' + error.message); 
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> Registrar venta'; } 
+    return; 
+  }
+  
   sales.unshift(data[0]);
   updatePill();
   render();
 }
 
-async function delSale(id){
-  if(!confirm('¿Eliminar esta venta?'))return;
-  const {error}=await sb.from('sales').delete().eq('id',id);
-  if(error){alert('Error al eliminar: '+error.message);return;}
-  sales=sales.filter(s=>s.id!==id);
+async function delSale(id) {
+  if (!confirm('¿Deseas eliminar este registro de venta?')) return;
+  const { error } = await sb.from('sales').delete().eq('id', id);
+  if (error) { alert('Error al eliminar: ' + error.message); return; }
+  sales = sales.filter(s => s.id !== id);
   updatePill();
   render();
 }
 
-async function addStock(id){
-  const sp=spirits.find(s=>s.id===id);
-  if(!sp)return;
-  const inp=document.getElementById('add-'+id);
-  const qty=parseFloat(inp?inp.value:1)||1;
-  if(qty<=0)return;
-  const newStock=parseFloat((sp.stock+qty).toFixed(2));
-  const {error}=await sb.from('spirits').update({stock:newStock}).eq('id',id);
-  if(error){alert('Error al actualizar stock: '+error.message);return;}
-  sp.stock=newStock;
+async function addStock(id) {
+  const sp = spirits.find(s => s.id === id);
+  if (!sp) return;
+  const inp = document.getElementById('add-' + id);
+  const qty = parseFloat(inp ? inp.value : 0) || 0;
+  if (qty <= 0) return;
+  
+  const newStock = sp.stock + qty;
+  const { error } = await sb.from('spirits').update({ stock: newStock }).eq('id', id);
+  if (error) { alert('Error al actualizar stock: ' + error.message); return; }
+  
+  sp.stock = newStock;
   render();
 }
 
-// ── INIT ──────────────────────────────────────────────────
-loadAll();
+// Encendido de la App
+init();
 </script>
 </body>
 </html>
