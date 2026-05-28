@@ -265,9 +265,20 @@ function filterBottles(cat){
   document.querySelectorAll('.bottle-card').forEach(el=>{el.style.display=(cat==='all'||el.dataset.cat===cat)?'':'none';});
 }
 
-// ── VENTAS (INTERFAZ MODO MIXTO) ───────────────────────────
-function changeSaleType(type){ _saleTypeFilter = type; render(); }
+// ── VENTAS (INTERFAZ MODO MIXTO EN CASCADA) ───────────────────
+let _shotSubFilter = 'destilado'; // 'destilado' o 'licor'
+let _copaSubFilter = 'Tinto';     // 'Blanco', 'Espumoso', 'Rosado', 'Tinto'
+let _botellaSubFilter = 'destilado'; // 'destilado', 'licor', 'vino'
+
+function changeSaleType(type){ 
+  _saleTypeFilter = type; 
+  render(); 
+}
 function changeCoctelSubFilter(sub){ _coctelSubFilter = sub; render(); }
+function changeShotSubFilter(sub){ _shotSubFilter = sub; render(); }
+function changeCopaSubFilter(sub){ _copaSubFilter = sub; render(); }
+function changeBotellaSubFilter(sub){ _botellaSubFilter = sub; render(); }
+
 function toggleSalesTable(){
   _salesCollapsed = !_salesCollapsed;
   const content = document.getElementById('sales-table-content');
@@ -279,38 +290,85 @@ function toggleSalesTable(){
 function rVentas(){
   const weeks=[...new Set(sales.map(s=>s.week))].filter(Boolean).sort();
   const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
-  let primarySelectorHTML = '';
+  let secondarySelectorHTML = '';
+  let filteredOptionsHTML = '';
   
   if(_saleTypeFilter === 'coctel') {
-    primarySelectorHTML = `
+    secondarySelectorHTML = `
       <div class="fl">
         <label>Tipo de Cóctel</label>
         <div class="segmented-control">
           <button class="${_coctelSubFilter==='Clásica'?'active':''}" onclick="changeCoctelSubFilter('Clásica')">Clásicas</button>
           <button class="${_coctelSubFilter==='Signature'?'active':''}" onclick="changeCoctelSubFilter('Signature')">Signatures</button>
         </div>
-      </div>
-      <div class="fl">
-        <label>Cóctel Seleccionado</label>
-        <select id="s-co" style="width:100%">
-          ${recipes.filter(r=>r.cat === _coctelSubFilter).map(r=>`<option value="${r.id}">${r.name}</option>`).join('') || '<option value="">Sin recetas aquí</option>'}
-        </select>
       </div>`;
-  } else {
-    let filteredSpirits = [];
-    if(_saleTypeFilter === 'shot') filteredSpirits = spirits.filter(s=>s.product_type === 'destilado');
-    if(_saleTypeFilter === 'copa') filteredSpirits = spirits.filter(s=>s.product_type === 'vino');
-    if(_saleTypeFilter === 'botella') filteredSpirits = spirits.filter(s=>s.product_type === 'destilado' || s.product_type === 'vino');
-    if(_saleTypeFilter === 'unidad') filteredSpirits = spirits.filter(s=>s.product_type === 'cerveza' || s.product_type === 'agua');
-    let modeLabel = _saleTypeFilter === 'shot' ? 'Shot (45ml)' : _saleTypeFilter === 'copa' ? 'Copa (150ml)' : _saleTypeFilter === 'botella' ? 'Botella' : 'Unidad Cerrada';
+    
+    filteredOptionsHTML = recipes
+      .filter(r => r.cat === _coctelSubFilter)
+      .map(r => `<option value="${r.id}">${r.name}</option>`)
+      .join('') || '<option value="">Sin recetas en esta categoría</option>';
 
-    primarySelectorHTML = `
+  } else if(_saleTypeFilter === 'shot') {
+    secondarySelectorHTML = `
       <div class="fl">
-        <label>Producto Directo — [${modeLabel}]</label>
-        <select id="s-co" style="width:100%">
-          ${filteredSpirits.map(s=>`<option value="${s.id}">${s.name} (${s.cat})</option>`).join('') || '<option value="">No hay productos compatibles</option>'}
-        </select>
+        <label>Categoría de Shot</label>
+        <div class="segmented-control">
+          <button class="${_shotSubFilter==='destilado'?'active':''}" onclick="changeShotSubFilter('destilado')">Destilados</button>
+          <button class="${_shotSubFilter==='licor'?'active':''}" onclick="changeShotSubFilter('licor')">Licores</button>
+        </div>
       </div>`;
+      
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === _shotSubFilter)
+      .map(s => `<option value="${s.id}">${s.name} (${s.cat})</option>`)
+      .join('') || '<option value="">Sin productos en esta categoría</option>';
+
+  } else if(_saleTypeFilter === 'copa') {
+    secondarySelectorHTML = `
+      <div class="fl">
+        <label>Tipo de Vino (Copa 150ml)</label>
+        <div class="segmented-control">
+          <button class="${_copaSubFilter==='Blanco'?'active':''}" onclick="changeCopaSubFilter('Blanco')">Blanco</button>
+          <button class="${_copaSubFilter==='Espumoso'?'active':''}" onclick="changeCopaSubFilter('Espumoso')">Espumoso</button>
+          <button class="${_copaSubFilter==='Rosado'?'active':''}" onclick="changeCopaSubFilter('Rosado')">Rosado</button>
+          <button class="${_copaSubFilter==='Tinto'?'active':''}" onclick="changeCopaSubFilter('Tinto')">Tinto</button>
+        </div>
+      </div>`;
+      
+    // Filtra buscando coincidencias en la columna 'cat' de forma inteligente (ej: "Vino Tinto" o "Tinto")
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === 'vino' && s.cat.toLowerCase().includes(_copaSubFilter.toLowerCase()))
+      .map(s => `<option value="${s.id}">${s.name}</option>`)
+      .join('') || '<option value="">Sin vinos disponibles en esta categoría</option>';
+
+  } else if(_saleTypeFilter === 'botella') {
+    secondarySelectorHTML = `
+      <div class="fl">
+        <label>Tipo de Botella Cerrada</label>
+        <div class="segmented-control">
+          <button class="${_botellaSubFilter==='destilado'?'active':''}" onclick="changeBotellaSubFilter('destilado')">Destilado</button>
+          <button class="${_botellaSubFilter==='licor'?'active':''}" onclick="changeBotellaSubFilter('licor')">Licor</button>
+          <button class="${_botellaSubFilter==='vino'?'active':''}" onclick="changeBotellaSubFilter('vino')">Vino</button>
+        </div>
+      </div>`;
+      
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === _botellaSubFilter)
+      .map(s => `<option value="${s.id}">${s.name} (${s.cat})</option>`)
+      .join('') || '<option value="">Sin botellas en esta categoría</option>';
+
+  } else if(_saleTypeFilter === 'unidad') {
+    // Para piezas (Cervezas y Aguas) no necesitamos segmentación extra, desglosamos ambas directo
+    secondarySelectorHTML = `
+      <div class="fl">
+        <label>Categoría Directa</label>
+        <div style="font-size:11px; color:var(--color-text-secondary); padding: 4px 0;">Mostrando Cervezas, Aguas y Refrescos</div>
+      </div>`;
+      
+    filteredOptionsHTML = spirits
+      .filter(s => s.product_type === 'cerveza' || s.product_type === 'agua')
+      .map(s => `<option value="${s.id}">${s.name} (${s.cat})</option>`)
+      .join('') || '<option value="">Sin unidades listas en catálogo</option>';
   }
 
   const filtered=_wkFilter==='all'?sales:sales.filter(s=>s.week===_wkFilter);
@@ -353,12 +411,21 @@ function rVentas(){
               <button class="${_saleTypeFilter==='coctel'?'active':''}" onclick="changeSaleType('coctel')">Cóctel</button>
               <button class="${_saleTypeFilter==='shot'?'active':''}" onclick="changeSaleType('shot')">Shot</button>
               <button class="${_saleTypeFilter==='copa'?'active':''}" onclick="changeSaleType('copa')">Copa</button>
-              <button class="${_saleTypeFilter==='botella'?'active':''}" onclick="changeSaleType('botella')">Botella</button>
+              <button class="${_saleTypeFilter==='botella'?'active':''}" onclick="changeBotellaSubFilter('botella') || changeSaleType('botella')">Botella</button>
               <button class="${_saleTypeFilter==='unidad'?'active':''}" onclick="changeSaleType('unidad')">Pza</button>
             </div>
           </div>
           <div class="fl"><label>Semana operativa *</label><input type="text" id="s-wk" placeholder="Ej: Semana 21" style="width:100%"></div>
-          ${primarySelectorHTML}
+          
+          ${secondarySelectorHTML}
+          
+          <div class="fl">
+            <label>Producto Seleccionado</label>
+            <select id="s-co" style="width:100%">
+              ${filteredOptionsHTML}
+            </select>
+          </div>
+          
           <div class="fl"><label>Cantidad despachada</label><input type="number" id="s-qty" min="1" value="1" style="width:100%"></div>
           <button class="btn btn-coral" id="btn-save" style="width:100%;justify-content:center;margin-top:5px" onclick="addSale()"><i class="ti ti-plus"></i> Registrar Operación</button>
         </div>
