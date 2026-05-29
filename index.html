@@ -168,7 +168,7 @@ let spirits=[], recipes=[], sales=[], curTab='dash';
 let _wkFilter='all', _cFilter='all', _recTabFilter='all';
 let _salesCollapsed=false;
 
-// Ventas — Cascade state machine
+// ventas — Cascade state machine
 let _saleMode='coctel';        // coctel | shot | copa | botella | pieza
 let _subCoctel='Clásica';      // Clásica | Signature
 let _subShot='destilado';      // destilado | licor
@@ -280,7 +280,7 @@ function bottleSVG(p){
 
 function updatePill(){
   const t=sales.reduce((s,x)=>s+(x.qty||1),0);
-  document.getElementById('top-pill').textContent=`${t} Ventas registradas`;
+  document.getElementById('top-pill').textContent=`${t} ventas registradas`;
 }
 
 function fmx(n){return (n||0).toLocaleString('es-MX');}
@@ -298,7 +298,7 @@ function go(tab){
 function render(){
   const el=document.getElementById('main');
   if(curTab==='dash') el.innerHTML=rDash();
-  else if(curTab==='ventas') el.innerHTML=rVentas();
+  else if(curTab==='ventas') el.innerHTML=rventas();
   else if(curTab==='recetas') el.innerHTML=rRecetas();
   else if(curTab==='catalogo') el.innerHTML=rCatalogo();
 }
@@ -347,7 +347,7 @@ function filterBottles(cat){
 }
 
 // ═══════════════════════════════════════════════════════════
-// VENTAS — Cascade system
+// ventas — Cascade system
 // ═══════════════════════════════════════════════════════════
 
 // Mode switcher (top segmented control)
@@ -501,7 +501,7 @@ function getModeColors(m){
   return{coctel:'background:#EEEDFE;color:#3C3489',shot:'background:#FFF0E8;color:#D85A30',copa:'background:#F0FFF4;color:#276749',botella:'background:#EAF3DE;color:#3B6D11',pieza:'background:#E8F4FD;color:#1565C0'}[m]||'background:#EEEDFE;color:#3C3489';
 }
 
-function rVentas(){
+function rventas(){
   const weeks=[...new Set(sales.map(s=>s.week))].filter(Boolean).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
   const filtered=_wkFilter==='all'?sales:sales.filter(s=>s.week===_wkFilter);
@@ -532,7 +532,7 @@ function rVentas(){
       <td style="max-width:240px">${detail}</td>
       <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="delSale(${JSON.stringify(s.id)})"><i class="ti ti-trash" style="color:#A32D2D;font-size:14px"></i></button></td>
     </tr>`;
-  }).join(''):`<tr><td colspan="6" class="empty">Sin Ventas registradas en este período</td></tr>`;
+  }).join(''):`<tr><td colspan="6" class="empty">Sin ventas registradas en este período</td></tr>`;
 
   return`
     <div class="page-title">Registrar ventas</div>
