@@ -508,6 +508,13 @@ function getModeColors(m){
 function rventas(){
   const weeks=[...new Set(sales.map(s=>s.week))].filter(Boolean).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
   const wkOpts=`<option value="all">Todas las semanas</option>`+weeks.map(w=>`<option value="${w}"${_wkFilter===w?' selected':''}>${w}</option>`).join('');
+  const searchVentasHTML = `
+    <div style="position:relative;flex:1;max-width:220px">
+      <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:13px"></i>
+      <input class="inp" type="text" placeholder="Buscar receta..." value="${_searchVentas}"
+        oninput="_searchVentas=this.value;render()"
+        style="padding-left:30px;font-size:12px;height:32px">
+    </div>`;
   const filtered=_wkFilter==='all'?sales:sales.filter(s=>s.week===_wkFilter);
 
   const rows=filtered.length?filtered.map(s=>{
@@ -521,7 +528,7 @@ function rventas(){
         return sp?`<span class="ml-chip"><b>${sp.name.split(' ')[0]}</b> −${i.ml*(s.qty||1)}ml</span>`:'';
       }).join(''):'—';
     }else{
-      const sp=spirits.find(x=>x.id===s.cocktail_id);
+      const sp = spirits.find(x => x.id === s.spirit_id);
       name=sp?sp.name:'?';
       if(mode==='shot') detail=`<span class="ml-chip" style="background:#FFF0E8;color:#D85A30">Shot −${(s.qty||1)*45}ml total</span>`;
       else if(mode==='copa') detail=`<span class="ml-chip" style="background:#F0FFF4;color:#276749">Copa −${(s.qty||1)*150}ml total</span>`;
@@ -656,8 +663,22 @@ function rRecetas(){
 function rCatalogo(){
   const cats=[...new Set(spirits.map(s=>s.cat))].sort();
   const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${_cFilter===c?' selected':''}>${c}</option>`).join('');
-  const spList=_cFilter==='all'?spirits:spirits.filter(s=>s.cat===_cFilter);
+  const searchCatHTML = `
+    <div style="position:relative;flex:1;max-width:220px">
+      <i class="ti ti-search" style="position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--txt3);font-size:13px"></i>
+      <input class="inp" type="text" placeholder="Buscar botella..." value="${_searchCatalogo}"
+        oninput="_searchCatalogo=this.value;render()"
+        style="padding-left:30px;font-size:12px;height:32px">
+    </div>`;
 
+  // Al filtrar spList, agregar:
+  let spList = _cFilter === 'all' ? spirits : spirits.filter(s => s.cat === _cFilter);
+  if (_searchCatalogo) {
+    spList = spList.filter(s => s.name.toLowerCase().includes(_searchCatalogo.toLowerCase()));
+  }  
+
+  const spList=_cFilter==='all'?spirits:spirits.filter(s=>s.cat===_cFilter);
+  
   const rows=spList.map(sp=>{
     const consumedML=getConsumedML(sp.id);
     const consumedUnits=getConsumedUnits(sp.id);
