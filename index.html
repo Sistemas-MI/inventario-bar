@@ -226,27 +226,29 @@ function inferProductType(cat){
 // ═══════════════════════════════════════════════════════════
 // STOCK CALCULATION — Mixed ml + units logic
 // ═══════════════════════════════════════════════════════════
-function getConsumedML(sid){
-  return sales.reduce((t,s)=>{
-    const mode=s.sale_mode||'coctel';
-    if(mode==='coctel'){
-      const r=recipes.find(r=>r.id===s.cocktail_id);
-      if(!r) return t;
-      const ing=r.ings.find(i=>i.id===sid);
-      return t+(ing?(s.qty||1)*ing.ml:0);
+function getConsumedML(sid) {
+  return sales.reduce((t, s) => {
+    const mode = s.sale_mode || 'coctel';
+    if (mode === 'coctel') {
+      const r = recipes.find(r => r.id === s.cocktail_id);
+      if (!r) return t;
+      const ing = r.ings.find(i => i.id === sid);
+      return t + (ing ? (s.qty || 1) * ing.ml : 0);
     }
-    if(mode==='shot' && s.cocktail_id===sid) return t+(s.qty||1)*45;
-    if(mode==='copa' && s.cocktail_id===sid) return t+(s.qty||1)*150;
+    // Para shot/copa: usa spirit_id (columna nueva)
+    if (mode === 'shot'  && s.spirit_id === sid) return t + (s.qty || 1) * 45;
+    if (mode === 'copa'  && s.spirit_id === sid) return t + (s.qty || 1) * 150;
     return t;
-  },0);
+  }, 0);
 }
 
-function getConsumedUnits(sid){
-  return sales.reduce((t,s)=>{
-    const mode=s.sale_mode||'coctel';
-    if((mode==='botella'||mode==='pieza') && s.cocktail_id===sid) return t+(s.qty||1);
+function getConsumedUnits(sid) {
+  return sales.reduce((t, s) => {
+    const mode = s.sale_mode || 'coctel';
+    if ((mode === 'botella' || mode === 'pieza') && s.spirit_id === sid)
+      return t + (s.qty || 1);
     return t;
-  },0);
+  }, 0);
 }
 
 function getRemainingBottles(sp){
@@ -712,30 +714,40 @@ function rCatalogo(){
 // ═══════════════════════════════════════════════════════════
 // ACTIONS — Supabase persistence
 // ═══════════════════════════════════════════════════════════
-async function addSale(){
-  const week=(document.getElementById('s-wk')?.value||'').trim();
-  const coVal=document.getElementById('s-co')?.value||'';
-  const qty=parseInt(document.getElementById('s-qty')?.value)||0;
-
+async function addSale() {
+  const week = (document.getElementById('s-wk')?.value || '').trim();
+  const coVal = document.getElementById('s-co')?.value || '';
+  const qty   = parseInt(document.getElementById('s-qty')?.value) || 0;
+    
   if(!week){alert('Por favor especifica la semana operativa (ej: Semana 21).');return;}
   if(!coVal||qty<=0){alert('Selecciona un producto y una cantidad válida.');return;}
 
-  // Parse the composite value: "recipe::ID" or "spirit::ID"
-  let cocktail_id=null;
-  if(coVal.startsWith('recipe::')){cocktail_id=coVal.replace('recipe::','');}
-  else if(coVal.startsWith('spirit::')){cocktail_id=coVal.replace('spirit::','');}
-  else{cocktail_id=coVal;}
+  // Separar si es receta o producto directo
+  let cocktail_id = null;
+  let spirit_id   = null;
+
+  if (coVal.startsWith('recipe::')) {
+    cocktail_id = coVal.replace('recipe::', '');   // cóctel → FK a recipes
+  } else if (coVal.startsWith('spirit::')) {
+    spirit_id = coVal.replace('spirit::', '');     // shot/copa/botella/pieza → FK a spirits
+  } else {
+    // fallback: intentar determinar por modo
+    if (sale_mode === 'coctel') cocktail_id = coVal;
+    else spirit_id = coVal;
+  }
 
   const sale_mode=_saleMode;
 
-  const btn=document.getElementById('btn-save');
-  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Confirmando...';}
+  const btn = document.getElementById('btn-save');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2"></i> Confirmando...'; }
 
-  const {data,error}=await sb.from('sales').insert({cocktail_id,qty,week,sale_mode}).select();
+  const payload = { qty, week, sale_mode, cocktail_id, spirit_id };
 
-  if(error){
-    alert('Error al guardar en Supabase: '+error.message);
-    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Registrar operación';}
+  const { data, error } = await sb.from('sales').insert(payload).select();
+
+  if (error) {
+    alert('Error al guardar en Supabase: ' + error.message);
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="ti ti-plus"></i> Registrar operación'; }
     return;
   }
   sales.unshift(data[0]);
