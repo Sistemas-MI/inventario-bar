@@ -536,16 +536,16 @@ function rventas(){
 
   return`
     <div class="page-title">Registrar ventas</div>
-    <div class="page-sub">Despacho de barra con selección inteligente en cascada</div>
+    <div class="page-sub">Cada venta descuenta los ML exactos según la receta y se guarda en la base de datos</div>
     <div class="two-col">
 
       <!-- FORM CARD -->
       <div class="card">
-        <div class="card-head"><span class="card-title">Despacho de Barra</span></div>
+        <div class="card-head"><span class="card-title">Nueva Venta</span></div>
         <div class="section-p">
 
           <div class="fl">
-            <label>Semana operativa *</label>
+            <label>Semana *</label>
             <input class="inp" type="text" id="s-wk" placeholder="Ej: Semana 21" style="width:100%">
           </div>
 
@@ -563,7 +563,7 @@ function rventas(){
           ${buildCascadeSelector()}
 
           <div class="fl">
-            <label>Cantidad despachada</label>
+            <label>Cantidad</label>
             <input class="inp" type="number" id="s-qty" min="1" value="1" style="width:100%">
           </div>
 
