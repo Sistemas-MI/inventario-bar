@@ -709,7 +709,7 @@ function rRecetas(){
     </div>`).join('')}
   </div>`:'';
 
-  return`<div class="page-title">Recetario Estructurado</div><div class="page-sub">Rendimiento volumétrico y popularidad por receta</div>
+  return`<div class="page-title">Recetario</div><div class="page-sub">Ordenadas por popularidad · Rendimiento = tragos por botella del licor principal</div>
     ${top3HTML}${filterTabsHTML}${sections||'<div class="empty">Sin recetas en esta categoría</div>'}`;
 }
 
@@ -775,10 +775,10 @@ function rCatalogo(){
   }).join('');
 
   return`
-    <div class="page-title">Catálogo y Control de Bodega</div>
+    <div class="page-title">Catálogo de Inventario</div>
     <div class="page-sub">Ajuste rápido de inventario — Entradas y mermas/consumos internos</div>
     <div class="toolbar">
-      <label style="font-size:12px;color:var(--txt2)">Filtrar familia:</label>
+      <label style="font-size:12px;color:var(--txt2)">Filtrar por tipo:</label>
       <select class="sel" style="width:auto;padding:5px 9px;font-size:12px" onchange="_cFilter=this.value;render()">${catOpts}</select>
       <span style="font-size:12px;color:var(--txt2)">${spList.length} referencias</span>
     </div>
