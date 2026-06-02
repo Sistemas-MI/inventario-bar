@@ -835,49 +835,26 @@ function rCatalogo(){
 let reportHistory = [];
 
 // Saves a sale record to report_history in Supabase (independent — nunca se borra)
-async function syncReportHistory(saleRecord){
-  // Actualizar memoria local inmediatamente
-  if(!reportHistory.some(r=>String(r.sale_id)===String(saleRecord.id))){
-    reportHistory.unshift({...saleRecord, sale_id: saleRecord.id});
-  }
+// Guarda la copia del reporte directamente en la base de datos (no en el navegador)
+async function syncReportHistory(saleData) {
+  const { data, error } = await sb
+    .from('report_history')
+    .insert({
+      sale_id: saleData.id,
+      cocktail_id: saleData.cocktail_id,
+      qty: saleData.qty,
+      week: saleData.week,
+      sale_mode: saleData.sale_mode,
+      created_at: saleData.created_at || new Date().toISOString()
+    });
 
-  const payload = {
-    sale_id:    String(saleRecord.id),   // cast a text por si sales.id es int4
-    cocktail_id:String(saleRecord.cocktail_id||''),
-    qty:        Number(saleRecord.qty)||1,
-    week:       saleRecord.week||null,
-    sale_mode:  saleRecord.sale_mode||'coctel',
-    created_at: saleRecord.created_at||new Date().toISOString()
-  };
-
-  const {error} = await sb.from('report_history').upsert(payload, {onConflict:'sale_id'});
-
-  if(error){
-    console.error('❌ report_history insert error:', error.message, error.details, error.hint);
-    // Mostrar alerta solo en desarrollo para no molestar en producción
-    // alert('Aviso: No se pudo guardar en historial: ' + error.message);
+  if (error) {
+    console.error('Error crítico al respaldar en report_history de Supabase:', error.message);
   } else {
-    console.log('✅ report_history sincronizado:', payload.sale_id);
+    console.log('Respaldo histórico guardado con éxito en la base de datos.');
   }
 }
 
-async function loadReportHistory(){
-  try{
-    const {data,error}=await sb.from('report_history').select('*').order('created_at',{ascending:false});
-    if(!error && data && data.length>0){
-      reportHistory=data;
-      console.log('✅ report_history cargado:', data.length, 'registros');
-    } else {
-      if(error) console.warn('⚠️ report_history error al cargar:', error.message);
-      // Fallback: usar sales actuales como fuente de datos
-      reportHistory=sales.map(s=>({...s, sale_id:String(s.id)}));
-      console.log('⚠️ Usando sales como fallback para reportHistory:', reportHistory.length);
-    }
-  }catch(e){
-    console.error('❌ loadReportHistory excepción:', e);
-    reportHistory=sales.map(s=>({...s, sale_id:String(s.id)}));
-  }
-}
 
 // Report filter state
 let _repFilterType='all';  // all | week | month
