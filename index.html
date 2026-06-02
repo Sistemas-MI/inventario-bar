@@ -879,7 +879,7 @@ async function syncReportHistory(saleRecord) {
  */
 async function loadReportHistory() {
   try {
-    const { data, error } = await sb.from('report_history').select('*').order('created_at', { ascending: false });
+    const { data, error } = await sb.from('report_history').select('*').order('created_at', { ascending: false }).limit(5000);
     
     if (!error && data && data.length > 0) {
       reportHistory = data;
