@@ -602,6 +602,8 @@ function rventas(){
       else if(mode==='botella') detail=`<span class="ml-chip" style="background:#EAF3DE;color:#3B6D11">−${s.qty||1} botella(s) completa(s)</span>`;
       else if(mode==='pieza') detail=`<span class="ml-chip" style="background:#E8F4FD;color:#1565C0">−${s.qty||1} pieza(s)</span>`;
     }
+
+      // error de marca
     return`<tr>
       <td style="font-weight:500">${name}</td>
       <td><span class="badge" style="${getModeColors(mode)}">${getModeLabel(mode)}</span></td>
@@ -855,7 +857,20 @@ async function syncReportHistory(saleData) {
   }
 }
 
+// Obtiene todo el histórico directamente desde Supabase para tus gráficas y filtros
+async function fetchReportHistoryFromDB() {
+  const { data, error } = await sb
+    .from('report_history')
+    .select('*')
+    .order('created_at', { ascending: false });
 
+  if (error) {
+    alert('Error al consultar la base de datos de reportes: ' + error.message);
+    return [];
+  }
+  return data; // Devuelve la lista completa de lo consumido históricamente
+}
+    
 // Report filter state
 let _repFilterType='all';  // all | week | month
 let _repFilterWeek='';
