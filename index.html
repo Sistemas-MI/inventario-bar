@@ -1051,7 +1051,7 @@ function getSaleMlForSpirit(s, spiritId){
     const ing=r.ings.find(i=>i.id===spiritId);
     return ing?(s.qty||1)*ing.ml:0;
   }
-  if(mode==='shot'&&s.cocktail_id===spiritId) return (s.qty||1)*45;
+  if(mode==='shot'&&s.cocktail_id===spiritId) return (s.qty||1)*60;
   if(mode==='copa'&&s.cocktail_id===spiritId) return (s.qty||1)*150;
   if(mode==='botella'&&s.cocktail_id===spiritId){
     const sp=spirits.find(x=>x.id===spiritId);
@@ -1101,7 +1101,7 @@ function rReportes(){
       if(!r) return t;
       return t+r.ings.reduce((m,i)=>m+(s.qty||1)*i.ml,0);
     }
-    if(mode==='shot') return t+(s.qty||1)*45;
+    if(mode==='shot') return t+(s.qty||1)*60;
     if(mode==='copa') return t+(s.qty||1)*150;
     if(mode==='botella'||mode==='pieza'){
       const sp=spirits.find(x=>x.id===s.cocktail_id);
@@ -1134,7 +1134,7 @@ function rReportes(){
       const sp=spirits.find(x=>x.id===s.cocktail_id);
       if(!sp) return;
       let ml=0;
-      if(mode==='shot') ml=45;
+      if(mode==='shot') ml=60;
       else if(mode==='copa') ml=150;
       else if(mode==='botella') ml=sp.ml;
       else if(mode==='pieza') ml=sp.ml; // pieza: descuenta unidad completa
@@ -1156,7 +1156,7 @@ function rReportes(){
       const sp=spirits.find(x=>x.id===s.cocktail_id);
       if(!sp) return;
       name=sp.name;
-      if(mode==='shot') mlVal=(s.qty||1)*45;
+      if(mode==='shot') mlVal=(s.qty||1)*60;
       else if(mode==='copa') mlVal=(s.qty||1)*150;
       else if(mode==='botella'||mode==='pieza') mlVal=(s.qty||1)*sp.ml;
     }
@@ -1201,7 +1201,7 @@ function rReportes(){
       const sp=spirits.find(x=>x.id===s.cocktail_id);
       name=sp?sp.name:'?';
       let mlPorUnidad=0;
-      if(mode==='shot') mlPorUnidad=45;
+      if(mode==='shot') mlPorUnidad=60;
       else if(mode==='copa') mlPorUnidad=150;
       else if(mode==='botella'||mode==='pieza') mlPorUnidad=sp?sp.ml:0;
       const totalML=(s.qty||1)*mlPorUnidad;
@@ -1360,7 +1360,7 @@ function exportRepPDF(){
   const totalMLAll=filtered.reduce((t,s)=>{
     const mode=s.sale_mode||'coctel';
     if(mode==='coctel'){const r=recipes.find(r=>r.id===s.cocktail_id);if(!r)return t;return t+r.ings.reduce((m,i)=>m+(s.qty||1)*i.ml,0);}
-    if(mode==='shot') return t+(s.qty||1)*45;
+    if(mode==='shot') return t+(s.qty||1)*60;
     if(mode==='copa') return t+(s.qty||1)*150;
     if(mode==='botella'||mode==='pieza'){const sp=spirits.find(x=>x.id===s.cocktail_id);return t+(sp?(s.qty||1)*sp.ml:0);}
     return t;
@@ -1382,7 +1382,7 @@ function exportRepPDF(){
     } else {
       const sp=spirits.find(x=>x.id===s.cocktail_id);
       name=sp?sp.name:'?';
-      const mlU=mode==='shot'?45:mode==='copa'?150:(sp?sp.ml:0);
+      const mlU=mode==='shot'?60:mode==='copa'?150:(sp?sp.ml:0);
       mlTotal=(s.qty||1)*mlU;
       mlDesc=`${s.qty||1} × ${mlU}ml`;
     }
