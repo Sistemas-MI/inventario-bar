@@ -392,7 +392,7 @@ function getConsumedML(sid){
       const ing=r.ings.find(i=>i.id===sid);
       return t+(ing?(s.qty||1)*ing.ml:0);
     }
-    if(mode==='shot' && s.cocktail_id===sid) return t+(s.qty||1)*45;
+    if(mode==='shot' && s.cocktail_id===sid) return t+(s.qty||1)*60;
     if(mode==='copa' && s.cocktail_id===sid) return t+(s.qty||1)*150;
     return t;
   },0);
@@ -599,7 +599,7 @@ function buildCascadeSelector(){
       </div>`;
   }
 
-  // ── SHOT ── destilado | licor (45ml por shot)
+  // ── SHOT ── destilado | licor (60ml por shot)
   if(_saleMode==='shot'){
     // Filtrar directamente por product_type para incluir TODO lo del catálogo
     const filtered=spirits.filter(s=>{
@@ -616,7 +616,7 @@ function buildCascadeSelector(){
         ${chips([['Destilados','destilado'],['Licores','licor']],_subShot,'setSubShot')}
       </div>
       <div class="fl">
-        <label>Seleccionar botella — descuenta 45ml por shot</label>
+        <label>Seleccionar botella — descuenta 60ml por shot</label>
         <select id="s-co" style="width:100%">${opts}</select>
       </div>`;
   }
@@ -697,7 +697,7 @@ function buildCascadeSelector(){
 
 // Labels for history table
 function getModeLabel(m){
-  return{coctel:'Cóctel',shot:'Shot 45ml',copa:'Copa 150ml',botella:'Botella',pieza:'Pieza'}[m]||m||'Cóctel';
+  return{coctel:'Cóctel',shot:'Shot 60ml',copa:'Copa 150ml',botella:'Botella',pieza:'Pieza'}[m]||m||'Cóctel';
 }
 function getModeColors(m){
   return{coctel:'background:#EEEDFE;color:#3C3489',shot:'background:#FFF0E8;color:#D85A30',copa:'background:#F0FFF4;color:#276749',botella:'background:#EAF3DE;color:#3B6D11',pieza:'background:#E8F4FD;color:#1565C0'}[m]||'background:#EEEDFE;color:#3C3489';
@@ -721,7 +721,7 @@ function rventas(){
     }else{
       const sp=spirits.find(x=>x.id===s.cocktail_id);
       name=sp?sp.name:'?';
-      if(mode==='shot') detail=`<span class="ml-chip" style="background:#FFF0E8;color:#D85A30">Shot −${(s.qty||1)*45}ml total</span>`;
+      if(mode==='shot') detail=`<span class="ml-chip" style="background:#FFF0E8;color:#D85A30">Shot −${(s.qty||1)*60}ml total</span>`;
       else if(mode==='copa') detail=`<span class="ml-chip" style="background:#F0FFF4;color:#276749">Copa −${(s.qty||1)*150}ml total</span>`;
       else if(mode==='botella') detail=`<span class="ml-chip" style="background:#EAF3DE;color:#3B6D11">−${s.qty||1} botella(s) completa(s)</span>`;
       else if(mode==='pieza') detail=`<span class="ml-chip" style="background:#E8F4FD;color:#1565C0">−${s.qty||1} pieza(s)</span>`;
