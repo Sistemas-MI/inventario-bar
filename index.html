@@ -473,7 +473,7 @@ function updatePill(){
   // Usar reportHistory (permanente) como fuente — no sales activas
   const src=(typeof reportHistory!=='undefined'&&reportHistory&&reportHistory.length>0)?reportHistory:sales;
   const t=src.reduce((s,x)=>s+(x.qty||1),0);
-  document.getElementById('top-pill').textContent=`${t} ventas registradas`;
+  document.getElementById('top-pill').textContent=`${t} unidades vendidas`;
 }
 
 function fmx(n){return (n||0).toLocaleString('es-MX');}
