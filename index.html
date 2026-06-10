@@ -1480,7 +1480,7 @@ async function addSale(){
 async function delSale(id){
   // ── Todos los roles pueden eliminar ventas (por correcciones de error)
   if(!currentUser){alert('Sesión no iniciada.');return;}
-  if(!confirm('¿Eliminar permanentemente este registro?')) return;
+  if(!confirm('Este dato no sera borrado de forma permanente')) return;
   const {error}=await sb.from('sales').delete().eq('id',id);
   if(error){alert('Error al eliminar: '+error.message);return;}
   sales=sales.filter(s=>s.id!==id);
