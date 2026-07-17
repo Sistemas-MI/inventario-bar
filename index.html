@@ -1132,13 +1132,11 @@ function rCatalogoBarra(){
     const consumedStr=isPiece?`${consumedUnits} pzas`:`−${totalBtlConsumed.toFixed(2)} btl`;
     const consumedMLStr=(!isPiece&&consumedML>0)?`<span style="font-size:10px;color:#A32D2D;display:block">−${Math.round(consumedML)}ml</span>`:'';
     const remSub=isPiece?'Cerrado':`${Math.round(remBot*sp.ml)}ml`;
-    const transferredIn=getTransferredIn(sp.id);
-    const transferredNote=transferredIn>0?`<span style="font-size:9.5px;color:var(--accent);display:block">+${transferredIn.toFixed(2)} de bodega</span>`:'';
     return`<tr>
       <td style="font-weight:500">${sp.name}<br><span style="font-size:10px;color:var(--txt3);font-weight:400">${(sp.product_type||'').toUpperCase()}</span></td>
       <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:11px">${sp.cat}</span></td>
       <td style="text-align:center">${sp.ml}ml</td>
-      <td style="text-align:center;font-weight:500">${parseFloat(sp.stock_barra||0).toFixed(2)}${transferredNote}</td>
+      <td style="text-align:center;font-weight:500">${parseFloat(sp.stock_barra||0).toFixed(2)}</td>
       <td style="text-align:center;color:#A32D2D">${consumedStr}${consumedMLStr}</td>
       <td style="text-align:center"><span style="font-weight:500">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--txt3);display:block">${remSub}</span></td>
       <td style="min-width:70px">
@@ -1206,7 +1204,6 @@ function rCatalogoBodega(){
 
   const rows=spList.map(sp=>{
     const initial=parseFloat(sp.stock_bodega)||0;
-    const transferredOut=getTransferredIn(sp.id);
     const rem=getEffectiveBodegaStock(sp);
     const p=getBodegaPct(sp);
     const fc=p<=0?'#F09595':p>=0.5?'#97C459':p>=0.25?'#EF9F27':'#E24B4A';
@@ -1217,7 +1214,6 @@ function rCatalogoBodega(){
       <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:11px">${sp.cat}</span></td>
       <td style="text-align:center">${sp.ml}ml</td>
       <td style="text-align:center;font-weight:500">${initial.toFixed(2)}</td>
-      <td style="text-align:center;color:#A32D2D">${transferredOut>0?`−${transferredOut.toFixed(2)} a barra`:'—'}</td>
       <td style="text-align:center;font-weight:500">${rem.toFixed(2)}</td>
       <td style="min-width:70px">
         <div class="prog"><div class="prog-fill" style="width:${Math.round(p*100)}%;background:${fc}"></div></div>
@@ -1247,10 +1243,10 @@ function rCatalogoBodega(){
         <table style="table-layout:fixed;width:100%">
           <colgroup>
             <col style="width:175px"><col style="width:100px"><col style="width:70px"><col style="width:90px">
-            <col style="width:110px"><col style="width:90px"><col style="width:75px"><col style="width:68px"><col style="width:115px">
+            <col style="width:95px"><col style="width:75px"><col style="width:68px"><col style="width:115px">
           </colgroup>
           <thead><tr>
-            ${[['name','Línea de producto',''],['cat','Categoría',''],['ml','Capacidad','text-align:center'],['stock','Inicial (bodega)','text-align:center'],['out','Traspasado','text-align:center'],['rem','Disponible','text-align:center'],['level','Nivel',''],['status','Estado','']].map(([key,lbl,sty])=>{
+            ${[['name','Línea de producto',''],['cat','Categoría',''],['ml','Capacidad','text-align:center'],['stock','Inicial (bodega)','text-align:center'],['rem','Disponible','text-align:center'],['level','Nivel',''],['status','Estado','']].map(([key,lbl,sty])=>{
               const isActive=_cSort===key;
               const arrow=isActive?(_cSortDir===1?'↑':'↓'):'<span style="opacity:0.25;font-size:9px">↕</span>';
               const sortable=['name','cat','ml','stock','rem'].includes(key);
