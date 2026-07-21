@@ -1201,13 +1201,15 @@ function rCatalogoBarra(){
     const consumedStr=isPiece?`${consumedUnits} pzas`:`−${totalBtlConsumed.toFixed(2)} btl`;
     const consumedMLStr=(!isPiece&&consumedML>0)?`<span style="font-size:10px;color:#A32D2D;display:block">−${Math.round(consumedML)}ml</span>`:'';
     const remSub=isPiece?'Cerrado':`${Math.round(remBot*sp.ml)}ml`;
+    const transferredIn=getTransferredIn(sp.id);
+    const transferredNote=transferredIn>0?`<span style="font-size:9.5px;color:#3B6D11;font-weight:500;display:block">+${transferredIn.toFixed(2)} de bodega</span>`:'';
     return`<tr>
       <td style="font-weight:500">${sp.name}<br><span style="font-size:10px;color:var(--txt3);font-weight:400">${(sp.product_type||'').toUpperCase()}</span></td>
       <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:11px">${sp.cat}</span></td>
       <td style="text-align:center">${sp.ml}ml</td>
       <td style="text-align:center;font-weight:500">${parseFloat(sp.stock_barra||0).toFixed(2)}</td>
       <td style="text-align:center;color:#A32D2D">${consumedStr}${consumedMLStr}</td>
-      <td style="text-align:center"><span style="font-weight:500">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--txt3);display:block">${remSub}</span></td>
+      <td style="text-align:center"><span style="font-weight:500">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--txt3);display:block">${remSub}</span>${transferredNote}</td>
       <td style="min-width:70px">
         <div class="prog"><div class="prog-fill" style="width:${Math.round(p*100)}%;background:${fc}"></div></div>
         <span style="font-size:10px;color:var(--txt2)">${Math.round(p*100)}%</span>
@@ -2273,7 +2275,10 @@ async function transferToBarra(id, amount){
   if(data && data[0]){
     transfers.unshift({...data[0], created_by_name:currentUser?.full_name||'', created_by_email:currentUser?.email||''});
   } else {
-    // Respaldo si Supabase no regresa la fila (poco común, pero no debe romper la UI)
+    // Supabase no devolvió la fila creada (típico cuando falta política RLS de SELECT
+    // sobre "transfers", aunque el INSERT sí haya funcionado). Se refleja igual en
+    // esta sesión, pero conviene revisar las políticas para que persista al recargar.
+    console.warn('⚠️ El traspaso se guardó pero Supabase no devolvió la fila — revisa que "transfers" tenga política RLS de SELECT para tu rol, o no se verá al recargar la página.');
     transfers.unshift({id:'tmp-'+Date.now(), spirit_id:id, qty:delta, created_by:currentUser?.id||null, created_at:new Date().toISOString(), created_by_name:currentUser?.full_name||'', created_by_email:currentUser?.email||''});
   }
   render();
