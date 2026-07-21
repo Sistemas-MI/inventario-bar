@@ -1083,6 +1083,21 @@ function rCatalogo(){
   return tabsHTML+(_catLoc==='bodega'?rCatalogoBodega():rCatalogoBarra());
 }
 
+// ── Número de semana ISO-8601 (lunes a domingo, semana 1 = la que contiene el 4 de enero)
+function getISOWeek(date){
+  const d=new Date(Date.UTC(date.getFullYear(),date.getMonth(),date.getDate()));
+  const dayNum=d.getUTCDay()||7;
+  d.setUTCDate(d.getUTCDate()+4-dayNum);
+  const yearStart=new Date(Date.UTC(d.getUTCFullYear(),0,1));
+  const weekNo=Math.ceil((((d-yearStart)/86400000)+1)/7);
+  return{week:weekNo, year:d.getUTCFullYear()};
+}
+function formatWeekLabel(dateStr){
+  if(!dateStr) return '—';
+  const {week}=getISOWeek(new Date(dateStr));
+  return`Semana ${week}`;
+}
+
 // ── CATÁLOGO · BARRA ── (igual que antes: descuenta con cada venta)
 // Historial de altas (fecha de adquisición) — reutilizado en Barra y Bodega
 function renderStockEntriesHistory(location){
@@ -1096,20 +1111,54 @@ function renderStockEntriesHistory(location){
   const rows=entries.map(e=>{
     const sp=spirits.find(x=>x.id===e.spirit_id);
     const date=e.created_at?new Date(e.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+    const weekLbl=formatWeekLabel(e.created_at);
     return`<tr>
       <td style="font-weight:500">${sp?sp.name:'?'}</td>
       <td style="text-align:center;font-weight:500;color:#3B6D11">+${parseFloat(e.qty).toFixed(2)}</td>
+      <td style="text-align:center"><span class="wk-tag">${weekLbl}</span></td>
       <td style="font-size:11px;color:var(--txt2);white-space:nowrap">${date}</td>
       <td style="font-size:11px;color:var(--txt2);white-space:nowrap">${e.created_by_name||e.created_by_email||'—'}</td>
     </tr>`;
-  }).join('')||`<tr><td colspan="4" class="empty">Aún no hay altas registradas en ${location==='bodega'?'bodega':'barra'}</td></tr>`;
+  }).join('')||`<tr><td colspan="5" class="empty">Aún no hay altas registradas en ${location==='bodega'?'bodega':'barra'}</td></tr>`;
 
   return`
     <div class="card">
       <div class="card-head"><span class="card-title">Fecha de adquisición</span><span class="card-sub">Cada vez que se agrega stock (+) queda registrado aquí · ${entries.length} registro(s)</span></div>
       <div class="table-scroll" style="max-height:280px">
         <table>
-          <thead><tr><th>Producto</th><th style="text-align:center">Cantidad agregada</th><th>Fecha</th><th>Registrado por</th></tr></thead>
+          <thead><tr><th>Producto</th><th style="text-align:center">Cantidad agregada</th><th style="text-align:center">Semana</th><th>Fecha</th><th>Registrado por</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ── Historial de traspasos (bodega → barra) — se registra cada vez que se usa "Mover a Barra"
+function renderTransfersHistory(){
+  // Filtra por la familia seleccionada en el toolbar, igual que la tabla principal
+  const entries=transfers.filter(t=>{
+    const sp=spirits.find(x=>x.id===t.spirit_id);
+    return _cFilter==='all' || (sp && sp.cat===_cFilter);
+  });
+  const rows=entries.map(t=>{
+    const sp=spirits.find(x=>x.id===t.spirit_id);
+    const date=t.created_at?new Date(t.created_at).toLocaleString('es-MX',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}):'—';
+    const weekLbl=formatWeekLabel(t.created_at);
+    return`<tr>
+      <td style="font-weight:500">${sp?sp.name:'?'}</td>
+      <td style="text-align:center;font-weight:500;color:var(--burg)">${parseFloat(t.qty).toFixed(2)}</td>
+      <td style="text-align:center"><span class="wk-tag">${weekLbl}</span></td>
+      <td style="font-size:11px;color:var(--txt2);white-space:nowrap">${date}</td>
+      <td style="font-size:11px;color:var(--txt2);white-space:nowrap">${t.created_by_name||t.created_by_email||'—'}</td>
+    </tr>`;
+  }).join('')||`<tr><td colspan="5" class="empty">Aún no hay traspasos registrados</td></tr>`;
+
+  return`
+    <div class="card">
+      <div class="card-head"><span class="card-title"><i class="ti ti-arrow-right" style="margin-right:6px"></i>Historial de traspasos</span><span class="card-sub">Cada vez que se usa "Mover a Barra" queda registrado aquí · ${entries.length} registro(s)</span></div>
+      <div class="table-scroll" style="max-height:280px">
+        <table>
+          <thead><tr><th>Producto</th><th style="text-align:center">Cantidad movida</th><th style="text-align:center">Semana</th><th>Fecha</th><th>Registrado por</th></tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
@@ -1251,6 +1300,12 @@ function rCatalogoBodega(){
           <button class="btn btn-coral btn-sm" style="padding:4px 8px" onclick="adjustStock('${sp.id}', parseFloat(document.getElementById('adj-${sp.id}')?.value)||1)" title="Agregar unidades"><i class="ti ti-plus"></i></button>
         </div>
       </td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input id="mv-${sp.id}" type="number" min="0.1" max="${rem>0?rem.toFixed(2):0}" step="0.1" value="1" style="width:54px;padding:4px 6px;border:0.5px solid var(--bdr2);border-radius:6px;font-size:12px;font-family:var(--font);text-align:center;background:var(--bg);color:var(--txt)" title="Cantidad a mover a barra (disponible: ${rem.toFixed(2)})">
+          <button class="btn btn-coral btn-sm" style="padding:4px 8px;white-space:nowrap" ${rem<=0?'disabled':''} onclick="transferToBarra('${sp.id}', parseFloat(document.getElementById('mv-${sp.id}')?.value)||1)" title="Mover a Barra"><i class="ti ti-arrow-right"></i> Mover a Barra</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 
@@ -1267,7 +1322,7 @@ function rCatalogoBodega(){
         <table style="table-layout:fixed;width:100%">
           <colgroup>
             <col style="width:175px"><col style="width:100px"><col style="width:70px"><col style="width:90px">
-            <col style="width:110px"><col style="width:90px"><col style="width:75px"><col style="width:68px"><col style="width:115px">
+            <col style="width:110px"><col style="width:90px"><col style="width:75px"><col style="width:68px"><col style="width:115px"><col style="width:175px">
           </colgroup>
           <thead><tr>
             ${[['name','Línea de producto',''],['cat','Categoría',''],['ml','Capacidad','text-align:center'],['stock','Inicial (bodega)','text-align:center'],['out','Traspasado','text-align:center'],['rem','Disponible','text-align:center'],['level','Nivel',''],['status','Estado','']].map(([key,lbl,sty])=>{
@@ -1279,12 +1334,14 @@ function rCatalogoBodega(){
                 : `<th style="${sty};white-space:nowrap">${lbl}</th>`;
             }).join('')}
             <th>Ajuste físico</th>
+            <th>Traspaso a barra</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
       </div>
     </div>
-    ${renderStockEntriesHistory('bodega')}`;
+    ${renderStockEntriesHistory('bodega')}
+    ${renderTransfersHistory()}`;
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -2175,10 +2232,56 @@ async function adjustStock(id, amount){
   render();
 }
 
+// ═══════════════════════════════════════════════════════════
+// TRASPASO MANUAL — Bodega → Barra
+// Mueve una cantidad puntual del stock de bodega hacia la barra,
+// insertando un registro en la tabla `transfers` (misma fuente
+// permanente que ya usa getTransferredIn para calcular el stock
+// efectivo). No modifica stock_barra/stock_bodega directamente:
+// ambos catálogos se recalculan solos a partir de este registro.
+// ═══════════════════════════════════════════════════════════
+async function transferToBarra(id, amount){
+  // ── RBAC guard: mismo criterio que el ajuste de stock — solo admin y manager
+  if(!currentUser){alert('Sesión no iniciada.');return;}
+  if(currentUser.role==='bartender'||currentUser.role==='lector'){
+    alert('Solo el encargado o administrador puede mover stock entre catálogos.');return;
+  }
+  const sp=spirits.find(s=>s.id===id);
+  if(!sp) return;
 
-// ═══════════════════════════════════════════════════════════
-// AUTH — Login · Logout · RBAC
-// ═══════════════════════════════════════════════════════════
+  const delta=parseFloat(parseFloat(amount).toFixed(2));
+  if(isNaN(delta)||delta<0.01){alert('Cantidad inválida. Debe ser de al menos 0.01 para que valga la pena registrar el traspaso.');return;}
+
+  const available=getEffectiveBodegaStock(sp);
+  if(delta>available+1e-9){
+    alert(`Solo hay ${available.toFixed(2)} disponible en bodega de "${sp.name}". No puedes mover ${delta.toFixed(2)}.`);
+    return;
+  }
+  if(!confirm(`¿Mover ${delta.toFixed(2)} de "${sp.name}" de bodega a barra?`)) return;
+
+  // Feedback visual inmediato
+  const btns=document.querySelectorAll(`button[onclick*="transferToBarra('${id}'"]`);
+  const originalHTML=btns.length?btns[0].innerHTML:'';
+  btns.forEach(b=>{b.disabled=true;b.innerHTML='<i class="ti ti-loader-2"></i> Moviendo...';});
+
+  const {data, error}=await sb.from('transfers').insert({spirit_id:id, qty:delta, created_by:currentUser?.id||null}).select();
+
+  if(error){
+    alert('Error al guardar el traspaso en Supabase: '+error.message+'\n\nVerifica que la tabla "transfers" exista y que las políticas RLS permitan INSERT a tu rol.');
+    btns.forEach(b=>{b.disabled=false;b.innerHTML=originalHTML;});
+    return;
+  }
+
+  if(data && data[0]){
+    transfers.unshift({...data[0], created_by_name:currentUser?.full_name||'', created_by_email:currentUser?.email||''});
+  } else {
+    // Respaldo si Supabase no regresa la fila (poco común, pero no debe romper la UI)
+    transfers.unshift({id:'tmp-'+Date.now(), spirit_id:id, qty:delta, created_by:currentUser?.id||null, created_at:new Date().toISOString(), created_by_name:currentUser?.full_name||'', created_by_email:currentUser?.email||''});
+  }
+  render();
+}
+
+
 
 // ── Arranca la app: revisa sesión existente primero
 async function initApp(){
@@ -2328,6 +2431,17 @@ function applyRoleUI(){
   });
   // También ocultar el input de cantidad si es lector/bartender
   document.querySelectorAll('input[id^="adj-"]').forEach(inp=>{
+    inp.style.display=(role==='bartender'||role==='lector')?'none':'';
+  });
+
+  // ════════════════════════════════════════════
+  // BOTÓN "Mover a Barra" (traspaso bodega → barra)
+  // Mismo criterio que el ajuste de stock: solo admin y manager
+  // ════════════════════════════════════════════
+  document.querySelectorAll('button[onclick*="transferToBarra"]').forEach(btn=>{
+    btn.style.display=(role==='bartender'||role==='lector')?'none':'';
+  });
+  document.querySelectorAll('input[id^="mv-"]').forEach(inp=>{
     inp.style.display=(role==='bartender'||role==='lector')?'none':'';
   });
 }
