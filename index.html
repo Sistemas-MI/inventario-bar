@@ -341,15 +341,14 @@ let _weekInput='';             // persiste el texto de semana entre renders
 // ═══════════════════════════════════════════════════════════
 async function loadAll(){
   try{
-    const [sp,rc,ri,sl,tr,se]=await Promise.all([
+    const [sp,rc,ri,tr,se]=await Promise.all([
       sb.from('spirits').select('*').order('cat').order('name'),
       sb.from('recipes').select('*').order('cat').order('name'),
       sb.from('recipe_ingredients').select('*'),
-      sb.from('sales').select('*').order('created_at',{ascending:false}),
       sb.from('transfers').select('*').order('created_at',{ascending:false}).limit(5000),
       sb.from('stock_entries').select('*').order('created_at',{ascending:false}).limit(5000)
     ]);
-    if(sp.error||rc.error||ri.error||sl.error) throw new Error('Error en Supabase');
+    if(sp.error||rc.error||ri.error) throw new Error('Error en Supabase');
     if(tr.error) console.warn('⚠️ No se pudo leer transfers (¿ya creaste la tabla en Supabase?):', tr.error.message);
     if(se.error) console.warn('⚠️ No se pudo leer stock_entries (¿ya creaste la tabla en Supabase?):', se.error.message);
     spirits=(sp.data||[]).map(s=>({
@@ -359,16 +358,24 @@ async function loadAll(){
       stock_barra: s.stock_barra!=null?s.stock_barra:(s.stock!=null?s.stock:0),
       stock_bodega: s.stock_bodega!=null?s.stock_bodega:0
     }));
-    sales=sl.data||[];
     transfers=tr.data||[];
     stockEntries=se.data||[];
-    // Enriquecer ventas, traspasos y altas con nombre/email de quien los registró
-    const userIds=[...new Set([...sales.map(s=>s.registered_by),...transfers.map(t=>t.created_by),...stockEntries.map(e=>e.created_by)].filter(Boolean))];
+    recipes=(rc.data||[]).map(r=>({
+      ...r,
+      ings:(ri.data||[]).filter(i=>i.recipe_id===r.id).map(i=>({id:i.spirit_id,ml:i.ml}))
+    }));
+    // Init default botella sub-filter with first available category
+    const botCats=[...new Set(spirits.filter(s=>s.product_type==='destilado'||s.product_type==='licor'||s.product_type==='vino').map(s=>s.cat))].sort();
+    if(!_subBotella && botCats.length) _subBotella=botCats[0];
+    updatePill();
+    await loadReportHistory(); // ventas + historial permanente, ahora una sola fuente (report_history)
+    // Enriquecer ventas (via report_history), traspasos y altas con nombre/email de quien los registró
+    const userIds=[...new Set([...reportHistory.map(s=>s.registered_by),...transfers.map(t=>t.created_by),...stockEntries.map(e=>e.created_by)].filter(Boolean))];
     if(userIds.length){
       const {data:profData}=await sb.from('profiles').select('id,full_name,email').in('id',userIds);
       if(profData){
         const profMap=Object.fromEntries(profData.map(p=>[p.id,p]));
-        sales=sales.map(s=>({
+        reportHistory=reportHistory.map(s=>({
           ...s,
           registered_by_name: s.registered_by?(profMap[s.registered_by]?.full_name||''):null,
           registered_by_email: s.registered_by?(profMap[s.registered_by]?.email||''):null
@@ -385,15 +392,7 @@ async function loadAll(){
         }));
       }
     }
-    recipes=(rc.data||[]).map(r=>({
-      ...r,
-      ings:(ri.data||[]).filter(i=>i.recipe_id===r.id).map(i=>({id:i.spirit_id,ml:i.ml}))
-    }));
-    // Init default botella sub-filter with first available category
-    const botCats=[...new Set(spirits.filter(s=>s.product_type==='destilado'||s.product_type==='licor'||s.product_type==='vino').map(s=>s.cat))].sort();
-    if(!_subBotella && botCats.length) _subBotella=botCats[0];
-    updatePill();
-    await loadReportHistory();
+    syncSalesView(); // reconstruye `sales` (lo que ve la pestaña Ventas) a partir de report_history
     render();
   }catch(e){
     document.getElementById('main').innerHTML=`<div class="alert-bar" style="margin:22px"><i class="ti ti-alert-circle"></i> Error de conexión. Revisa credenciales de Supabase en consola.</div>`;
@@ -1346,89 +1345,57 @@ function rCatalogoBodega(){
 
 // ═══════════════════════════════════════════════════════════
 // REPORTES — Historical persistent log (Supabase: report_history)
+// Desde ahora report_history es también la fuente donde se registran las
+// ventas nuevas (antes se escribía primero en `sales` y se replicaba aquí).
+// La tabla `sales` queda intacta en Supabase (no se borra, no se pierde
+// nada de lo ya registrado) pero deja de recibir escrituras nuevas.
 // ═══════════════════════════════════════════════════════════
 let reportHistory = [];
 
 /**
- * Registra o actualiza de forma permanente una venta en Supabase.
- * Guarda un snapshot del inventario líquido exacto en el momento de la operación.
+ * Reconstruye `sales` (lo que ve/usa la pestaña Ventas) a partir de
+ * report_history, ocultando las filas marcadas como eliminadas
+ * (deleted_at) SIN quitarlas de report_history. Así el frontend se
+ * comporta exactamente igual que antes: al "eliminar" una venta
+ * desaparece de la lista, pero el stock/las mermas no se revierten,
+ * porque el cálculo de consumo (_getStockSource) sigue leyendo TODO
+ * report_history sin filtrar por deleted_at.
  */
-async function syncReportHistory(saleRecord) {
-  // 1. Sincronizar memoria RAM inmediata para mantener la UI reactiva
-  if (!reportHistory.some(r => String(r.sale_id) === String(saleRecord.id))) {
-    reportHistory.unshift({ ...saleRecord, sale_id: saleRecord.id });
-  }
-
-  // 2. Construir el Payload sanitizado y blindar tipos de datos
-  const payload = {
-    sale_id:       String(saleRecord.id), // Cast seguro a string
-    cocktail_id:   String(saleRecord.cocktail_id || ''),
-    qty:           Number(saleRecord.qty) || 1,
-    week:          saleRecord.week || null,
-    sale_mode:     saleRecord.sale_mode || 'coctel',
-    created_at:    saleRecord.created_at || new Date().toISOString(),
-    registered_by: currentUser?.id || null,  // UUID permanente de quien registró
-    
-    // 🛡️ CONTROL DE MERMAS RESCATADO: Foto matemática del alcohol en barra en este milisegundo
-    stock_snapshot: JSON.stringify(
-      spirits.map(sp => {
-        const barraStock=getEffectiveBarraStock(sp);
-        const remainingBarraUnits=Math.max(0, barraStock - (getConsumedML(sp.id) / sp.ml) - getConsumedUnits(sp.id));
-        return {
-          id: sp.id,
-          name: sp.name,
-          stock_barra: barraStock,
-          stock_bodega: getEffectiveBodegaStock(sp),
-          ml: sp.ml,
-          // remaining_barra: remanente en BARRA en botellas/piezas equivalentes (no en ml) —
-          // se usa para el comparativo semanal y es consistente entre líquidos y piezas.
-          remaining_barra: remainingBarraUnits,
-          // Calcula mililitros restantes en barra restando consumos por receta y unidades físicas vendidas
-          remaining_ml: Math.round(remainingBarraUnits * sp.ml)
-        };
-      })
-    )
-  };
-
-  // 3. Persistencia dura en la nube de Supabase (Evita duplicados por 'sale_id')
-  const { error } = await sb.from('report_history').upsert(payload, { onConflict: 'sale_id' });
-
-  if (error) {
-    console.error('❌ Error crítico al escribir en report_history de Supabase:', error.message, error.details, error.hint);
-  } else {
-    console.log('✅ Historial y Control de mermas sincronizados en Supabase para venta:', payload.sale_id);
-  }
+function syncSalesView(){
+  sales = reportHistory
+    .filter(r => !r.deleted_at)
+    .map(r => ({
+      id: r.id,
+      cocktail_id: r.cocktail_id,
+      qty: r.qty,
+      week: r.week,
+      sale_mode: r.sale_mode,
+      created_at: r.created_at,
+      registered_by: r.registered_by,
+      registered_by_name: r.registered_by_name,
+      registered_by_email: r.registered_by_email
+    }));
 }
 
 /**
  * Carga el historial directamente desde Supabase ordenado de forma cronológica descendente.
- * report_history es la fuente de verdad permanente del consumo de stock.
- * Eliminar una venta de la tabla `sales` NO revierte el stock porque
- * los cálculos de consumo se basan en report_history.
+ * report_history es la fuente de verdad permanente del consumo de stock Y del
+ * registro de ventas. "Eliminar" una venta solo la marca con deleted_at — el
+ * cálculo de consumo se basa en report_history completo, deleted_at incluido.
  */
 async function loadReportHistory() {
   try {
     const { data, error } = await sb.from('report_history').select('*').order('created_at', { ascending: false }).limit(5000);
-    
     if (!error && data) {
       reportHistory = data;
       console.log('✅ Historial permanente cargado desde Supabase:', data.length, 'registros.');
-      // Si report_history está vacío pero hay ventas, migrar (primera vez)
-      if(data.length===0 && sales.length>0){
-        console.log('⚠️ report_history vacío, sincronizando ventas existentes...');
-        for(const s of sales){
-          await syncReportHistory(s);
-        }
-      }
     } else {
       if (error) console.warn('⚠️ No se pudo leer report_history:', error.message);
-      // Fallback: usar ventas actuales en memoria (modo contingencia)
-      reportHistory = sales.map(s => ({ ...s, sale_id: String(s.id) }));
-      console.log('⚠️ Modo contingencia: usando sales como fuente temporal.');
+      reportHistory = [];
     }
   } catch (e) {
     console.error('❌ Excepción en loadReportHistory:', e);
-    reportHistory = sales.map(s => ({ ...s, sale_id: String(s.id) }));
+    reportHistory = [];
   }
 }
 
@@ -2157,19 +2124,46 @@ async function addSale(){
   const btn=document.getElementById('btn-save');
   if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader-2"></i> Confirmando...';}
 
-  const {data,error}=await sb.from('sales').insert({cocktail_id,qty,week,sale_mode,registered_by:currentUser?.id||null}).select();
+  // Registro provisional en memoria PRIMERO (igual que el comportamiento anterior):
+  // así el snapshot de stock que se guarda ya refleja el consumo de esta venta.
+  const provisionalId='tmp-'+Date.now();
+  reportHistory.unshift({ id:provisionalId, cocktail_id, qty, week, sale_mode, created_at:new Date().toISOString(), registered_by:currentUser?.id||null });
+
+  // 🛡️ Control de mermas: foto del inventario líquido justo después de esta venta
+  const stock_snapshot=JSON.stringify(
+    spirits.map(sp=>{
+      const barraStock=getEffectiveBarraStock(sp);
+      const remainingBarraUnits=Math.max(0, barraStock - (getConsumedML(sp.id) / sp.ml) - getConsumedUnits(sp.id));
+      return {
+        id: sp.id,
+        name: sp.name,
+        stock_barra: barraStock,
+        stock_bodega: getEffectiveBodegaStock(sp),
+        ml: sp.ml,
+        remaining_barra: remainingBarraUnits,
+        remaining_ml: Math.round(remainingBarraUnits * sp.ml)
+      };
+    })
+  );
+
+  const {data,error}=await sb.from('report_history').insert({cocktail_id,qty,week,sale_mode,registered_by:currentUser?.id||null,stock_snapshot}).select();
 
   if(error){
+    reportHistory=reportHistory.filter(r=>r.id!==provisionalId); // revertir el registro provisional
     alert('Error al guardar en Supabase: '+error.message);
     if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plus"></i> Registrar operación';}
     return;
   }
-  sales.unshift({
+  // Sustituir el provisional por el registro real de Supabase (id/created_at definitivos)
+  const idx=reportHistory.findIndex(r=>r.id===provisionalId);
+  const finalRecord={
     ...data[0],
     registered_by_name: currentUser?.full_name||'',
     registered_by_email: currentUser?.email||''
-  });
-  await syncReportHistory(data[0]);
+  };
+  if(idx>=0) reportHistory[idx]=finalRecord; else reportHistory.unshift(finalRecord);
+
+  syncSalesView();
   _weekInput='';
   updatePill();
   render();
@@ -2180,9 +2174,15 @@ async function delSale(id){
   if(!currentUser){alert('Sesión no iniciada.');return;}
   if(currentUser.role==='lector'){alert('Tu rol solo tiene permiso de lectura.');return;}
   if(!confirm('Este dato no sera borrado de forma permanente')) return;
-  const {error}=await sb.from('sales').delete().eq('id',id);
+  // "Borrado suave": se marca deleted_at en report_history (no se borra la fila).
+  // Desaparece de la pestaña Ventas, pero el stock y el control de mermas no se
+  // revierten — exactamente el mismo comportamiento que tenía el sistema antes.
+  const deleted_at=new Date().toISOString();
+  const {error}=await sb.from('report_history').update({deleted_at, deleted_by:currentUser?.id||null}).eq('id',id);
   if(error){alert('Error al eliminar: '+error.message);return;}
-  sales=sales.filter(s=>s.id!==id);
+  const rec=reportHistory.find(r=>r.id===id);
+  if(rec){ rec.deleted_at=deleted_at; rec.deleted_by=currentUser?.id||null; }
+  syncSalesView();
   updatePill();
   render();
 }
