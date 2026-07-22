@@ -2176,8 +2176,14 @@ async function delSale(id){
   if(!confirm('Esta venta se eliminará PERMANENTEMENTE de la base de datos y no se podrá recuperar. ¿Deseas continuar?')) return;
   // Borrado real: se elimina la fila de report_history. A partir de ahora
   // el consumo/stock SÍ se recalcula sin esta venta (ya no hay "borrado suave").
-  const {error}=await sb.from('report_history').delete().eq('id',id);
+  const {data,error}=await sb.from('report_history').delete().eq('id',id).select();
   if(error){alert('Error al eliminar: '+error.message);return;}
+  if(!data||data.length===0){
+    // 0 filas afectadas sin error explícito = casi siempre un problema de
+    // permisos (RLS) en Supabase — avisamos en vez de fallar en silencio.
+    alert('No se pudo eliminar la venta: Supabase no encontró o no autorizó el borrado de ese registro (revisa los permisos RLS de DELETE en report_history).');
+    return;
+  }
   reportHistory=reportHistory.filter(r=>r.id!==id);
   syncSalesView();
   updatePill();
