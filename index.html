@@ -663,18 +663,25 @@ function rDash(){
   spirits.forEach(sp=>{
     const rem=getRemainingBottles(sp);
     const st=status(sp,rem);
-    if(st.cls==='b-zero') zero++;
+    // "Agotado" en el dashboard = igual que el reporte "Solo agotadas": cero
+    // en TODOS lados (barra + bodega). Si la barra está en 0 pero bodega
+    // todavía tiene respaldo, no es una emergencia de compra — cuenta como
+    // "Bajo" (solo falta un traspaso, no una compra).
+    const combinedZero=getCombinedRemaining(sp)<=0;
+    if(combinedZero) zero++;
     else if(st.cls==='b-ok') ok++;
-    else {warn++;} // b-crit = Bajo (ahora solo hay ok/bajo/agotado)
+    else {warn++;} // incluye "Bajo" real y "Agotado en barra con respaldo en bodega"
   });
   const cats=[...new Set(spirits.map(s=>s.cat))].sort();
   const selOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-  // Filtro de estado para el grid
+  // Filtro de estado para el grid — mismo criterio combinado que el conteo de arriba
   const dashStatusFilter=(sp)=>{
     const st=status(sp);
+    const combinedZero=getCombinedRemaining(sp)<=0;
+    if(combinedZero) return _dashFilter==='agotado';
     if(_dashFilter==='ok') return st.cls==='b-ok';
-    if(_dashFilter==='bajo') return st.cls==='b-crit';
-    if(_dashFilter==='agotado') return st.cls==='b-zero';
+    if(_dashFilter==='bajo') return st.cls!=='b-ok';
+    if(_dashFilter==='agotado') return false;
     return true;
   };
   const cards=spirits.filter(dashStatusFilter).map(sp=>{
