@@ -516,10 +516,11 @@ function getCombinedPct(sp){
   if(initial<=0) return 0;
   return Math.max(0,Math.min(1,getCombinedRemaining(sp)/initial));
 }
-// Umbral fijo del reporte de compras: 20% del stock combinado, o agotado.
-const REORDER_THRESHOLD=0.20;
+// Reporte de compras: "necesita reposición" ahora usa la MISMA lógica de
+// cantidad física que el Dashboard (dashStatus) — no depende de tener
+// historial de ventas para funcionar, así sirve desde el primer día.
 function needsReorder(sp){
-  return getCombinedRemaining(sp)<=0 || getCombinedPct(sp)<=REORDER_THRESHOLD;
+  return dashStatus(sp).cls!=='b-ok';
 }
 
 // Total histórico consumido de un producto, en botellas/piezas equivalentes
@@ -1540,8 +1541,8 @@ function rReportes(){
 
   const filtered=getRepFilteredSales();
 
-  // ── REPORTE DE COMPRAS — bajo/agotado combinando barra+bodega (umbral 20%)
-  const reorderList=[...spirits].filter(needsReorder).sort((a,b)=>getCombinedPct(a)-getCombinedPct(b));
+  // ── REPORTE DE COMPRAS — bajo/agotado por cantidad física real (barra+bodega)
+  const reorderList=[...spirits].filter(needsReorder).sort((a,b)=>getCombinedRemaining(a)-getCombinedRemaining(b));
   const zeroCount=reorderList.filter(sp=>getCombinedRemaining(sp)<=0).length;
   const bajosCount=reorderList.length-zeroCount;
   const reorderRows=reorderList.map(sp=>{
@@ -1559,10 +1560,10 @@ function rReportes(){
       <td style="text-align:center">${bodega.toFixed(2)}</td>
       <td style="text-align:center;font-weight:500">${total.toFixed(2)}</td>
       <td style="text-align:center">${Math.round(pct*100)}%</td>
-      <td><span class="badge ${isZero?'b-zero':'b-crit'}">${isZero?'Agotado':'Bajo ≤20%'}</span></td>
+      <td><span class="badge ${isZero?'b-zero':'b-crit'}">${isZero?'Agotado':'Bajo'}</span></td>
       <td style="text-align:center;font-weight:500;color:var(--burg)">${suggestion.qty>0?suggestion.qty+' und.':'—'}${suggestedNote}</td>
     </tr>`;
-  }).join('')||`<tr><td colspan="8" class="empty">Todo el inventario está por encima del 20% — nada que comprar por ahora</td></tr>`;
+  }).join('')||`<tr><td colspan="8" class="empty">Todo el inventario está en buen nivel — nada que comprar por ahora</td></tr>`;
 
   // ── RANKING DE CONSUMO — todos los productos, histórico permanente, por nombre
   const consumptionRanking=[...spirits]
@@ -1779,10 +1780,10 @@ function rReportes(){
   const tabCompras=`
     ${reorderList.length?`<div class="alert-bar" style="background:rgba(163,45,45,0.07);border-color:rgba(163,45,45,0.25);color:#A32D2D">
       <i class="ti ti-shopping-cart-exclamation" style="font-size:16px"></i>
-      <span><b>${reorderList.length} producto(s)</b> al 20% o menos (barra + bodega combinados) — hay que reponerlos: ${reorderList.slice(0,5).map(s=>s.name).join(', ')}${reorderList.length>5?`… y ${reorderList.length-5} más`:''}</span>
+      <span><b>${reorderList.length} producto(s)</b> con poco stock (barra + bodega) — hay que reponerlos: ${reorderList.slice(0,5).map(s=>s.name).join(', ')}${reorderList.length>5?`… y ${reorderList.length-5} más`:''}</span>
     </div>`:`<div class="alert-bar" style="background:rgba(59,109,17,0.07);border-color:rgba(59,109,17,0.2);color:#3B6D11">
       <i class="ti ti-circle-check" style="font-size:16px"></i>
-      <span>Todo el catálogo está por encima del 20% combinado (barra + bodega). Nada urgente que comprar.</span>
+      <span>Todo el catálogo tiene buen nivel de stock (barra + bodega). Nada urgente que comprar.</span>
     </div>`}
     <div class="card">
       <div class="card-head">
@@ -1794,7 +1795,7 @@ function rReportes(){
           <div class="export-menu">
             <button class="export-menu-item" onclick="exportBajosPDF();closeExportMenu('compras')">
               <i class="ti ti-list-details"></i>
-              <span class="export-menu-item-txt"><span class="export-menu-item-title">Bajos</span><br><span class="export-menu-item-sub">≤20% de stock combinado, sin contar agotados</span></span>
+              <span class="export-menu-item-txt"><span class="export-menu-item-title">Bajos</span><br><span class="export-menu-item-sub">Poco stock en barra y bodega, sin contar agotados</span></span>
               <span class="export-menu-count">${bajosCount}</span>
             </button>
             <button class="export-menu-item is-danger" onclick="exportAgotadosPDF();closeExportMenu('compras')">
@@ -1805,7 +1806,7 @@ function rReportes(){
           </div>
         </div>
       </div>
-      <div class="page-sub" style="padding:0 18px;margin:8px 0 0">Considera el stock total (barra + bodega). Umbral: 20% del stock cargado, o agotado. "Sugerido comprar" se calcula con el consumo semanal que el sistema detecta en tu historial de ventas.</div>
+      <div class="page-sub" style="padding:0 18px;margin:8px 0 0">Considera el stock físico real (barra + bodega). Bajo: 0.50 botellas o menos / 2 piezas o menos, salvo que la bodega tenga respaldo suficiente (más de 1 botella o 2 piezas). "Sugerido comprar" se calcula con el consumo semanal que el sistema detecta en tu historial de ventas.</div>
       <div class="table-scroll" style="max-height:460px;margin-top:10px">
         <table>
           <thead><tr><th>Producto</th><th>Categoría</th><th style="text-align:center">En barra</th><th style="text-align:center">En bodega</th><th style="text-align:center">Total</th><th style="text-align:center">% vs inicial</th><th>Estado</th><th style="text-align:center">Sugerido comprar</th></tr></thead>
@@ -2036,9 +2037,9 @@ document.addEventListener('click',e=>{
   });
 });
 
-// ── PDF EXPORT — Reporte de SOLO BAJOS (≤20%, sin contar los ya agotados)
+// ── PDF EXPORT — Reporte de SOLO BAJOS (poco stock físico, sin contar los ya agotados)
 function exportBajosPDF(){
-  const bajosList=[...spirits].filter(sp=>needsReorder(sp) && getCombinedRemaining(sp)>0).sort((a,b)=>getCombinedPct(a)-getCombinedPct(b));
+  const bajosList=[...spirits].filter(sp=>needsReorder(sp) && getCombinedRemaining(sp)>0).sort((a,b)=>getCombinedRemaining(a)-getCombinedRemaining(b));
   if(!bajosList.length){alert('No hay productos bajos en este momento — nada que exportar.');return;}
 
   const now=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
@@ -2046,7 +2047,7 @@ function exportBajosPDF(){
     const barra=getRemainingBottles(sp), bodega=getEffectiveBodegaStock(sp);
     const suggestion=getSuggestedRestock(sp);
     const sugeridoTxt=suggestion.qty>0?String(suggestion.qty):'—';
-    return`<tr><td>${sp.name}</td><td>${sp.cat}</td><td style="text-align:center">${barra.toFixed(2)}</td><td style="text-align:center">${bodega.toFixed(2)}</td><td>Bajo ≤20%</td><td style="text-align:center;font-weight:bold;color:#6B1F2A">${sugeridoTxt}</td></tr>`;
+    return`<tr><td>${sp.name}</td><td>${sp.cat}</td><td style="text-align:center">${barra.toFixed(2)}</td><td style="text-align:center">${bodega.toFixed(2)}</td><td>Bajo</td><td style="text-align:center;font-weight:bold;color:#6B1F2A">${sugeridoTxt}</td></tr>`;
   }).join('');
 
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
@@ -2066,7 +2067,7 @@ function exportBajosPDF(){
     .footer{margin-top:24px;font-size:10px;color:#A8937A;text-align:center}
   </style></head><body>
   <h1>Reporte de Bajos — Clandestinna</h1>
-  <div class="sub">Productos al 20% o menos de stock combinado (barra + bodega), sin contar los ya agotados · "Sugerido comprar" según el consumo semanal detectado · Generado el ${now}</div>
+  <div class="sub">Productos con poco stock físico (barra + bodega), sin contar los ya agotados · "Sugerido comprar" según el consumo semanal detectado · Generado el ${now}</div>
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-val">${bajosList.length}</div><div class="kpi-lbl">Productos bajos</div></div>
   </div>
