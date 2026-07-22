@@ -577,9 +577,9 @@ function status(sp_or_p, remainingBottles){
   if(rem<=0) return{cls:'b-zero',lbl:'Agotado'};
   const isPiece=(sp.product_type==='cerveza'||sp.product_type==='agua'||sp.product_type==='refrescos');
   if(isPiece){
-    // Piezas: bajo si quedan menos de 5
-    if(rem>=5) return{cls:'b-ok',lbl:'OK'};
-    return{cls:'b-crit',lbl:'Bajo'};
+    // Piezas: bajo si quedan 2 o menos
+    if(rem<=2) return{cls:'b-crit',lbl:'Bajo'};
+    return{cls:'b-ok',lbl:'OK'};
   }
   // Licores, destilados, vinos: bajo si quedan 0.50 botellas o menos
   if(rem>0.5) return{cls:'b-ok',lbl:'OK'};
@@ -684,8 +684,19 @@ function rDash(){
     if(_dashFilter==='agotado') return false;
     return true;
   };
-  const cards=spirits.filter(dashStatusFilter).map(sp=>{
-    const rem=getRemainingBottles(sp),st=status(sp,rem);
+  // Ordenado por cantidad disponible en barra (de menor a mayor) — así lo más
+  // urgente de atender aparece primero, en vez de orden alfabético.
+  const cards=spirits.filter(dashStatusFilter).sort((a,b)=>getRemainingBottles(a)-getRemainingBottles(b)).map(sp=>{
+    const rem=getRemainingBottles(sp);
+    let st=status(sp,rem);
+    // Si está en 0 en barra pero SÍ hay respaldo en bodega, la etiqueta de la
+    // tarjeta no debe decir "Agotado" (ese rótulo se reserva para cuando no
+    // queda nada en ningún lado) — se muestra "Bajo", igual que el grupo en
+    // el que ya se está contando arriba. Así no hay contradicción visual
+    // entre el filtro "Bajos" y una tarjeta roja de "Agotado".
+    if(st.cls==='b-zero' && getCombinedRemaining(sp)>0){
+      st={cls:'b-crit', lbl:'Bajo'};
+    }
     const isPiece=(sp.product_type==='cerveza'||sp.product_type==='agua'||sp.product_type==='refrescos');
     // Para botellas: pct = rem (0.23 → 23%, 2.89 → 100%)
     // Para piezas:   pct = rem/stock (cuántas de las iniciales quedan)
@@ -1285,8 +1296,13 @@ function rCatalogoBodega(){
     const rem=getEffectiveBodegaStock(sp);
     const p=getBodegaPct(sp);
     const fc=p<=0?'#F09595':p>=0.5?'#97C459':p>=0.25?'#EF9F27':'#E24B4A';
-    const stCls=rem<=0?'b-zero':(p<0.25?'b-crit':(p<0.5?'b-warn':'b-ok'));
-    const stLbl=rem<=0?'Agotado':(p<0.25?'Crítico':(p<0.5?'Bajo':'OK'));
+    // Bodega: "Bajo" por cantidad física disponible, no por porcentaje —
+    // botellas (destilado/licor/vino): bajo con 1 o menos disponibles.
+    // piezas (cerveza/agua/refrescos): bajo con 2 o menos disponibles.
+    const isPiece=sp.product_type==='cerveza'||sp.product_type==='agua'||sp.product_type==='refrescos';
+    const bajoThreshold=isPiece?2:1;
+    const stCls=rem<=0?'b-zero':(rem<=bajoThreshold?'b-crit':'b-ok');
+    const stLbl=rem<=0?'Agotado':(rem<=bajoThreshold?'Bajo':'OK');
     return`<tr>
       <td style="font-weight:500">${sp.name}<br><span style="font-size:10px;color:var(--txt3);font-weight:400">${(sp.product_type||'').toUpperCase()}</span></td>
       <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:11px">${sp.cat}</span></td>
@@ -1519,6 +1535,7 @@ function rReportes(){
   // ── REPORTE DE COMPRAS — bajo/agotado combinando barra+bodega (umbral 20%)
   const reorderList=[...spirits].filter(needsReorder).sort((a,b)=>getCombinedPct(a)-getCombinedPct(b));
   const zeroCount=reorderList.filter(sp=>getCombinedRemaining(sp)<=0).length;
+  const bajosCount=reorderList.length-zeroCount;
   const reorderRows=reorderList.map(sp=>{
     const barra=getRemainingBottles(sp), bodega=getEffectiveBodegaStock(sp), total=getCombinedRemaining(sp);
     const pct=getCombinedPct(sp);
@@ -1767,14 +1784,14 @@ function rReportes(){
             <i class="ti ti-file-type-pdf"></i> Exportar PDF <i class="ti ti-chevron-down"></i>
           </button>
           <div class="export-menu">
-            <button class="export-menu-item" onclick="exportComprasPDF();closeExportMenu('compras')">
+            <button class="export-menu-item" onclick="exportBajosPDF();closeExportMenu('compras')">
               <i class="ti ti-list-details"></i>
-              <span class="export-menu-item-txt"><span class="export-menu-item-title">Todas</span><br><span class="export-menu-item-sub">Bajas + agotadas (≤20%)</span></span>
-              <span class="export-menu-count">${reorderList.length}</span>
+              <span class="export-menu-item-txt"><span class="export-menu-item-title">Bajos</span><br><span class="export-menu-item-sub">≤20% de stock combinado, sin contar agotados</span></span>
+              <span class="export-menu-count">${bajosCount}</span>
             </button>
             <button class="export-menu-item is-danger" onclick="exportAgotadosPDF();closeExportMenu('compras')">
               <i class="ti ti-alert-triangle"></i>
-              <span class="export-menu-item-txt"><span class="export-menu-item-title">Solo agotadas</span><br><span class="export-menu-item-sub">Stock cero — comprar ya</span></span>
+              <span class="export-menu-item-txt"><span class="export-menu-item-title">Agotados</span><br><span class="export-menu-item-sub">Stock cero — comprar ya</span></span>
               <span class="export-menu-count">${zeroCount}</span>
             </button>
           </div>
@@ -2011,22 +2028,21 @@ document.addEventListener('click',e=>{
   });
 });
 
-// ── PDF EXPORT — Reporte de compras (bajos y agotados, barra+bodega)
-function exportComprasPDF(){
-  const reorderList=[...spirits].filter(needsReorder).sort((a,b)=>getCombinedPct(a)-getCombinedPct(b));
-  if(!reorderList.length){alert('No hay productos bajos ni agotados en este momento — nada que exportar.');return;}
+// ── PDF EXPORT — Reporte de SOLO BAJOS (≤20%, sin contar los ya agotados)
+function exportBajosPDF(){
+  const bajosList=[...spirits].filter(sp=>needsReorder(sp) && getCombinedRemaining(sp)>0).sort((a,b)=>getCombinedPct(a)-getCombinedPct(b));
+  if(!bajosList.length){alert('No hay productos bajos en este momento — nada que exportar.');return;}
 
   const now=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
-  const rows=reorderList.map(sp=>{
-    const barra=getRemainingBottles(sp), bodega=getEffectiveBodegaStock(sp), total=getCombinedRemaining(sp);
+  const rows=bajosList.map(sp=>{
+    const barra=getRemainingBottles(sp), bodega=getEffectiveBodegaStock(sp);
     const suggestion=getSuggestedRestock(sp);
-    const estado=total<=0?'Agotado':'Bajo ≤20%';
     const sugeridoTxt=suggestion.qty>0?String(suggestion.qty):'—';
-    return`<tr><td>${sp.name}</td><td>${sp.cat}</td><td style="text-align:center">${barra.toFixed(2)}</td><td style="text-align:center">${bodega.toFixed(2)}</td><td>${estado}</td><td style="text-align:center;font-weight:bold;color:#6B1F2A">${sugeridoTxt}</td></tr>`;
+    return`<tr><td>${sp.name}</td><td>${sp.cat}</td><td style="text-align:center">${barra.toFixed(2)}</td><td style="text-align:center">${bodega.toFixed(2)}</td><td>Bajo ≤20%</td><td style="text-align:center;font-weight:bold;color:#6B1F2A">${sugeridoTxt}</td></tr>`;
   }).join('');
 
   const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Reporte de Compras — Clandestinna</title>
+  <title>Reporte de Bajos — Clandestinna</title>
   <style>
     body{font-family:Georgia,serif;font-size:12px;color:#1A1008;padding:32px}
     h1{font-size:22px;color:#6B1F2A;margin-bottom:4px}
@@ -2041,11 +2057,10 @@ function exportComprasPDF(){
     tr:nth-child(even) td{background:#FAF6F0}
     .footer{margin-top:24px;font-size:10px;color:#A8937A;text-align:center}
   </style></head><body>
-  <h1>Reporte de Compras — Clandestinna</h1>
-  <div class="sub">Productos al 20% o menos de stock combinado (barra + bodega), o agotados · "Sugerido comprar" según el consumo semanal detectado · Generado el ${now}</div>
+  <h1>Reporte de Bajos — Clandestinna</h1>
+  <div class="sub">Productos al 20% o menos de stock combinado (barra + bodega), sin contar los ya agotados · "Sugerido comprar" según el consumo semanal detectado · Generado el ${now}</div>
   <div class="kpi-row">
-    <div class="kpi"><div class="kpi-val">${reorderList.length}</div><div class="kpi-lbl">Productos a reponer</div></div>
-    <div class="kpi"><div class="kpi-val">${reorderList.filter(sp=>getCombinedRemaining(sp)<=0).length}</div><div class="kpi-lbl">Agotados</div></div>
+    <div class="kpi"><div class="kpi-val">${bajosList.length}</div><div class="kpi-lbl">Productos bajos</div></div>
   </div>
   <table><thead><tr><th>Producto</th><th>Categoría</th><th>En barra</th><th>En bodega</th><th>Estado</th><th>Sugerido comprar</th></tr></thead>
   <tbody>${rows}</tbody></table>
