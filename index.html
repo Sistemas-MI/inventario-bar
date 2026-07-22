@@ -468,15 +468,15 @@ function getConsumedUnits(sid){
 function getTransferredIn(sid){
   return transfers.reduce((t,x)=>t+(x.spirit_id===sid?parseFloat(x.qty)||0:0),0);
 }
-// Stock efectivo EN BARRA = lo que inició en barra + todo lo que ha llegado de bodega.
+// Stock efectivo EN BARRA = lo que inició en barra + lo que ha llegado de
+// bodega + lo que ha llegado directo de bonificaciones.
 // Sobre esto se resta el consumo de ventas (igual que antes).
 function getEffectiveBarraStock(sp){
-  return (parseFloat(sp.stock_barra)||0)+getTransferredIn(sp.id);
+  return (parseFloat(sp.stock_barra)||0)+getTransferredIn(sp.id)+getBonifTransferredOut(sp.id);
 }
-// Stock efectivo EN BODEGA = lo que inició en bodega + lo que ha llegado de
-// bonificaciones - todo lo que ya salió hacia barra.
+// Stock efectivo EN BODEGA = lo que inició en bodega - todo lo que ya salió hacia barra.
 function getEffectiveBodegaStock(sp){
-  return Math.max(0,(parseFloat(sp.stock_bodega)||0)+getBonifTransferredOut(sp.id)-getTransferredIn(sp.id));
+  return Math.max(0,(parseFloat(sp.stock_bodega)||0)-getTransferredIn(sp.id));
 }
 function getBodegaPct(sp){
   const initial=parseFloat(sp.stock_bodega)||0;
@@ -486,14 +486,14 @@ function getBodegaPct(sp){
 
 // ═══════════════════════════════════════════════════════════
 // BONIFICACIONES — botellas que regala el proveedor (fuente permanente:
-// tabla `bonif_transfers`). Funciona igual que Bodega→Barra, pero para
-// Bonificaciones→Bodega: nunca se revierte solo, es el registro real de
-// "se movió una botella de bonificaciones a bodega".
+// tabla `bonif_transfers`). Igual que Bodega→Barra, pero directo de
+// Bonificaciones→Barra (para usarse ya): nunca se revierte solo, es el
+// registro real de "se movió una botella de bonificaciones a barra".
 // ═══════════════════════════════════════════════════════════
 function getBonifTransferredOut(sid){
   return bonifTransfers.reduce((t,x)=>t+(x.spirit_id===sid?parseFloat(x.qty)||0:0),0);
 }
-// Stock efectivo EN BONIFICACIONES = lo que se dio de alta - lo que ya se movió a bodega.
+// Stock efectivo EN BONIFICACIONES = lo que se dio de alta - lo que ya se movió a barra.
 function getEffectiveBonifStock(sp){
   return Math.max(0,(parseFloat(sp.stock_bonificaciones)||0)-getBonifTransferredOut(sp.id));
 }
@@ -1244,7 +1244,7 @@ function renderBonifTransfersHistory(){
 
   return`
     <div class="card">
-      <div class="card-head"><span class="card-title"><i class="ti ti-gift" style="margin-right:6px"></i>Historial de traspasos — Bonificaciones</span><span class="card-sub">Cada vez que se usa "Mover a Bodega" queda registrado aquí · ${entries.length} registro(s)</span></div>
+      <div class="card-head"><span class="card-title"><i class="ti ti-gift" style="margin-right:6px"></i>Historial de traspasos — Bonificaciones</span><span class="card-sub">Cada vez que se usa "Mover a Barra" queda registrado aquí · ${entries.length} registro(s)</span></div>
       <div class="table-scroll" style="max-height:280px">
         <table>
           <thead><tr><th>Producto</th><th style="text-align:center">Cantidad movida</th><th style="text-align:center">Semana</th><th>Fecha</th><th>Registrado por</th></tr></thead>
@@ -1472,7 +1472,7 @@ function rCatalogoBonificaciones(){
       <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:11px">${sp.cat}</span></td>
       <td style="text-align:center">${sp.ml}ml</td>
       <td style="text-align:center;font-weight:500">${initial.toFixed(2)}</td>
-      <td style="text-align:center;color:#A32D2D">${transferredOut>0?`−${transferredOut.toFixed(2)} a bodega`:'—'}</td>
+      <td style="text-align:center;color:#A32D2D">${transferredOut>0?`−${transferredOut.toFixed(2)} a barra`:'—'}</td>
       <td style="text-align:center;font-weight:500">${rem.toFixed(2)}</td>
       <td style="min-width:70px">
         <div class="prog"><div class="prog-fill" style="width:${Math.round(p*100)}%;background:${fc}"></div></div>
@@ -1488,8 +1488,8 @@ function rCatalogoBonificaciones(){
       </td>
       <td>
         <div style="display:flex;align-items:center;gap:4px">
-          <input id="mvb-${sp.id}" type="number" min="0.1" max="${rem>0?rem.toFixed(2):0}" step="0.1" value="1" style="width:54px;padding:4px 6px;border:0.5px solid var(--bdr2);border-radius:6px;font-size:12px;font-family:var(--font);text-align:center;background:var(--bg);color:var(--txt)" title="Cantidad a mover a bodega (disponible: ${rem.toFixed(2)})">
-          <button class="btn btn-coral btn-sm" style="padding:4px 8px;white-space:nowrap" ${rem<=0?'disabled':''} onclick="transferToBodega('${sp.id}', parseFloat(document.getElementById('mvb-${sp.id}')?.value)||1)" title="Mover a Bodega"><i class="ti ti-arrow-right"></i> Mover a Bodega</button>
+          <input id="mvb-${sp.id}" type="number" min="0.1" max="${rem>0?rem.toFixed(2):0}" step="0.1" value="1" style="width:54px;padding:4px 6px;border:0.5px solid var(--bdr2);border-radius:6px;font-size:12px;font-family:var(--font);text-align:center;background:var(--bg);color:var(--txt)" title="Cantidad a mover a barra (disponible: ${rem.toFixed(2)})">
+          <button class="btn btn-coral btn-sm" style="padding:4px 8px;white-space:nowrap" ${rem<=0?'disabled':''} onclick="transferBonifToBarra('${sp.id}', parseFloat(document.getElementById('mvb-${sp.id}')?.value)||1)" title="Mover a Barra"><i class="ti ti-arrow-right"></i> Mover a Barra</button>
         </div>
       </td>
     </tr>`;
@@ -1497,7 +1497,7 @@ function rCatalogoBonificaciones(){
 
   return`
     <div class="page-title">Catálogo del inventario — Bonificaciones</div>
-    <div class="page-sub">Botellas que el proveedor regala, independiente de tu compra normal. Se da de alta con el botón +/- y se mueve a Bodega cuando quieras incorporarla a tu inventario regular.</div>
+    <div class="page-sub">Botellas que el proveedor regala, independiente de tu compra normal. Se da de alta con el botón +/- y se mueve directo a Barra cuando quieras usarla.</div>
     <div class="toolbar">
       <label style="font-size:12px;color:var(--txt2)">Filtrar familia:</label>
       <select class="sel" style="width:auto;padding:5px 9px;font-size:12px" onchange="_cFilter=this.value;render()">${catOpts}</select>
@@ -1520,7 +1520,7 @@ function rCatalogoBonificaciones(){
                 : `<th style="${sty};white-space:nowrap">${lbl}</th>`;
             }).join('')}
             <th>Ajuste físico</th>
-            <th>Traspaso a bodega</th>
+            <th>Traspaso a barra</th>
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>
@@ -2474,15 +2474,15 @@ async function transferToBarra(id, amount){
 }
 
 // ═══════════════════════════════════════════════════════════
-// TRASPASO MANUAL — Bonificaciones → Bodega
-// Mueve una cantidad puntual del stock de bonificaciones hacia bodega,
-// insertando un registro en la tabla `bonif_transfers` (misma fuente
-// permanente que ya usa getBonifTransferredOut para calcular el stock
-// efectivo). No modifica stock_bodega/stock_bonificaciones directamente:
-// ambos catálogos se recalculan solos a partir de este registro — y de
-// ahí, el botón "Mover a Barra" de Bodega ya funciona igual que siempre.
+// TRASPASO MANUAL — Bonificaciones → Barra
+// Mueve una cantidad puntual del stock de bonificaciones directo hacia la
+// barra (para que se use), insertando un registro en la tabla
+// `bonif_transfers` (misma fuente permanente que ya usa
+// getBonifTransferredOut para calcular el stock efectivo). No modifica
+// stock_barra/stock_bonificaciones directamente: ambos catálogos se
+// recalculan solos a partir de este registro.
 // ═══════════════════════════════════════════════════════════
-async function transferToBodega(id, amount){
+async function transferBonifToBarra(id, amount){
   // ── RBAC guard: mismo criterio que el resto de traspasos — solo admin y manager
   if(!currentUser){alert('Sesión no iniciada.');return;}
   if(currentUser.role==='bartender'||currentUser.role==='lector'){
@@ -2499,10 +2499,10 @@ async function transferToBodega(id, amount){
     alert(`Solo hay ${available.toFixed(2)} disponible en bonificaciones de "${sp.name}". No puedes mover ${delta.toFixed(2)}.`);
     return;
   }
-  if(!confirm(`¿Mover ${delta.toFixed(2)} de "${sp.name}" de bonificaciones a bodega?`)) return;
+  if(!confirm(`¿Mover ${delta.toFixed(2)} de "${sp.name}" de bonificaciones a barra?`)) return;
 
   // Feedback visual inmediato
-  const btns=document.querySelectorAll(`button[onclick*="transferToBodega('${id}'"]`);
+  const btns=document.querySelectorAll(`button[onclick*="transferBonifToBarra('${id}'"]`);
   const originalHTML=btns.length?btns[0].innerHTML:'';
   btns.forEach(b=>{b.disabled=true;b.innerHTML='<i class="ti ti-loader-2"></i> Moviendo...';});
 
@@ -2688,10 +2688,10 @@ function applyRoleUI(){
   });
 
   // ════════════════════════════════════════════
-  // BOTÓN "Mover a Bodega" (traspaso bonificaciones → bodega)
+  // BOTÓN "Mover a Barra" desde Bonificaciones (traspaso bonificaciones → barra)
   // Mismo criterio que el resto de traspasos: solo admin y manager
   // ════════════════════════════════════════════
-  document.querySelectorAll('button[onclick*="transferToBodega"]').forEach(btn=>{
+  document.querySelectorAll('button[onclick*="transferBonifToBarra"]').forEach(btn=>{
     btn.style.display=(role==='bartender'||role==='lector')?'none':'';
   });
   document.querySelectorAll('input[id^="mvb-"]').forEach(inp=>{
