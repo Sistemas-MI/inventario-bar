@@ -1357,6 +1357,7 @@ function rCatalogoBodega(){
       case 'cat':     return d*a.cat.localeCompare(b.cat,'es');
       case 'ml':      return d*(a.ml-b.ml);
       case 'stock':   return d*((parseFloat(a.stock_bodega)||0)-(parseFloat(b.stock_bodega)||0));
+      case 'out':     return d*(getTransferredIn(a.id)-getTransferredIn(b.id));
       case 'rem':     return d*(rA-rB);
       default:        return(rA>0&&rB<=0)?-1:(rA<=0&&rB>0)?1:0;
     }
@@ -1422,7 +1423,7 @@ function rCatalogoBodega(){
             ${[['name','Línea de producto',''],['cat','Categoría',''],['ml','Capacidad','text-align:center'],['stock','Inicial (bodega)','text-align:center'],['out','Traspasado','text-align:center'],['rem','Disponible','text-align:center'],['level','Nivel',''],['status','Estado','']].map(([key,lbl,sty])=>{
               const isActive=_cSort===key;
               const arrow=isActive?(_cSortDir===1?'↑':'↓'):'<span style="opacity:0.25;font-size:9px">↕</span>';
-              const sortable=['name','cat','ml','stock','rem'].includes(key);
+              const sortable=['name','cat','ml','stock','out','rem'].includes(key);
               return sortable
                 ? `<th style="${sty};cursor:pointer;user-select:none;white-space:nowrap" onclick="if(_cSort==='${key}'){_cSortDir*=-1;}else{_cSort='${key}';_cSortDir=1;}render()" title="Ordenar por ${lbl}">${lbl} <span style="font-size:10px;vertical-align:middle">${arrow}</span></th>`
                 : `<th style="${sty};white-space:nowrap">${lbl}</th>`;
