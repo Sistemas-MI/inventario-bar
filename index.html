@@ -676,12 +676,13 @@ function rDash(){
   const selOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
   // Filtro de estado para el grid — mismo criterio combinado que el conteo de arriba
   const dashStatusFilter=(sp)=>{
+    if(_dashFilter==='all') return true; // "Todos" siempre debe mostrar el catálogo completo
     const st=status(sp);
     const combinedZero=getCombinedRemaining(sp)<=0;
-    if(combinedZero) return _dashFilter==='agotado';
+    if(_dashFilter==='agotado') return combinedZero;
+    if(combinedZero) return false; // ya se cuenta como "Agotado", no debe duplicarse en OK/Bajo
     if(_dashFilter==='ok') return st.cls==='b-ok';
     if(_dashFilter==='bajo') return st.cls!=='b-ok';
-    if(_dashFilter==='agotado') return false;
     return true;
   };
   // Ordenado por cantidad disponible en barra (de menor a mayor) — así lo más
@@ -704,6 +705,7 @@ function rDash(){
     const pct=Math.max(0, isPiece?(barraStock===0?0:Math.min(1,rem/barraStock)):Math.min(1,rem));
     const unit=isPiece?'pzas':'botellas';
     const remML=isPiece?null:Math.round(rem*sp.ml);
+    const bodegaStock=getEffectiveBodegaStock(sp);
     return`<div class="bottle-card" data-cat="${sp.cat}">
       ${bottleSVG(pct)}
       <div class="b-name">${sp.name}</div>
@@ -711,6 +713,7 @@ function rDash(){
       <span class="badge ${st.cls}" style="margin-top:6px">${st.lbl}</span>
       <div class="b-info" style="font-weight:500">${rem.toFixed(2)} ${unit}</div>
       ${!isPiece?`<div class="b-info" style="color:var(--txt3);font-size:10px">${fmx(remML)} ml</div>`:''}
+      <div class="wk-tag" style="margin-top:6px;display:inline-flex;align-items:center;gap:4px;cursor:pointer" onclick="setCatLoc('bodega');go('catalogo')" title="Ir a Catálogo → Bodega"><i class="ti ti-building-warehouse" style="font-size:11px"></i> Bodega: ${bodegaStock.toFixed(2)}</div>
     </div>`;
   }).join('');
   const dashChips=[['Todos','all'],['OK','ok'],['Bajos','bajo'],['Agotados','agotado']];
