@@ -591,24 +591,16 @@ function status(sp_or_p, remainingBottles){
 // Si la barra está baja/vacía pero la bodega tiene un respaldo sano (por
 // encima de su propio umbral de "bajo": 1 botella / 2 piezas), NO se marca
 // como "Bajo" — solo falta un traspaso, no hay urgencia real. Solo se marca
-// "Bajo" cuando la bodega TAMBIÉN está corta. "Agotado" sigue siendo cuando
-// no queda nada en ningún lado.
-// EXCEPCIÓN: la categoría Agua queda fuera de esta lógica (a petición
-// explícita) — su "Bajo"/"OK" se calcula únicamente con lo que hay en barra,
-// sin que un respaldo en bodega la "salve" a OK.
+// "Bajo" cuando la bodega TAMBIÉN está corta (2 piezas o menos, 1 botella o
+// menos). "Agotado" sigue siendo cuando no queda nada en ningún lado.
+// Aplica igual para botellas, cerveza, agua y refrescos.
 // ═══════════════════════════════════════════════════════════
 function dashStatus(sp){
   if(getCombinedRemaining(sp)<=0) return{cls:'b-zero',lbl:'Agotado'};
   const rem=getRemainingBottles(sp);
   const barraSt=status(sp,rem);
   if(barraSt.cls==='b-ok') return barraSt; // la barra sola ya está bien
-  if(sp.product_type==='agua'){
-    // Ya se descartó "Agotado real" arriba (combinado > 0), así que si la
-    // barra sola dice "Agotado" en realidad es "Bajo" — queda algo en
-    // bodega, solo que no se usa para decidir el estado del Agua.
-    return barraSt.cls==='b-zero'?{cls:'b-crit',lbl:'Bajo'}:barraSt;
-  }
-  const isPiece=(sp.product_type==='cerveza'||sp.product_type==='refrescos');
+  const isPiece=(sp.product_type==='cerveza'||sp.product_type==='agua'||sp.product_type==='refrescos');
   const bodegaThreshold=isPiece?2:1;
   const bodegaStock=getEffectiveBodegaStock(sp);
   if(bodegaStock>bodegaThreshold) return{cls:'b-ok',lbl:'OK'}; // barra baja, pero bodega con respaldo de sobra
