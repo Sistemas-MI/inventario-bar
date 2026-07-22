@@ -586,6 +586,26 @@ function status(sp_or_p, remainingBottles){
   return{cls:'b-crit',lbl:'Bajo'};
 }
 
+// ═══════════════════════════════════════════════════════════
+// ESTADO PARA DASHBOARD — versión "consciente de bodega".
+// Si la barra está baja/vacía pero la bodega tiene un respaldo sano (por
+// encima de su propio umbral de "bajo": 1 botella / 2 piezas), NO se marca
+// como "Bajo" — solo falta un traspaso, no hay urgencia real. Solo se marca
+// "Bajo" cuando la bodega TAMBIÉN está corta. "Agotado" sigue siendo cuando
+// no queda nada en ningún lado.
+// ═══════════════════════════════════════════════════════════
+function dashStatus(sp){
+  if(getCombinedRemaining(sp)<=0) return{cls:'b-zero',lbl:'Agotado'};
+  const rem=getRemainingBottles(sp);
+  const barraSt=status(sp,rem);
+  if(barraSt.cls==='b-ok') return barraSt; // la barra sola ya está bien
+  const isPiece=(sp.product_type==='cerveza'||sp.product_type==='agua'||sp.product_type==='refrescos');
+  const bodegaThreshold=isPiece?2:1;
+  const bodegaStock=getEffectiveBodegaStock(sp);
+  if(bodegaStock>bodegaThreshold) return{cls:'b-ok',lbl:'OK'}; // barra baja, pero bodega con respaldo de sobra
+  return{cls:'b-crit',lbl:'Bajo'};
+}
+
 function bottleSVG(p){
   const W=32,H=72,c=p<=0?'#F09595':p>=0.5?'#639922':p>=0.25?'#BA7517':'#E24B4A';
   const fH=Math.round((H-14)*Math.max(0,Math.min(1,p))),fY=H-4-fH;
@@ -661,43 +681,27 @@ function updateNavBadges(){
 function rDash(){
   let ok=0,warn=0,crit=0,zero=0;
   spirits.forEach(sp=>{
-    const rem=getRemainingBottles(sp);
-    const st=status(sp,rem);
-    // "Agotado" en el dashboard = igual que el reporte "Solo agotadas": cero
-    // en TODOS lados (barra + bodega). Si la barra está en 0 pero bodega
-    // todavía tiene respaldo, no es una emergencia de compra — cuenta como
-    // "Bajo" (solo falta un traspaso, no una compra).
-    const combinedZero=getCombinedRemaining(sp)<=0;
-    if(combinedZero) zero++;
+    const st=dashStatus(sp);
+    if(st.cls==='b-zero') zero++;
     else if(st.cls==='b-ok') ok++;
-    else {warn++;} // incluye "Bajo" real y "Agotado en barra con respaldo en bodega"
+    else {warn++;}
   });
   const cats=[...new Set(spirits.map(s=>s.cat))].sort();
   const selOpts=`<option value="all">Todas las categorías</option>`+cats.map(c=>`<option value="${c}">${c}</option>`).join('');
-  // Filtro de estado para el grid — mismo criterio combinado que el conteo de arriba
+  // Filtro de estado para el grid — mismo criterio que el conteo de arriba
   const dashStatusFilter=(sp)=>{
     if(_dashFilter==='all') return true; // "Todos" siempre debe mostrar el catálogo completo
-    const st=status(sp);
-    const combinedZero=getCombinedRemaining(sp)<=0;
-    if(_dashFilter==='agotado') return combinedZero;
-    if(combinedZero) return false; // ya se cuenta como "Agotado", no debe duplicarse en OK/Bajo
+    const st=dashStatus(sp);
     if(_dashFilter==='ok') return st.cls==='b-ok';
-    if(_dashFilter==='bajo') return st.cls!=='b-ok';
+    if(_dashFilter==='bajo') return st.cls==='b-crit';
+    if(_dashFilter==='agotado') return st.cls==='b-zero';
     return true;
   };
   // Ordenado por cantidad disponible en barra (de menor a mayor) — así lo más
   // urgente de atender aparece primero, en vez de orden alfabético.
   const cards=spirits.filter(dashStatusFilter).sort((a,b)=>getRemainingBottles(a)-getRemainingBottles(b)).map(sp=>{
     const rem=getRemainingBottles(sp);
-    let st=status(sp,rem);
-    // Si está en 0 en barra pero SÍ hay respaldo en bodega, la etiqueta de la
-    // tarjeta no debe decir "Agotado" (ese rótulo se reserva para cuando no
-    // queda nada en ningún lado) — se muestra "Bajo", igual que el grupo en
-    // el que ya se está contando arriba. Así no hay contradicción visual
-    // entre el filtro "Bajos" y una tarjeta roja de "Agotado".
-    if(st.cls==='b-zero' && getCombinedRemaining(sp)>0){
-      st={cls:'b-crit', lbl:'Bajo'};
-    }
+    const st=dashStatus(sp);
     const isPiece=(sp.product_type==='cerveza'||sp.product_type==='agua'||sp.product_type==='refrescos');
     // Para botellas: pct = rem (0.23 → 23%, 2.89 → 100%)
     // Para piezas:   pct = rem/stock (cuántas de las iniciales quedan)
