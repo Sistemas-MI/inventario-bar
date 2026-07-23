@@ -475,7 +475,9 @@ function getConsumptionBreakdown(sp){
       if(ing){
         const ml=(s.qty||1)*ing.ml;
         breakdown.coctel+=ml;
-        breakdown.cocteles[r.name]=(breakdown.cocteles[r.name]||0)+ml;
+        if(!breakdown.cocteles[r.name]) breakdown.cocteles[r.name]={ml:0, qty:0};
+        breakdown.cocteles[r.name].ml+=ml;
+        breakdown.cocteles[r.name].qty+=(s.qty||1);
       }
       return;
     }
@@ -1760,13 +1762,15 @@ function rReportes(){
     const isPiece=r.sp.product_type==='cerveza'||r.sp.product_type==='agua'||r.sp.product_type==='refrescos';
     const bd=getConsumptionBreakdown(r.sp);
     const bdLines=[];
-    // Cóctel: se detalla EN QUÉ recetas específicas, no solo el total
+    // Cóctel: se detalla EN QUÉ recetas específicas, no solo el total.
+    // Si son muchas (botella muy versátil), se recorta igual que ya se
+    // hace en el aviso de "Reporte de compras" (top 5 + "y N más").
     const cocktailNames=Object.keys(bd.cocteles);
     if(cocktailNames.length){
-      const cocktailParts=cocktailNames
-        .sort((a,b)=>bd.cocteles[b]-bd.cocteles[a])
-        .map(name=>`${name} (${fmx(Math.round(bd.cocteles[name]))}ml)`);
-      bdLines.push(`<div style="font-size:10px;color:var(--txt3);margin-top:2px">Cóctel: ${cocktailParts.join(', ')}</div>`);
+      const sortedNames=cocktailNames.sort((a,b)=>bd.cocteles[b].qty-bd.cocteles[a].qty);
+      const cocktailParts=sortedNames.slice(0,5).map(name=>`${name} (${bd.cocteles[name].qty})`);
+      const extra=sortedNames.length>5?`… y ${sortedNames.length-5} más`:'';
+      bdLines.push(`<div style="font-size:10px;color:var(--txt3);margin-top:2px">Cóctel: ${cocktailParts.join(', ')}${extra}</div>`);
     }
     // Shot / copa / botella / pieza: consumo directo de la botella, sin receta de por medio
     const directParts=[];
