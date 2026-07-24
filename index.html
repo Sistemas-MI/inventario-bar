@@ -1329,9 +1329,9 @@ function rCatalogoBarra(){
       <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:11px">${sp.cat}</span></td>
       <td style="text-align:center">${sp.ml}ml</td>
       <td style="text-align:center;font-weight:500">${parseFloat(sp.stock_barra||0).toFixed(2)}</td>
+      <td style="text-align:center">${(transferredNote||bonifNote)?`${transferredNote}${bonifNote}`:'<span style="color:var(--txt3)">—</span>'}</td>
       <td style="text-align:center;color:#A32D2D">${consumedStr}${consumedMLStr}</td>
       <td style="text-align:center"><span style="font-weight:500">${remBot.toFixed(2)}</span><span style="font-size:10px;color:var(--txt3);display:block">${remSub}</span></td>
-      <td style="text-align:center">${(transferredNote||bonifNote)?`${transferredNote}${bonifNote}`:'<span style="color:var(--txt3)">—</span>'}</td>
       <td style="min-width:70px">
         <div class="prog"><div class="prog-fill" style="width:${Math.round(p*100)}%;background:${fc}"></div></div>
         <span style="font-size:10px;color:var(--txt2)">${Math.round(p*100)}%</span>
@@ -1360,10 +1360,10 @@ function rCatalogoBarra(){
         <table style="table-layout:fixed;width:100%">
           <colgroup>
             <col style="width:175px"><col style="width:100px"><col style="width:70px"><col style="width:72px">
-            <col style="width:90px"><col style="width:85px"><col style="width:105px"><col style="width:75px"><col style="width:68px"><col style="width:115px">
+            <col style="width:105px"><col style="width:90px"><col style="width:85px"><col style="width:75px"><col style="width:68px"><col style="width:115px">
           </colgroup>
           <thead><tr>
-            ${[['name','Línea de producto',''],['cat','Categoría',''],['ml','Capacidad','text-align:center'],['stock','Inicial (barra)','text-align:center'],['consumed','Consumo total','text-align:center'],['rem','Disponible','text-align:center'],['traspasos','Traspasos','text-align:center'],['level','Nivel',''],['status','Estado','']].map(([key,lbl,sty])=>{
+            ${[['name','Línea de producto',''],['cat','Categoría',''],['ml','Capacidad','text-align:center'],['stock','Inicial (barra)','text-align:center'],['traspasos','Traspasos','text-align:center'],['consumed','Consumo total','text-align:center'],['rem','Disponible','text-align:center'],['level','Nivel',''],['status','Estado','']].map(([key,lbl,sty])=>{
               const isActive=_cSort===key;
               const arrow=isActive?(_cSortDir===1?'↑':'↓'):'<span style="opacity:0.25;font-size:9px">↕</span>';
               const extraTip=key==='stock'?' — no cambia con traspasos, es la base que cargaste; mira "Disponible" para ver el stock real':(key==='rem'?' — este sí refleja traspasos y consumo en tiempo real':'');
