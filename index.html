@@ -1366,7 +1366,8 @@ function rCatalogoBarra(){
             ${[['name','Línea de producto',''],['cat','Categoría',''],['ml','Capacidad','text-align:center'],['stock','Inicial (barra)','text-align:center'],['consumed','Consumo total','text-align:center'],['rem','Disponible','text-align:center'],['traspasos','Traspasos','text-align:center'],['level','Nivel',''],['status','Estado','']].map(([key,lbl,sty])=>{
               const isActive=_cSort===key;
               const arrow=isActive?(_cSortDir===1?'↑':'↓'):'<span style="opacity:0.25;font-size:9px">↕</span>';
-              return`<th style="${sty};cursor:pointer;user-select:none;white-space:nowrap" onclick="if(_cSort==='${key}'){_cSortDir*=-1;}else{_cSort='${key}';_cSortDir=1;}render()" title="Ordenar por ${lbl}">${lbl} <span style="font-size:10px;vertical-align:middle">${arrow}</span></th>`;
+              const extraTip=key==='stock'?' — no cambia con traspasos, es la base que cargaste; mira "Disponible" para ver el stock real':(key==='rem'?' — este sí refleja traspasos y consumo en tiempo real':'');
+              return`<th style="${sty};cursor:pointer;user-select:none;white-space:nowrap" onclick="if(_cSort==='${key}'){_cSortDir*=-1;}else{_cSort='${key}';_cSortDir=1;}render()" title="Ordenar por ${lbl}${extraTip}">${lbl} <span style="font-size:10px;vertical-align:middle">${arrow}</span></th>`;
             }).join('')}
             <th>Ajuste físico</th>
           </tr></thead>
@@ -1457,8 +1458,9 @@ function rCatalogoBodega(){
               const isActive=_cSort===key;
               const arrow=isActive?(_cSortDir===1?'↑':'↓'):'<span style="opacity:0.25;font-size:9px">↕</span>';
               const sortable=['name','cat','ml','stock','out','rem'].includes(key);
+              const extraTip=key==='stock'?' — no cambia con traspasos, es la base que cargaste; mira "Disponible" para ver el stock real':(key==='rem'?' — este sí refleja traspasos y consumo en tiempo real':'');
               return sortable
-                ? `<th style="${sty};cursor:pointer;user-select:none;white-space:nowrap" onclick="if(_cSort==='${key}'){_cSortDir*=-1;}else{_cSort='${key}';_cSortDir=1;}render()" title="Ordenar por ${lbl}">${lbl} <span style="font-size:10px;vertical-align:middle">${arrow}</span></th>`
+                ? `<th style="${sty};cursor:pointer;user-select:none;white-space:nowrap" onclick="if(_cSort==='${key}'){_cSortDir*=-1;}else{_cSort='${key}';_cSortDir=1;}render()" title="Ordenar por ${lbl}${extraTip}">${lbl} <span style="font-size:10px;vertical-align:middle">${arrow}</span></th>`
                 : `<th style="${sty};white-space:nowrap">${lbl}</th>`;
             }).join('')}
             <th>Ajuste físico</th>
@@ -1550,8 +1552,9 @@ function rCatalogoBonificaciones(){
               const isActive=_cSort===key;
               const arrow=isActive?(_cSortDir===1?'↑':'↓'):'<span style="opacity:0.25;font-size:9px">↕</span>';
               const sortable=['name','cat','ml','stock','out','rem'].includes(key);
+              const extraTip=key==='stock'?' — no cambia con traspasos, es la base que cargaste; mira "Disponible" para ver el stock real':(key==='rem'?' — este sí refleja traspasos y consumo en tiempo real':'');
               return sortable
-                ? `<th style="${sty};cursor:pointer;user-select:none;white-space:nowrap" onclick="if(_cSort==='${key}'){_cSortDir*=-1;}else{_cSort='${key}';_cSortDir=1;}render()" title="Ordenar por ${lbl}">${lbl} <span style="font-size:10px;vertical-align:middle">${arrow}</span></th>`
+                ? `<th style="${sty};cursor:pointer;user-select:none;white-space:nowrap" onclick="if(_cSort==='${key}'){_cSortDir*=-1;}else{_cSort='${key}';_cSortDir=1;}render()" title="Ordenar por ${lbl}${extraTip}">${lbl} <span style="font-size:10px;vertical-align:middle">${arrow}</span></th>`
                 : `<th style="${sty};white-space:nowrap">${lbl}</th>`;
             }).join('')}
             <th>Ajuste físico</th>
