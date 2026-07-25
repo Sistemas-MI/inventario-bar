@@ -2786,15 +2786,15 @@ function applyRoleUI(){
 
   // ════════════════════════════════════════════
   // NAV BUTTONS
-  // idx: 0=dash 1=ventas 2=recetas 3=catalogo 4=reportes
+  // idx: 0=dash 1=ventas 2=recetas 3=catalogo 4=reportes 5=proveedores
   // ════════════════════════════════════════════
   const navBtns=[...document.querySelectorAll('.nav-btn')];
   const navVisible={
-    admin:    [0,1,2,3,4],
-    manager:  [0,1,2,3,4],
+    admin:    [0,1,2,3,4,5],
+    manager:  [0,1,2,3,4,5],
     bartender:[0,1,2,3],
-    lector:   [0,1,2,3,4]   // ve todo excepto acciones — igual que manager en nav
-  }[role] || [0,1,2,3,4];
+    lector:   [0,1,2,3,4,5]   // ve todo excepto acciones — igual que manager en nav
+  }[role] || [0,1,2,3,4,5];
 
   navBtns.forEach((btn,i)=>{
     btn.style.display=navVisible.includes(i)?'flex':'none';
