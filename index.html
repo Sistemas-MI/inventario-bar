@@ -2210,6 +2210,16 @@ function rProveedores(){
     </tr>`;
   }).join('')||`<tr><td colspan="6" class="empty">No hay productos en esta categoría</td></tr>`;
 
+  // Fila de totales: suma cada columna de proveedor sobre la lista filtrada actual
+  const totalCells=SUPPLIERS.map(([field])=>{
+    const total=spList.reduce((t,sp)=>t+(parseFloat(sp[field])||0),0);
+    return`<td style="text-align:center;font-weight:600;color:var(--burg)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>`;
+  }).join('');
+  const totalRow=`<tr style="background:var(--bg2)">
+    <td style="font-weight:600" colspan="2">Total (${spList.length} referencias)</td>
+    ${totalCells}
+  </tr>`;
+
   return`
     <div class="page-title">Proveedores</div>
     <div class="page-sub">Tabla comparativa de precios por botella · Captura lo que te cobra cada proveedor para comparar antes de comprar. No afecta el stock ni ningún otro cálculo del sistema.</div>
@@ -2231,6 +2241,7 @@ function rProveedores(){
             ${SUPPLIERS.map(([,label])=>`<th style="text-align:center">${label}</th>`).join('')}
           </tr></thead>
           <tbody>${rows}</tbody>
+          <tfoot>${totalRow}</tfoot>
         </table>
       </div>
     </div>`;
