@@ -2503,9 +2503,10 @@ async function addSale(){
 }
 
 async function delSale(id){
-  // ── RBAC guard: lector no puede eliminar ventas (el resto de roles sí, por correcciones de error)
+  // ── RBAC guard: solo admin y manager pueden eliminar ventas. Bartender
+  // solo puede registrar, no borrar (evita que revierta stock por su cuenta).
   if(!currentUser){alert('Sesión no iniciada.');return;}
-  if(currentUser.role==='lector'){alert('Tu rol solo tiene permiso de lectura.');return;}
+  if(currentUser.role==='lector'||currentUser.role==='bartender'){alert('Tu rol no tiene permiso para eliminar ventas.');return;}
   if(!confirm('Esta venta se eliminará PERMANENTEMENTE de la base de datos y no se podrá recuperar. ¿Deseas continuar?')) return;
   // Borrado real: se elimina la fila de report_history. A partir de ahora
   // el consumo/stock SÍ se recalcula sin esta venta (ya no hay "borrado suave").
@@ -2832,10 +2833,10 @@ function applyRoleUI(){
 
   // ════════════════════════════════════════════
   // BOTONES ELIMINAR VENTA (trash)
-  // Lector NO puede borrar ventas
+  // Solo admin y manager pueden borrar. Bartender solo registra, no borra.
   // ════════════════════════════════════════════
   document.querySelectorAll('button[onclick*="delSale"]').forEach(btn=>{
-    btn.style.display=(role==='lector')?'none':'';
+    btn.style.display=(role==='lector'||role==='bartender')?'none':'';
   });
 
   // ════════════════════════════════════════════
