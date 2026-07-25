@@ -300,6 +300,7 @@
     <button class="nav-btn" onclick="go('catalogo')"><i class="ti ti-bottle"></i>Catálogo</button>
     <div class="nav-lbl">Análisis</div>
     <button class="nav-btn" onclick="go('reportes')"><i class="ti ti-chart-bar"></i>Reportes<span id="nav-badge-reportes" class="nav-badge" style="display:none">0</span></button>
+    <button class="nav-btn" onclick="go('proveedores')"><i class="ti ti-truck-delivery"></i>Proveedores</button>
   </div>
   <div class="main" id="main"><div class="loading"><div class="spin"></div><br><br>Cargando inventario...</div></div>
 </div>
@@ -319,7 +320,7 @@ let spirits=[], recipes=[], sales=[], transfers=[], stockEntries=[], bonifTransf
 let currentUser=null; // {id, email, role, full_name}
 
 // Filters - Dashboard & Catalog
-let _wkFilter='all', _cFilter='all', _recTabFilter='all';
+let _wkFilter='all', _cFilter='all', _recTabFilter='all', _provFilter='all';
 let _catLoc='barra';        // 'barra' | 'bodega' — pestaña activa del catálogo
 let _recCollapsed={}; // { [cat]: bool } — estado colapso por categoría
 let _salesCollapsed=false;
@@ -691,15 +692,15 @@ function fmx(n){return (n||0).toLocaleString('es-MX');}
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════
-const NAV_TABS=['dash','ventas','recetas','catalogo','reportes'];
+const NAV_TABS=['dash','ventas','recetas','catalogo','reportes','proveedores'];
 function go(tab){
   // ── RBAC: bartender puede: dash, ventas, recetas (solo ver), catalogo (solo ver)
   const bartenderAllowed=['dash','ventas','recetas','catalogo'];
   if(currentUser && currentUser.role==='bartender' && !bartenderAllowed.includes(tab)){
     return;
   }
-  // ── RBAC: lector puede: dash, ventas (solo ver), recetas (solo ver), catalogo (solo ver), reportes (solo ver)
-  const lectorAllowed=['dash','ventas','recetas','catalogo','reportes'];
+  // ── RBAC: lector puede: dash, ventas (solo ver), recetas (solo ver), catalogo (solo ver), reportes (solo ver), proveedores (solo ver)
+  const lectorAllowed=['dash','ventas','recetas','catalogo','reportes','proveedores'];
   if(currentUser && currentUser.role==='lector' && !lectorAllowed.includes(tab)){
     return;
   }
@@ -716,6 +717,7 @@ function render(){
   else if(curTab==='recetas') el.innerHTML=rRecetas();
   else if(curTab==='catalogo') el.innerHTML=rCatalogo();
   else if(curTab==='reportes') el.innerHTML=rReportes();
+  else if(curTab==='proveedores') el.innerHTML=rProveedores();
   applyRoleUI(); // ← aplica visibilidad por rol tras cada render
   updateNavBadges();
 }
@@ -2170,6 +2172,70 @@ function rReportes(){
     ${tabContent}`;
 }
 
+// ═══════════════════════════════════════════════════════════
+// PROVEEDORES — tabla comparativa de precios por botella entre los
+// 4 proveedores fijos. Solo consulta/edición de precio; no afecta
+// stock, ventas ni ningún otro cálculo del sistema.
+// ═══════════════════════════════════════════════════════════
+const SUPPLIERS=[
+  ['price_wine_club','WINE CLUB'],
+  ['price_cava_sautto','CAVA SAUTTO'],
+  ['price_cut_wine','CUT WINE'],
+  ['price_almacen_victoria','ALMACEN VICTORIA'],
+];
+
+function rProveedores(){
+  const cats=[...new Set(spirits.map(s=>s.cat))].sort();
+  const catOpts=`<option value="all">Todas</option>`+cats.map(c=>`<option value="${c}"${_provFilter===c?' selected':''}>${c}</option>`).join('');
+  const spRaw=_provFilter==='all'?spirits:spirits.filter(s=>s.cat===_provFilter);
+  const spList=[...spRaw].sort((a,b)=>a.name.localeCompare(b.name,'es'));
+
+  const rows=spList.map(sp=>{
+    const priceCells=SUPPLIERS.map(([field])=>{
+      const val=parseFloat(sp[field])||0;
+      return`<td style="text-align:center">
+        <div style="display:flex;align-items:center;justify-content:center;gap:2px">
+          <span style="font-size:11px;color:var(--txt3)">$</span>
+          <input type="number" min="0" step="0.01" value="${val.toFixed(2)}"
+            id="prov-${field}-${sp.id}"
+            style="width:72px;padding:4px 6px;border:0.5px solid var(--bdr2);border-radius:6px;font-size:12px;font-family:var(--font);text-align:right;background:var(--bg);color:var(--txt)"
+            onchange="updateSupplierPrice('${sp.id}','${field}',this.value)">
+        </div>
+      </td>`;
+    }).join('');
+    return`<tr>
+      <td style="font-weight:500">${sp.name}<br><span style="font-size:10px;color:var(--txt3);font-weight:400">${(sp.product_type||'').toUpperCase()}</span></td>
+      <td><span style="background:var(--bg2);border-radius:5px;padding:2px 6px;font-size:11px">${sp.cat}</span></td>
+      ${priceCells}
+    </tr>`;
+  }).join('')||`<tr><td colspan="6" class="empty">No hay productos en esta categoría</td></tr>`;
+
+  return`
+    <div class="page-title">Proveedores</div>
+    <div class="page-sub">Tabla comparativa de precios por botella · Captura lo que te cobra cada proveedor para comparar antes de comprar. No afecta el stock ni ningún otro cálculo del sistema.</div>
+    <div class="toolbar">
+      <label style="font-size:12px;color:var(--txt2)">Filtrar familia:</label>
+      <select class="sel" style="width:auto;padding:5px 9px;font-size:12px" onchange="_provFilter=this.value;render()">${catOpts}</select>
+      <span style="font-size:12px;color:var(--txt2)">${spList.length} referencias</span>
+    </div>
+    <div class="card">
+      <div class="table-scroll">
+        <table style="table-layout:fixed;width:100%">
+          <colgroup>
+            <col style="width:200px"><col style="width:110px">
+            <col style="width:130px"><col style="width:130px"><col style="width:130px"><col style="width:150px">
+          </colgroup>
+          <thead><tr>
+            <th>Línea de producto</th>
+            <th>Categoría</th>
+            ${SUPPLIERS.map(([,label])=>`<th style="text-align:center">${label}</th>`).join('')}
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    </div>`;
+}
+
 // ── PDF EXPORT
 function exportRepPDF(){
   const filtered=getRepFilteredSales();
@@ -2443,6 +2509,33 @@ async function delSale(id){
   syncSalesView();
   updatePill();
   render();
+}
+
+// ── PROVEEDORES: guardar el precio que cobra un proveedor por una botella.
+// No afecta stock ni ningún otro cálculo — es solo información de referencia.
+async function updateSupplierPrice(id, field, value){
+  if(!currentUser){alert('Sesión no iniciada.');return;}
+  if(currentUser.role==='lector'){alert('Tu rol solo tiene permiso de lectura.');return;}
+  const sp=spirits.find(s=>s.id===id);
+  if(!sp) return;
+  const price=parseFloat(value);
+  if(isNaN(price)||price<0){alert('Precio inválido. Debe ser un número mayor o igual a 0.');return;}
+  const rounded=parseFloat(price.toFixed(2));
+
+  const inputEl=document.getElementById(`prov-${field}-${id}`);
+  const {error}=await sb.from('spirits').update({[field]:rounded}).eq('id',id);
+
+  if(error){
+    alert('Error al guardar el precio en Supabase: '+error.message);
+    if(inputEl) inputEl.value=(parseFloat(sp[field])||0).toFixed(2); // revertir a lo último guardado
+    return;
+  }
+  sp[field]=rounded; // actualizar en memoria, sin recargar toda la tabla
+  if(inputEl){
+    inputEl.value=rounded.toFixed(2);
+    inputEl.style.borderColor='#3B6D11'; // breve confirmación visual, reutilizando el verde ya usado en el sistema
+    setTimeout(()=>{ if(inputEl) inputEl.style.borderColor=''; }, 700);
+  }
 }
 
 async function adjustStock(id, amount){
@@ -2765,6 +2858,16 @@ function applyRoleUI(){
   });
   document.querySelectorAll('input[id^="mvb-"]').forEach(inp=>{
     inp.style.display=(role==='bartender'||role==='lector')?'none':'';
+  });
+
+  // ════════════════════════════════════════════
+  // PROVEEDORES: precios visibles para todos los que llegan a esta pestaña,
+  // pero solo admin/manager pueden editarlos — lector los ve en solo lectura
+  // ════════════════════════════════════════════
+  document.querySelectorAll('input[id^="prov-"]').forEach(inp=>{
+    inp.disabled=(role==='lector');
+    inp.style.opacity=(role==='lector')?'0.6':'';
+    inp.style.cursor=(role==='lector')?'not-allowed':'';
   });
 }
 
