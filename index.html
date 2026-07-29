@@ -317,11 +317,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
-let spirits=[], recipes=[], sales=[], transfers=[], stockEntries=[], bonifTransfers=[], curTab='dash';
+let spirits=[], recipes=[], sales=[], transfers=[], stockEntries=[], bonifTransfers=[], supplierPriceHistory=[], curTab='dash';
 let currentUser=null; // {id, email, role, full_name}
 
 // Filters - Dashboard & Catalog
-let _wkFilter='all', _cFilter='all', _recTabFilter='all', _provFilter='all';
+let _wkFilter='all', _cFilter='all', _recTabFilter='all', _provFilter='all', _provMonth=null, _provTab='mensual';
 let _catLoc='barra';        // 'barra' | 'bodega' — pestaña activa del catálogo
 let _recCollapsed={}; // { [cat]: bool } — estado colapso por categoría
 let _salesCollapsed=false;
@@ -343,18 +343,20 @@ let _weekInput='';             // persiste el texto de semana entre renders
 // ═══════════════════════════════════════════════════════════
 async function loadAll(){
   try{
-    const [sp,rc,ri,tr,se,bt]=await Promise.all([
+    const [sp,rc,ri,tr,se,bt,sph]=await Promise.all([
       sb.from('spirits').select('*').order('cat').order('name'),
       sb.from('recipes').select('*').order('cat').order('name'),
       sb.from('recipe_ingredients').select('*'),
       sb.from('transfers').select('*').order('created_at',{ascending:false}).limit(5000),
       sb.from('stock_entries').select('*').order('created_at',{ascending:false}).limit(5000),
-      sb.from('bonif_transfers').select('*').order('created_at',{ascending:false}).limit(5000)
+      sb.from('bonif_transfers').select('*').order('created_at',{ascending:false}).limit(5000),
+      sb.from('supplier_price_history').select('*').order('month',{ascending:true})
     ]);
     if(sp.error||rc.error||ri.error) throw new Error('Error en Supabase');
     if(tr.error) console.warn('⚠️ No se pudo leer transfers (¿ya creaste la tabla en Supabase?):', tr.error.message);
     if(se.error) console.warn('⚠️ No se pudo leer stock_entries (¿ya creaste la tabla en Supabase?):', se.error.message);
     if(bt.error) console.warn('⚠️ No se pudo leer bonif_transfers (¿ya creaste la tabla en Supabase?):', bt.error.message);
+    if(sph.error) console.warn('⚠️ No se pudo leer supplier_price_history (¿ya creaste la tabla en Supabase?):', sph.error.message);
     spirits=(sp.data||[]).map(s=>({
       ...s,
       product_type: s.product_type || inferProductType(s.cat),
@@ -366,6 +368,8 @@ async function loadAll(){
     transfers=tr.data||[];
     stockEntries=se.data||[];
     bonifTransfers=bt.data||[];
+    supplierPriceHistory=sph.data||[];
+    if(!_provMonth) _provMonth=getCurrentMonthStr();
     recipes=(rc.data||[]).map(r=>({
       ...r,
       ings:(ri.data||[]).filter(i=>i.recipe_id===r.id).map(i=>({id:i.spirit_id,ml:i.ml}))
@@ -2186,6 +2190,28 @@ const SUPPLIERS=[
   ['price_cut_wine','CUT WINE'],
   ['price_almacen_victoria','ALMACEN VICTORIA'],
 ];
+const MESES_ES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+// ── YYYY-MM-01 del mes calendario real de hoy — este es siempre el único mes editable
+function getCurrentMonthStr(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+}
+function formatMonthLabel(monthStr){
+  const [y,m]=monthStr.split('-').map(Number);
+  return `${MESES_ES[m-1]} ${y}`;
+}
+function shiftMonth(monthStr, delta){
+  const [y,m]=monthStr.split('-').map(Number);
+  const d=new Date(y, m-1+delta, 1);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
+}
+// Precio de un producto/proveedor en un mes dado — si nunca se capturó ese
+// mes (no existe fila), regresa 0 sin necesidad de haber creado el registro.
+function getProvPrice(spiritId, month, field){
+  const row=supplierPriceHistory.find(r=>r.spirit_id===spiritId && r.month===month);
+  return row ? (parseFloat(row[field])||0) : 0;
+}
 
 function rProveedores(){
   const cats=[...new Set(spirits.map(s=>s.cat))].sort();
@@ -2193,16 +2219,24 @@ function rProveedores(){
   const spRaw=_provFilter==='all'?spirits:spirits.filter(s=>s.cat===_provFilter);
   const spList=[...spRaw].sort((a,b)=>a.name.localeCompare(b.name,'es'));
 
+  const currentMonth=getCurrentMonthStr();
+  if(!_provMonth) _provMonth=currentMonth;
+  const isEditable=_provMonth===currentMonth;
+  const isFutureBlocked=_provMonth>currentMonth;
+  if(isFutureBlocked) _provMonth=currentMonth; // nunca navegar a un mes futuro que aún no existe
+
   const rows=spList.map(sp=>{
     const priceCells=SUPPLIERS.map(([field])=>{
-      const val=parseFloat(sp[field])||0;
+      const val=getProvPrice(sp.id,_provMonth,field);
       return`<td style="text-align:center">
         <div style="display:flex;align-items:center;justify-content:center;gap:2px">
           <span style="font-size:11px;color:var(--txt3)">$</span>
-          <input type="number" min="0" step="0.01" value="${val.toFixed(2)}"
-            id="prov-${field}-${sp.id}"
-            style="width:72px;padding:4px 6px;border:0.5px solid var(--bdr2);border-radius:6px;font-size:12px;font-family:var(--font);text-align:right;background:var(--bg);color:var(--txt)"
-            onchange="updateSupplierPrice('${sp.id}','${field}',this.value)">
+          ${isEditable
+            ? `<input type="number" min="0" step="0.01" value="${val.toFixed(2)}"
+                id="prov-${field}-${sp.id}"
+                style="width:72px;padding:4px 6px;border:0.5px solid var(--bdr2);border-radius:6px;font-size:12px;font-family:var(--font);text-align:right;background:var(--bg);color:var(--txt)"
+                onchange="updateSupplierPriceMonth('${sp.id}','${field}',this.value)">`
+            : `<span style="width:72px;display:inline-block;text-align:right;color:var(--txt3);font-size:12px">${val.toFixed(2)}</span>`}
         </div>
       </td>`;
     }).join('');
@@ -2213,9 +2247,9 @@ function rProveedores(){
     </tr>`;
   }).join('')||`<tr><td colspan="6" class="empty">No hay productos en esta categoría</td></tr>`;
 
-  // Fila de totales: suma cada columna de proveedor sobre la lista filtrada actual
+  // Fila de totales: suma cada columna de proveedor sobre la lista filtrada actual, para el mes elegido
   const totalCells=SUPPLIERS.map(([field])=>{
-    const total=spList.reduce((t,sp)=>t+(parseFloat(sp[field])||0),0);
+    const total=spList.reduce((t,sp)=>t+getProvPrice(sp.id,_provMonth,field),0);
     return`<td style="text-align:center;font-weight:600;color:var(--burg)">$${total.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2})}</td>`;
   }).join('');
   const totalRow=`<tr style="background:var(--bg2)">
@@ -2223,13 +2257,15 @@ function rProveedores(){
     ${totalCells}
   </tr>`;
 
-  return`
-    <div class="page-title">Proveedores</div>
-    <div class="page-sub">Tabla comparativa de precios por botella · Captura lo que te cobra cada proveedor para comparar antes de comprar. No afecta el stock ni ningún otro cálculo del sistema.</div>
-    <div class="toolbar">
-      <label style="font-size:12px;color:var(--txt2)">Filtrar familia:</label>
-      <select class="sel" style="width:auto;padding:5px 9px;font-size:12px" onchange="_provFilter=this.value;render()">${catOpts}</select>
-      <span style="font-size:12px;color:var(--txt2)">${spList.length} referencias</span>
+  const tabMensualActive=_provTab!=='anual';
+  const monthTabHTML=`
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:var(--bg2);border:0.5px solid var(--bdr);border-radius:var(--r);padding:8px 12px">
+      <button onclick="_provMonth=shiftMonth(_provMonth,-1);render()" style="border:none;background:none;color:var(--txt2);cursor:pointer;font-size:14px" title="Mes anterior"><i class="ti ti-chevron-left"></i></button>
+      <div style="flex:1;text-align:center;font-family:var(--font-serif);font-size:14px;color:var(--burg);font-weight:500">${formatMonthLabel(_provMonth)}</div>
+      <button ${isEditable?'disabled style="border:none;background:none;color:var(--txt3);cursor:not-allowed;font-size:14px"':`onclick="_provMonth=shiftMonth(_provMonth,1);render()" style="border:none;background:none;color:var(--txt2);cursor:pointer;font-size:14px"`} title="Mes siguiente"><i class="ti ti-chevron-right"></i></button>
+      ${isEditable
+        ?`<span style="font-size:10px;background:rgba(59,109,17,0.12);color:#3B6D11;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap">Mes actual · editable</span>`
+        :`<span style="font-size:10px;background:rgba(168,147,122,0.18);color:var(--txt2);padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap"><i class="ti ti-lock" style="font-size:10px;vertical-align:-1px"></i> Histórico · solo lectura</span>`}
     </div>
     <div class="card">
       <div class="table-scroll">
@@ -2247,8 +2283,65 @@ function rProveedores(){
           <tfoot>${totalRow}</tfoot>
         </table>
       </div>
+    </div>
+    <div style="margin-top:10px;font-size:10.5px;color:var(--txt3)"><i class="ti ti-lock" style="font-size:12px;vertical-align:-1px"></i> Los meses pasados quedan bloqueados de solo lectura automáticamente en cuanto cambia el mes calendario.</div>`;
+
+  const annualHTML=renderProvComparativaAnual();
+
+  return`
+    <div class="page-title">Proveedores</div>
+    <div class="page-sub">Historial mensual de precios por botella · Captura lo que te cobra cada proveedor para comparar antes de comprar. No afecta el stock ni ningún otro cálculo del sistema.</div>
+    <div class="toolbar" style="justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:10px">
+        <label style="font-size:12px;color:var(--txt2)">Filtrar familia:</label>
+        <select class="sel" style="width:auto;padding:5px 9px;font-size:12px" onchange="_provFilter=this.value;render()">${catOpts}</select>
+        <span style="font-size:12px;color:var(--txt2)">${spList.length} referencias</span>
+      </div>
+      <div style="display:flex;background:var(--bg2);padding:3px;border-radius:var(--r);gap:2px;border:0.5px solid var(--bdr)">
+        <button onclick="_provTab='mensual';render()" style="padding:6px 14px;font-size:11px;border:none;border-radius:6px;font-family:var(--font);cursor:pointer;background:${tabMensualActive?'var(--burg)':'none'};color:${tabMensualActive?'var(--gold2)':'var(--txt2)'};font-weight:${tabMensualActive?'500':'400'}">Captura mensual</button>
+        <button onclick="_provTab='anual';render()" style="padding:6px 14px;font-size:11px;border:none;border-radius:6px;font-family:var(--font);cursor:pointer;background:${!tabMensualActive?'var(--burg)':'none'};color:${!tabMensualActive?'var(--gold2)':'var(--txt2)'};font-weight:${!tabMensualActive?'500':'400'}">Comparativa anual</button>
+      </div>
+    </div>
+    ${tabMensualActive?monthTabHTML:annualHTML}`;
+}
+
+// ── Comparativa anual: gasto total mensual por proveedor, sumando todo el catálogo
+function renderProvComparativaAnual(){
+  const months=[...new Set(supplierPriceHistory.map(r=>r.month))].sort();
+  if(!months.length){
+    return`<div class="card" style="padding:24px;text-align:center;color:var(--txt3);font-size:12px">Aún no hay precios capturados en ningún mes.</div>`;
+  }
+  const totals=months.map(m=>{
+    const rowsMonth=supplierPriceHistory.filter(r=>r.month===m);
+    return SUPPLIERS.map(([field])=>rowsMonth.reduce((t,r)=>t+(parseFloat(r[field])||0),0));
+  });
+  const maxVal=Math.max(1,...totals.flat());
+  const colors=['#6B1F2A','#B8935A','#8a9a7a','#a8937a'];
+  const groupW=Math.max(90,600/Math.max(1,months.length));
+  const barW=Math.min(20,(groupW-16)/4);
+  let bars='', xlabels='';
+  totals.forEach((month,mi)=>{
+    month.forEach((val,pi)=>{
+      const h=maxVal>0?(val/maxVal)*140:0;
+      const x=50+mi*groupW+pi*(barW+2);
+      const y=170-h;
+      bars+=`<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${colors[pi]}" rx="2"></rect>`;
+    });
+    xlabels+=`<text x="${50+mi*groupW+groupW/2-10}" y="185" font-size="10" fill="#6B5A46" text-anchor="middle">${formatMonthLabel(months[mi]).split(' ')[0].slice(0,3)}</text>`;
+  });
+  const legend=SUPPLIERS.map(([,label],i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--txt2)"><span style="width:9px;height:9px;background:${colors[i]};border-radius:2px;display:inline-block"></span>${label}</div>`).join('');
+  return`
+    <div class="card" style="padding:16px">
+      <div style="font-size:11px;color:var(--txt2);margin-bottom:10px">Gasto mensual total por proveedor (suma de todo el catálogo)</div>
+      <svg viewBox="0 0 ${Math.max(600,50+months.length*groupW)} 200" style="width:100%;height:200px">
+        <line x1="40" y1="170" x2="${Math.max(580,40+months.length*groupW)}" y2="170" stroke="var(--bdr2)" stroke-width="1"></line>
+        ${bars}
+        ${xlabels}
+      </svg>
+      <div style="display:flex;gap:16px;margin-top:8px;flex-wrap:wrap">${legend}</div>
     </div>`;
 }
+
 
 // ── PDF EXPORT
 function exportRepPDF(){
@@ -2526,9 +2619,12 @@ async function delSale(id){
   render();
 }
 
-// ── PROVEEDORES: guardar el precio que cobra un proveedor por una botella.
-// No afecta stock ni ningún otro cálculo — es solo información de referencia.
-async function updateSupplierPrice(id, field, value){
+// ── PROVEEDORES: guardar el precio que cobra un proveedor por una botella,
+// para el mes actualmente seleccionado (siempre el mes calendario real).
+// Usa upsert: si ya existe fila para ese producto+mes, solo actualiza esa
+// columna (sin tocar los otros 3 proveedores); si no existe, la crea con
+// esta única columna (las otras 3 quedan en 0 hasta que se capturen).
+async function updateSupplierPriceMonth(id, field, value){
   if(!currentUser){alert('Sesión no iniciada.');return;}
   if(currentUser.role==='lector'){alert('Tu rol solo tiene permiso de lectura.');return;}
   const sp=spirits.find(s=>s.id===id);
@@ -2536,16 +2632,27 @@ async function updateSupplierPrice(id, field, value){
   const price=parseFloat(value);
   if(isNaN(price)||price<0){alert('Precio inválido. Debe ser un número mayor o igual a 0.');return;}
   const rounded=parseFloat(price.toFixed(2));
+  const month=_provMonth;
 
   const inputEl=document.getElementById(`prov-${field}-${id}`);
-  const {error}=await sb.from('spirits').update({[field]:rounded}).eq('id',id);
+  const {data,error}=await sb.from('supplier_price_history')
+    .upsert({spirit_id:id, month, [field]:rounded, updated_by:currentUser?.id||null}, {onConflict:'spirit_id,month'})
+    .select();
 
   if(error){
     alert('Error al guardar el precio en Supabase: '+error.message);
-    if(inputEl) inputEl.value=(parseFloat(sp[field])||0).toFixed(2); // revertir a lo último guardado
+    if(inputEl) inputEl.value=getProvPrice(id,month,field).toFixed(2); // revertir a lo último guardado
     return;
   }
-  sp[field]=rounded; // actualizar en memoria, sin recargar toda la tabla
+  // Actualizar en memoria sin recargar toda la tabla
+  const idx=supplierPriceHistory.findIndex(r=>r.spirit_id===id && r.month===month);
+  if(data && data[0]){
+    if(idx>=0) supplierPriceHistory[idx]=data[0]; else supplierPriceHistory.push(data[0]);
+  } else if(idx>=0){
+    supplierPriceHistory[idx][field]=rounded;
+  } else {
+    supplierPriceHistory.push({spirit_id:id, month, price_wine_club:0, price_cava_sautto:0, price_cut_wine:0, price_almacen_victoria:0, [field]:rounded});
+  }
   if(inputEl){
     inputEl.value=rounded.toFixed(2);
     inputEl.style.borderColor='#3B6D11'; // breve confirmación visual, reutilizando el verde ya usado en el sistema
