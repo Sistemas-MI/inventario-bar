@@ -2350,15 +2350,20 @@ function renderProvChartAcumulado(months){
   const colors=['#6B1F2A','#B8935A','#8a9a7a','#a8937a'];
   const groupW=Math.max(90,600/Math.max(1,months.length));
   const barW=Math.min(20,(groupW-16)/4);
+  const maxBarH=105; // se deja espacio arriba para las etiquetas de valor
   let bars='', xlabels='';
   totals.forEach((month,mi)=>{
     month.forEach((val,pi)=>{
-      const h=maxVal>0?(val/maxVal)*140:0;
+      const h=maxVal>0?(val/maxVal)*maxBarH:0;
       const x=50+mi*groupW+pi*(barW+2);
       const y=170-h;
       const label=SUPPLIERS[pi][1];
       const fmtVal=val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
       bars+=`<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${colors[pi]}" rx="2" style="cursor:pointer"><title>${label} — ${formatMonthLabel(months[mi])}: $${fmtVal}</title></rect>`;
+      if(val>0){
+        const lx=x+barW/2, ly=y-4;
+        bars+=`<text x="${lx}" y="${ly}" font-size="8" fill="${colors[pi]}" text-anchor="start" transform="rotate(-90 ${lx} ${ly})">$${Math.round(val).toLocaleString('es-MX')}</text>`;
+      }
     });
     const totalMes=month.reduce((t,v)=>t+v,0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
     xlabels+=`<text x="${50+mi*groupW+groupW/2-10}" y="185" font-size="10" fill="#6B5A46" text-anchor="middle" style="cursor:pointer"><title>${formatMonthLabel(months[mi])} — Total combinado: $${totalMes}</title>${formatMonthLabel(months[mi]).split(' ')[0].slice(0,3)}</text>`;
@@ -2366,7 +2371,7 @@ function renderProvChartAcumulado(months){
   const legend=SUPPLIERS.map(([,label],i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--txt2)"><span style="width:9px;height:9px;background:${colors[i]};border-radius:2px;display:inline-block"></span>${label}</div>`).join('');
   return`
     <div style="font-size:11px;color:var(--txt2);margin-bottom:10px">Gasto mensual total por proveedor (suma de todo el catálogo)</div>
-    <svg viewBox="0 0 ${Math.max(600,50+months.length*groupW)} 200" style="width:100%;height:200px">
+    <svg viewBox="0 0 ${Math.max(600,50+months.length*groupW)} 220" style="width:100%;height:220px">
       <line x1="40" y1="170" x2="${Math.max(580,40+months.length*groupW)}" y2="170" stroke="var(--bdr2)" stroke-width="1"></line>
       ${bars}
       ${xlabels}
@@ -2381,7 +2386,7 @@ function renderProvChartAcumulado(months){
 function renderProvChartProducto(spiritId, months){
   const sp=spirits.find(s=>s.id===spiritId);
   const colors=['#6B1F2A','#B8935A','#8a9a7a','#a8937a'];
-  const w=600,h=200,padL=45,padR=15,padT=15,padB=35;
+  const w=600,h=220,padL=45,padR=15,padT=32,padB=35;
   const plotW=w-padL-padR, plotH=h-padT-padB;
 
   const series=SUPPLIERS.map(([field])=>{
@@ -2407,7 +2412,9 @@ function renderProvChartProducto(spiritId, months){
       lines+=`<path d="${d}" fill="none" stroke="${colors[pi]}" stroke-width="2"></path>`;
       pts.forEach(p=>{
         const fmtVal=p.val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
-        dots+=`<circle cx="${xFor(p.mi).toFixed(1)}" cy="${yFor(p.val).toFixed(1)}" r="4" fill="${colors[pi]}" style="cursor:pointer"><title>${SUPPLIERS[pi][1]} — ${formatMonthLabel(months[p.mi])}: $${fmtVal}</title></circle>`;
+        const cx=xFor(p.mi).toFixed(1), cy=yFor(p.val).toFixed(1);
+        dots+=`<circle cx="${cx}" cy="${cy}" r="4" fill="${colors[pi]}" style="cursor:pointer"><title>${SUPPLIERS[pi][1]} — ${formatMonthLabel(months[p.mi])}: $${fmtVal}</title></circle>`;
+        dots+=`<text x="${cx}" y="${yFor(p.val)-8-(pi%2)*11}" font-size="9" fill="${colors[pi]}" text-anchor="middle">$${fmtVal}</text>`;
       });
     }
   });
@@ -2422,7 +2429,7 @@ function renderProvChartProducto(spiritId, months){
   const legend=SUPPLIERS.map(([,label],i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--txt2)"><span style="width:9px;height:9px;background:${colors[i]};border-radius:2px;display:inline-block"></span>${label}</div>`).join('');
   return`
     <div style="font-size:11px;color:var(--txt2);margin-bottom:10px">Precio de <b style="color:var(--txt)">${sp.name}</b> por proveedor, mes a mes</div>
-    <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:200px">
+    <svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px">
       <line x1="${padL}" y1="${padT+plotH}" x2="${w-padR}" y2="${padT+plotH}" stroke="var(--bdr2)" stroke-width="1"></line>
       ${lines}
       ${dots}
