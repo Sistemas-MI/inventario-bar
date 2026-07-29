@@ -2201,11 +2201,6 @@ function formatMonthLabel(monthStr){
   const [y,m]=monthStr.split('-').map(Number);
   return `${MESES_ES[m-1]} ${y}`;
 }
-function shiftMonth(monthStr, delta){
-  const [y,m]=monthStr.split('-').map(Number);
-  const d=new Date(y, m-1+delta, 1);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-01`;
-}
 // Precio de un producto/proveedor en un mes dado — si nunca se capturó ese
 // mes (no existe fila), regresa 0 sin necesidad de haber creado el registro.
 function getProvPrice(spiritId, month, field){
@@ -2224,6 +2219,14 @@ function rProveedores(){
   const isEditable=_provMonth===currentMonth;
   const isFutureBlocked=_provMonth>currentMonth;
   if(isFutureBlocked) _provMonth=currentMonth; // nunca navegar a un mes futuro que aún no existe
+
+  // Meses disponibles en el selector: solo los que ya tienen algo capturado,
+  // más el mes actual siempre presente (aunque todavía esté vacío) para que
+  // se pueda empezar a capturar. Nada de meses "fantasma" sin datos.
+  const registeredMonths=[...new Set(supplierPriceHistory.map(r=>r.month))];
+  if(!registeredMonths.includes(currentMonth)) registeredMonths.push(currentMonth);
+  const availableMonths=registeredMonths.sort();
+  const monthOpts=availableMonths.map(m=>`<option value="${m}"${m===_provMonth?' selected':''}>${formatMonthLabel(m)}${m===currentMonth?' (actual)':''}</option>`).join('');
 
   const rows=spList.map(sp=>{
     const priceCells=SUPPLIERS.map(([field])=>{
@@ -2260,9 +2263,8 @@ function rProveedores(){
   const tabMensualActive=_provTab!=='anual';
   const monthTabHTML=`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;background:var(--bg2);border:0.5px solid var(--bdr);border-radius:var(--r);padding:8px 12px">
-      <button onclick="_provMonth=shiftMonth(_provMonth,-1);render()" style="border:none;background:none;color:var(--txt2);cursor:pointer;font-size:14px" title="Mes anterior"><i class="ti ti-chevron-left"></i></button>
-      <div style="flex:1;text-align:center;font-family:var(--font-serif);font-size:14px;color:var(--burg);font-weight:500">${formatMonthLabel(_provMonth)}</div>
-      <button ${isEditable?'disabled style="border:none;background:none;color:var(--txt3);cursor:not-allowed;font-size:14px"':`onclick="_provMonth=shiftMonth(_provMonth,1);render()" style="border:none;background:none;color:var(--txt2);cursor:pointer;font-size:14px"`} title="Mes siguiente"><i class="ti ti-chevron-right"></i></button>
+      <label style="font-size:11px;color:var(--txt2);white-space:nowrap">Mes:</label>
+      <select class="sel" style="width:auto;padding:5px 9px;font-size:12px;font-family:var(--font-serif);color:var(--burg)" onchange="_provMonth=this.value;render()">${monthOpts}</select>
       ${isEditable
         ?`<span style="font-size:10px;background:rgba(59,109,17,0.12);color:#3B6D11;padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap">Mes actual · editable</span>`
         :`<span style="font-size:10px;background:rgba(168,147,122,0.18);color:var(--txt2);padding:3px 8px;border-radius:20px;font-weight:500;white-space:nowrap"><i class="ti ti-lock" style="font-size:10px;vertical-align:-1px"></i> Histórico · solo lectura</span>`}
