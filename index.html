@@ -2327,9 +2327,12 @@ function renderProvComparativaAnual(){
       const h=maxVal>0?(val/maxVal)*140:0;
       const x=50+mi*groupW+pi*(barW+2);
       const y=170-h;
-      bars+=`<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${colors[pi]}" rx="2"></rect>`;
+      const label=SUPPLIERS[pi][1];
+      const fmtVal=val.toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+      bars+=`<rect x="${x}" y="${y}" width="${barW}" height="${h}" fill="${colors[pi]}" rx="2" style="cursor:pointer"><title>${label} — ${formatMonthLabel(months[mi])}: $${fmtVal}</title></rect>`;
     });
-    xlabels+=`<text x="${50+mi*groupW+groupW/2-10}" y="185" font-size="10" fill="#6B5A46" text-anchor="middle">${formatMonthLabel(months[mi]).split(' ')[0].slice(0,3)}</text>`;
+    const totalMes=month.reduce((t,v)=>t+v,0).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
+    xlabels+=`<text x="${50+mi*groupW+groupW/2-10}" y="185" font-size="10" fill="#6B5A46" text-anchor="middle" style="cursor:pointer"><title>${formatMonthLabel(months[mi])} — Total combinado: $${totalMes}</title>${formatMonthLabel(months[mi]).split(' ')[0].slice(0,3)}</text>`;
   });
   const legend=SUPPLIERS.map(([,label],i)=>`<div style="display:flex;align-items:center;gap:5px;font-size:10.5px;color:var(--txt2)"><span style="width:9px;height:9px;background:${colors[i]};border-radius:2px;display:inline-block"></span>${label}</div>`).join('');
   return`
