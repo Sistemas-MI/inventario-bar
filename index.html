@@ -232,7 +232,6 @@
         /* ── TOPBAR user badge ── */
         #user-badge{display:none;align-items:center;gap:10px}
         #user-badge.show{display:flex}
-        .user-role-tag{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.07em;padding:2px 8px;border-radius:20px;background:rgba(184,147,90,0.15);color:var(--gold2);border:0.5px solid rgba(184,147,90,0.3)}
         .logout-btn{background:none;border:0.5px solid rgba(107,31,42,0.3);border-radius:6px;color:var(--txt2);padding:4px 10px;font-size:11px;cursor:pointer;font-family:var(--font);transition:all .15s}
         .logout-btn:hover{background:rgba(107,31,42,0.06);color:var(--burg)}
         /* ── Role visibility helpers ── */
@@ -276,7 +275,6 @@
     <div id="top-pill" class="pill">Conectando...</div>
     <div id="user-badge">
       <span id="user-name-lbl" style="font-size:12px;color:var(--txt2);font-weight:300"></span>
-      <span id="user-role-lbl" class="user-role-tag"></span>
       <button class="logout-btn" onclick="logout()"><i class="ti ti-logout" style="font-size:12px"></i> Salir</button>
     </div>
   </div>
@@ -2628,9 +2626,9 @@ function exportAgotadosPDF(){
 // ═══════════════════════════════════════════════════════════
 
 async function addSale(){
-  // ── RBAC guard: lector no puede registrar ventas
+  // ── RBAC guard: lector y bartender solo pueden ver, no registrar ventas
   if(!currentUser){alert('Sesión no iniciada.');return;}
-  if(currentUser.role==='lector'){alert('Tu rol solo tiene permiso de lectura.');return;}
+  if(currentUser.role==='lector'||currentUser.role==='bartender'){alert('Tu rol solo tiene permiso de lectura.');return;}
 
   const week=(document.getElementById('s-wk')?.value||'').trim();
   const coVal=document.getElementById('s-co')?.value||'';
@@ -2726,7 +2724,7 @@ async function delSale(id){
 // dejarla guardada vacía — para no ocupar espacio con registros inútiles.
 async function updateSupplierPriceMonth(id, field, value){
   if(!currentUser){alert('Sesión no iniciada.');return;}
-  if(currentUser.role==='lector'){alert('Tu rol solo tiene permiso de lectura.');return;}
+  if(currentUser.role==='lector'||currentUser.role==='manager'){alert('Tu rol solo tiene permiso de lectura.');return;}
   const sp=spirits.find(s=>s.id===id);
   if(!sp) return;
   const price=parseFloat(value);
@@ -2782,10 +2780,10 @@ async function updateSupplierPriceMonth(id, field, value){
 }
 
 async function adjustStock(id, amount){
-  // ── RBAC guard: solo admin y manager ajustan stock
+  // ── RBAC guard: solo admin puede ajustar stock
   if(!currentUser){alert('Sesión no iniciada.');return;}
-  if(currentUser.role==='bartender'||currentUser.role==='lector'){
-    alert('Solo el encargado o administrador puede ajustar el stock.');return;
+  if(currentUser.role!=='admin'){
+    alert('Solo el administrador puede ajustar el stock.');return;
   }
   const sp=spirits.find(s=>s.id===id);
   if(!sp) return;
@@ -2835,10 +2833,10 @@ async function adjustStock(id, amount){
 // ambos catálogos se recalculan solos a partir de este registro.
 // ═══════════════════════════════════════════════════════════
 async function transferToBarra(id, amount){
-  // ── RBAC guard: mismo criterio que el ajuste de stock — solo admin y manager
+  // ── RBAC guard: mismo criterio que el ajuste de stock — solo admin
   if(!currentUser){alert('Sesión no iniciada.');return;}
-  if(currentUser.role==='bartender'||currentUser.role==='lector'){
-    alert('Solo el encargado o administrador puede mover stock entre catálogos.');return;
+  if(currentUser.role!=='admin'){
+    alert('Solo el administrador puede mover stock entre catálogos.');return;
   }
   const sp=spirits.find(s=>s.id===id);
   if(!sp) return;
@@ -2888,10 +2886,10 @@ async function transferToBarra(id, amount){
 // recalculan solos a partir de este registro.
 // ═══════════════════════════════════════════════════════════
 async function transferBonifToBarra(id, amount){
-  // ── RBAC guard: mismo criterio que el resto de traspasos — solo admin y manager
+  // ── RBAC guard: mismo criterio que el resto de traspasos — solo admin
   if(!currentUser){alert('Sesión no iniciada.');return;}
-  if(currentUser.role==='bartender'||currentUser.role==='lector'){
-    alert('Solo el encargado o administrador puede mover stock entre catálogos.');return;
+  if(currentUser.role!=='admin'){
+    alert('Solo el administrador puede mover stock entre catálogos.');return;
   }
   const sp=spirits.find(s=>s.id===id);
   if(!sp) return;
@@ -3009,11 +3007,8 @@ function _showLoginError(msg){const e=document.getElementById('login-error');e.t
 function _updateUserBadge(){
   const badge=document.getElementById('user-badge');
   const nameLbl=document.getElementById('user-name-lbl');
-  const roleLbl=document.getElementById('user-role-lbl');
   if(!badge||!currentUser) return;
-  const roleLabel={admin:'Administrador',manager:'Encargado',bartender:'Bartender',lector:'Lector'}[currentUser.role]||currentUser.role;
   nameLbl.textContent=currentUser.full_name||currentUser.email;
-  roleLbl.textContent=roleLabel;
   badge.classList.add('show');
 }
 function _hideUserBadge(){
@@ -3054,16 +3049,16 @@ function applyRoleUI(){
 
   // ════════════════════════════════════════════
   // BOTÓN "+ Registrar operación"
-  // Lector NO puede registrar ventas
+  // Lector y bartender solo pueden VER las ventas, no registrar
   // ════════════════════════════════════════════
   const btnSave=document.getElementById('btn-save');
   if(btnSave){
-    btnSave.style.display=(role==='lector')?'none':'';
+    btnSave.style.display=(role==='lector'||role==='bartender')?'none':'';
   }
 
   // ════════════════════════════════════════════
   // BOTONES ELIMINAR VENTA (trash)
-  // Solo admin y manager pueden borrar. Bartender solo registra, no borra.
+  // Solo admin y manager pueden borrar. Bartender solo ve, no borra.
   // ════════════════════════════════════════════
   document.querySelectorAll('button[onclick*="delSale"]').forEach(btn=>{
     btn.style.display=(role==='lector'||role==='bartender')?'none':'';
@@ -3071,46 +3066,46 @@ function applyRoleUI(){
 
   // ════════════════════════════════════════════
   // BOTONES AJUSTE STOCK (+/-) en catálogo
-  // Bartender y Lector solo pueden VER el catálogo
+  // Solo admin puede ajustar stock — manager, bartender y lector solo ven
   // ════════════════════════════════════════════
   document.querySelectorAll('button[onclick*="adjustStock"]').forEach(btn=>{
-    btn.style.display=(role==='bartender'||role==='lector')?'none':'';
+    btn.style.display=(role!=='admin')?'none':'';
   });
-  // También ocultar el input de cantidad si es lector/bartender
+  // También ocultar el input de cantidad si no es admin
   document.querySelectorAll('input[id^="adj-"]').forEach(inp=>{
-    inp.style.display=(role==='bartender'||role==='lector')?'none':'';
+    inp.style.display=(role!=='admin')?'none':'';
   });
 
   // ════════════════════════════════════════════
   // BOTÓN "Mover a Barra" (traspaso bodega → barra)
-  // Mismo criterio que el ajuste de stock: solo admin y manager
+  // Solo admin puede mover stock entre catálogos
   // ════════════════════════════════════════════
   document.querySelectorAll('button[onclick*="transferToBarra"]').forEach(btn=>{
-    btn.style.display=(role==='bartender'||role==='lector')?'none':'';
+    btn.style.display=(role!=='admin')?'none':'';
   });
   document.querySelectorAll('input[id^="mv-"]').forEach(inp=>{
-    inp.style.display=(role==='bartender'||role==='lector')?'none':'';
+    inp.style.display=(role!=='admin')?'none':'';
   });
 
   // ════════════════════════════════════════════
   // BOTÓN "Mover a Barra" desde Bonificaciones (traspaso bonificaciones → barra)
-  // Mismo criterio que el resto de traspasos: solo admin y manager
+  // Solo admin puede mover stock entre catálogos
   // ════════════════════════════════════════════
   document.querySelectorAll('button[onclick*="transferBonifToBarra"]').forEach(btn=>{
-    btn.style.display=(role==='bartender'||role==='lector')?'none':'';
+    btn.style.display=(role!=='admin')?'none':'';
   });
   document.querySelectorAll('input[id^="mvb-"]').forEach(inp=>{
-    inp.style.display=(role==='bartender'||role==='lector')?'none':'';
+    inp.style.display=(role!=='admin')?'none':'';
   });
 
   // ════════════════════════════════════════════
   // PROVEEDORES: precios visibles para todos los que llegan a esta pestaña,
-  // pero solo admin/manager pueden editarlos — lector los ve en solo lectura
+  // pero solo admin puede editarlos — manager y lector los ven en solo lectura
   // ════════════════════════════════════════════
   document.querySelectorAll('input[id^="prov-"]').forEach(inp=>{
-    inp.disabled=(role==='lector');
-    inp.style.opacity=(role==='lector')?'0.6':'';
-    inp.style.cursor=(role==='lector')?'not-allowed':'';
+    inp.disabled=(role==='lector'||role==='manager');
+    inp.style.opacity=(role==='lector'||role==='manager')?'0.6':'';
+    inp.style.cursor=(role==='lector'||role==='manager')?'not-allowed':'';
   });
 }
 
