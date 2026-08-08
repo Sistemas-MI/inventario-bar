@@ -2497,7 +2497,7 @@ function exportConsumoPDF(){
     .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
     .pdf-logo{height:50px;width:auto;object-fit:contain;flex-shrink:0}
   </style></head><body>
-  <div class="pdf-header"><div><h1>Botellas más consumidas — Clandestinna</h1><div class="sub">Histórico permanente · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
+  <div class="pdf-header"><div><h1>Botellas más consumidas</h1><div class="sub">Histórico permanente · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-val">${consumptionRanking.length}</div><div class="kpi-lbl">Productos con consumo</div></div>
     <div class="kpi"><div class="kpi-val">${consumptionRanking[0].sp.name.split(' ').slice(0,2).join(' ')}</div><div class="kpi-lbl">Más consumido</div></div>
@@ -2570,7 +2570,7 @@ function exportRepPDF(){
     .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
     .pdf-logo{height:50px;width:auto;object-fit:contain;flex-shrink:0}
   </style></head><body>
-  <div class="pdf-header"><div><h1>Reporte de Ventas — Clandestinna</h1><div class="sub">${periodLabel} · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
+  <div class="pdf-header"><div><h1>Reporte de Ventas</h1><div class="sub">${periodLabel} · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-val">${filtered.length}</div><div class="kpi-lbl">Operaciones</div></div>
     <div class="kpi"><div class="kpi-val">${filtered.reduce((t,s)=>t+(s.qty||1),0)}</div><div class="kpi-lbl">Unidades</div></div>
@@ -2637,7 +2637,7 @@ function exportBajosPDF(){
     .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
     .pdf-logo{height:50px;width:auto;object-fit:contain;flex-shrink:0}
   </style></head><body>
-  <div class="pdf-header"><div><h1>Reporte de Bajos — Clandestinna</h1><div class="sub">Productos con poco stock físico (barra + bodega), sin contar los ya agotados · "Sugerido comprar" según el consumo semanal detectado · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
+  <div class="pdf-header"><div><h1>Reporte de Bajos</h1><div class="sub">Productos con poco stock físico (barra + bodega), sin contar los ya agotados · "Sugerido comprar" según el consumo semanal detectado · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-val">${bajosList.length}</div><div class="kpi-lbl">Productos bajos</div></div>
   </div>
@@ -2683,7 +2683,7 @@ function exportAgotadosPDF(){
     .pdf-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px}
     .pdf-logo{height:50px;width:auto;object-fit:contain;flex-shrink:0}
   </style></head><body>
-  <div class="pdf-header"><div><h1>Reporte de Agotados — Clandestinna</h1><div class="sub">Productos con stock 0 (barra + bodega) · Hay que comprarlos sí o sí · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
+  <div class="pdf-header"><div><h1>Reporte de Agotados</h1><div class="sub">Productos con stock 0 (barra + bodega) · Hay que comprarlos sí o sí · Generado el ${now}</div></div><img src="${CLAND_LOGO}" alt="Clandestinna" class="pdf-logo"></div>
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-val">${agotadosList.length}</div><div class="kpi-lbl">Productos agotados</div></div>
   </div>
