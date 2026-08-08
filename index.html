@@ -2177,13 +2177,8 @@ function rReportes(){
   const tabContent={ventas:tabVentas, compras:tabCompras, consumo:tabConsumo}[_repTab]||tabVentas;
 
   return`
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
-      <div>
-        <div class="page-title">Reportes</div>
-        <div class="page-sub">Historial permanente · Los registros se conservan aunque se eliminen en Registrar Ventas</div>
-      </div>
-      <img src="${CLAND_LOGO}" alt="Clandestinna" style="height:44px;width:auto;object-fit:contain;flex-shrink:0">
-    </div>
+    <div class="page-title">Reportes</div>
+    <div class="page-sub">Historial permanente · Los registros se conservan aunque se eliminen en Registrar Ventas</div>
     ${tabsHTML}
     ${tabContent}`;
 }
