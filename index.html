@@ -2048,8 +2048,12 @@ function rReportes(){
 
   const tabConsumo=`
     <div class="card">
-      <div class="card-head"><span class="card-title"><i class="ti ti-trending-up" style="margin-right:6px"></i>Qué se consume más</span><span class="card-sub">Histórico permanente, por nombre de producto · ${consumptionRanking.length} con ventas</span></div>
-      <div class="page-sub" style="padding:0 18px;margin:8px 0 0">Suma el consumo de esa botella en <b>todas</b> las modalidades: como ingrediente de cócteles (según su receta), shot, copa, botella completa o pieza.</div>
+      <div class="card-head"><span class="card-title"><i class="ti ti-trending-up" style="margin-right:6px"></i>Qué se consume más</span>
+        <button class="btn btn-coral btn-sm" onclick="exportConsumoPDF()" style="display:inline-flex;align-items:center;gap:6px">
+          <i class="ti ti-file-type-pdf"></i> Exportar PDF
+        </button>
+      </div>
+      <div class="page-sub" style="padding:0 18px;margin:8px 0 0">Suma el consumo de esa botella en <b>todas</b> las modalidades: como ingrediente de cócteles (según su receta), shot, copa, botella completa o pieza. · ${consumptionRanking.length} con ventas</div>
       <div class="table-scroll" style="max-height:460px;margin-top:10px">
         <table>
           <thead><tr><th style="text-align:center;width:36px">#</th><th>Producto</th><th>Categoría</th><th>Consumo</th></tr></thead>
@@ -2438,6 +2442,74 @@ function renderProvChartProducto(spiritId, months){
     ${bestHTML}`;
 }
 
+
+// ── PDF EXPORT — Consumo: botellas más consumidas (histórico permanente)
+function exportConsumoPDF(){
+  const consumptionRanking=[...spirits]
+    .map(sp=>({sp, total:getTotalConsumedBottles(sp)}))
+    .filter(r=>r.total>0)
+    .sort((a,b)=>b.total-a.total);
+
+  if(!consumptionRanking.length){alert('Aún no hay consumo registrado para exportar.');return;}
+
+  const now=new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+
+  const rows=consumptionRanking.map((r,i)=>{
+    const isPiece=r.sp.product_type==='cerveza'||r.sp.product_type==='agua'||r.sp.product_type==='refrescos';
+    const bd=getConsumptionBreakdown(r.sp);
+    const bdParts=[];
+    const cocktailNames=Object.keys(bd.cocteles).sort((a,b)=>bd.cocteles[b].qty-bd.cocteles[a].qty);
+    if(cocktailNames.length){
+      const top=cocktailNames.slice(0,5).map(name=>`${name} (${bd.cocteles[name].qty})`).join(', ');
+      const extra=cocktailNames.length>5?` … y ${cocktailNames.length-5} más`:'';
+      bdParts.push(`Cóctel: ${top}${extra}`);
+    }
+    if(bd.shot>0) bdParts.push(`Shot: ${Math.round(bd.shot)}ml`);
+    if(bd.copa>0) bdParts.push(`Copa: ${Math.round(bd.copa)}ml`);
+    if(bd.botella>0) bdParts.push(`Botella: ${bd.botella.toFixed(0)} und`);
+    if(bd.pieza>0) bdParts.push(`Pieza: ${bd.pieza.toFixed(0)} und`);
+    return`<tr>
+      <td style="text-align:center">${i+1}</td>
+      <td>${r.sp.name}</td>
+      <td>${r.sp.cat}</td>
+      <td style="text-align:right;font-weight:bold;color:#6B1F2A">${r.total.toFixed(2)} ${isPiece?'pzas':'btl'}</td>
+      <td style="font-size:10px;color:#6B5A46">${bdParts.join(' · ')||'—'}</td>
+    </tr>`;
+  }).join('');
+
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Consumo — Clandestinna</title>
+  <style>
+    body{font-family:Georgia,serif;font-size:12px;color:#1A1008;padding:32px}
+    h1{font-size:22px;color:#6B1F2A;margin-bottom:4px}
+    .sub{font-size:12px;color:#6B5A46;margin-bottom:20px}
+    .kpi-row{display:flex;gap:20px;margin-bottom:20px}
+    .kpi{border:1px solid #ddd;border-radius:6px;padding:10px 16px;text-align:center;min-width:100px}
+    .kpi-val{font-size:22px;font-weight:bold;color:#6B1F2A}
+    .kpi-lbl{font-size:10px;color:#6B5A46;text-transform:uppercase;letter-spacing:.05em}
+    table{width:100%;border-collapse:collapse;font-size:11px}
+    th{background:#6B1F2A;color:#F5EDD8;padding:7px 10px;text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.05em}
+    td{padding:7px 10px;border-bottom:1px solid #eee;vertical-align:top}
+    tr:nth-child(even) td{background:#FAF6F0}
+    .footer{margin-top:24px;font-size:10px;color:#A8937A;text-align:center}
+  </style></head><body>
+  <h1>Botellas más consumidas — Clandestinna</h1>
+  <div class="sub">Histórico permanente · Generado el ${now}</div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-val">${consumptionRanking.length}</div><div class="kpi-lbl">Productos con consumo</div></div>
+    <div class="kpi"><div class="kpi-val">${consumptionRanking[0].sp.name.split(' ').slice(0,2).join(' ')}</div><div class="kpi-lbl">Más consumido</div></div>
+  </div>
+  <table><thead><tr><th>#</th><th>Producto</th><th>Categoría</th><th>Consumo</th><th>Detalle</th></tr></thead>
+  <tbody>${rows}</tbody></table>
+  <div class="footer">Clandestinna · Control de Inventario</div>
+  </body></html>`;
+
+  const w=window.open('','_blank','width=960,height=700');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{w.print();},400);
+}
 
 // ── PDF EXPORT
 function exportRepPDF(){
